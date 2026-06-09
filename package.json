@@ -1,0 +1,44 @@
+{
+  "name": "biofrontier-sc",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "data:habitat-fallback": "tsx scripts/compute-habitat-fallback.ts",
+    "data:habitat": "tsx scripts/compute-habitat.ts",
+    "data:fetch": "tsx scripts/fetch-occurrences.ts"
+  },
+  "dependencies": {
+    "@types/leaflet": "^1.9.21",
+    "h3-js": "^4.4.0",
+    "leaflet": "^1.9.4",
+    "next": "16.2.7",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-leaflet": "^5.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@turf/turf": "^7.3.5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.2",
+    "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.7",
+    "jsdom": "^29.1.1",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.4",
+    "typescript": "^5",
+    "vitest": "^4.1.8"
+  }
+}
