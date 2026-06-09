@@ -1,10 +1,6 @@
-import { latLngToCell, cellToLatLng, cellToBoundary, polygonToCells, CONTAINED_BY_CELL } from 'h3-js'
+import { latLngToCell, cellToLatLng, cellToBoundary, polygonToCells } from 'h3-js'
 
-// Resolution for point-to-hex mapping (~0.7 km² hexbins, suitable for occurrence clustering)
-export const SC_RESOLUTION = 7
-
-// Resolution for the statewide grid overview (~36 km² hexbins)
-export const SC_GRID_RESOLUTION = 6
+export const SC_RESOLUTION = 6
 
 export const SC_BBOX = {
   north: -25.95,
@@ -37,7 +33,8 @@ export function isInSCBounds(lat: number, lng: number): boolean {
   )
 }
 
-// All H3 hexbins fully contained within Santa Catarina's bounding box at resolution 6
+// All H3 hexbins intersecting Santa Catarina's bounding box at resolution 6
+// polygonToCells in h3-js v4 uses [lat, lng] order
 export function generateSCHexgrid(): string[] {
   const polygon: Array<[number, number]> = [
     [SC_BBOX.north, SC_BBOX.west],
@@ -46,5 +43,5 @@ export function generateSCHexgrid(): string[] {
     [SC_BBOX.south, SC_BBOX.west],
     [SC_BBOX.north, SC_BBOX.west],  // close ring
   ]
-  return polygonToCells(polygon, SC_GRID_RESOLUTION, { containmentMode: CONTAINED_BY_CELL })
+  return polygonToCells(polygon, SC_RESOLUTION)
 }
