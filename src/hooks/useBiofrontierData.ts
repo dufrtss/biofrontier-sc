@@ -51,13 +51,17 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
       rank:           0,  // assigned below
     }))
 
-    const sortedWithRank = [...scored]
+    // Only rank hexbins that have actual occurrence data for the active filter.
+    // Zero-record hexbins all score identically with fallback habitat data, making
+    // the ranking meaningless if they're included.
+    const surveyed = scored
+      .filter(h => (taxonFilter === 'vertebrates' ? h.vertebrates : h.all).occurrenceCount > 0)
       .sort((a, b) => b.frontierScore - a.frontierScore)
-      .map((h, idx) => ({ ...h, rank: idx + 1 }))
+    surveyed.forEach((h, idx) => { h.rank = idx + 1 })
 
     return {
-      hexbins:      Object.fromEntries(sortedWithRank.map(h => [h.hexId, h])),
-      rankedHexIds: sortedWithRank.map(h => h.hexId),
+      hexbins:      Object.fromEntries(scored.map(h => [h.hexId, h])),
+      rankedHexIds: surveyed.map(h => h.hexId),
     }
   }, [raw, taxonFilter])
 
