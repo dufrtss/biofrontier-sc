@@ -4,21 +4,24 @@ import { useEffect, useRef } from 'react'
 import type { ScoredHexbin, TaxonFilter } from '@/lib/types'
 import { scoreToColor } from '@/lib/color'
 import { hexCenter } from '@/lib/h3-utils'
+import InfoTooltip from './InfoTooltip'
 
 interface Props {
   hex: ScoredHexbin | null
   taxonFilter: TaxonFilter
   onClose: () => void
+  onOpenMethodology: (sectionId: string) => void
 }
 
 interface AnimatedBarProps {
   label: string
+  labelExtra?: React.ReactNode
   value: number
   color: string
   animate: boolean
 }
 
-function AnimatedBar({ label, value, color, animate }: AnimatedBarProps) {
+function AnimatedBar({ label, labelExtra, value, color, animate }: AnimatedBarProps) {
   const pct = Math.round(value * 100)
   const barRef = useRef<HTMLDivElement>(null)
 
@@ -36,24 +39,23 @@ function AnimatedBar({ label, value, color, animate }: AnimatedBarProps) {
   return (
     <div className="space-y-1">
       <div className="flex justify-between items-baseline">
-        <span className="text-[11px] text-slate-400 tracking-wide uppercase font-medium">{label}</span>
+        <span className="flex items-center text-[11px] text-slate-400 tracking-wide uppercase font-medium">
+          {label}{labelExtra}
+        </span>
         <span className="text-xs font-mono text-slate-300 tabular-nums">{pct}%</span>
       </div>
       <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden border border-slate-700/50">
         <div
           ref={barRef}
           className="h-full rounded-full"
-          style={{
-            width: animate ? '0%' : `${pct}%`,
-            background: color,
-          }}
+          style={{ width: animate ? '0%' : `${pct}%`, background: color }}
         />
       </div>
     </div>
   )
 }
 
-export default function HexDetail({ hex, taxonFilter, onClose }: Props) {
+export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology }: Props) {
   const prevHexId = useRef<string | null>(null)
   const shouldAnimate = hex !== null && hex.hexId !== prevHexId.current
 
@@ -68,10 +70,8 @@ export default function HexDetail({ hex, taxonFilter, onClose }: Props) {
   const accentColor = scoreToColor(hex.frontierScore)
   const frontierPct = Math.round(hex.frontierScore * 100)
   const effortPct = Math.round(hex.effortScore * 100)
-  const habitatPct = Math.round(hex.habitatQuality * 100)
   const surveyGapPct = 100 - effortPct
 
-  // Frontier score label
   const frontierLabel =
     hex.frontierScore >= 0.8 ? 'CRITICAL GAP' :
     hex.frontierScore >= 0.6 ? 'HIGH POTENTIAL' :
@@ -89,7 +89,6 @@ export default function HexDetail({ hex, taxonFilter, onClose }: Props) {
           borderBottom: `1px solid ${accentColor}28`,
         }}
       >
-        {/* Subtle diagonal stripe texture */}
         <div
           className="absolute inset-0 opacity-[0.04] pointer-events-none"
           style={{
@@ -105,28 +104,36 @@ export default function HexDetail({ hex, taxonFilter, onClose }: Props) {
 
         <div className="relative flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            {/* Rank + score headline */}
+            {/* Rank / unsurveyed badge */}
             <div className="flex items-baseline gap-3">
-              <span
-                className="text-5xl font-black leading-none tabular-nums tracking-tighter"
-                style={{ color: accentColor, fontFeatureSettings: '"tnum"' }}
-              >
-                #{hex.rank}
-              </span>
-              <div>
-                <div
-                  className="text-2xl font-bold leading-none tabular-nums"
-                  style={{ color: accentColor }}
-                >
-                  {frontierPct}%
-                </div>
-                <div
-                  className="text-[9px] font-bold tracking-[0.15em] mt-0.5"
-                  style={{ color: `${accentColor}cc` }}
-                >
-                  {frontierLabel}
-                </div>
-              </div>
+              {hex.rank > 0 ? (
+                <>
+                  <span
+                    className="text-5xl font-black leading-none tabular-nums tracking-tighter"
+                    style={{ color: accentColor, fontFeatureSettings: '"tnum"' }}
+                  >
+                    #{hex.rank}
+                  </span>
+                  <div>
+                    <div
+                      className="text-2xl font-bold leading-none tabular-nums"
+                      style={{ color: accentColor }}
+                    >
+                      {frontierPct}%
+                    </div>
+                    <div
+                      className="text-[9px] font-bold tracking-[0.15em] mt-0.5"
+                      style={{ color: `${accentColor}cc` }}
+                    >
+                      {frontierLabel}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <span className="text-sm font-semibold text-slate-500 bg-slate-800 rounded px-2 py-1">
+                  Unsurveyed
+                </span>
+              )}
             </div>
 
             {/* Coordinates */}
@@ -152,23 +159,27 @@ export default function HexDetail({ hex, taxonFilter, onClose }: Props) {
         {/* Key metric grid */}
         <div className="px-4 pt-4 pb-3">
           <div className="grid grid-cols-2 gap-2">
-            {[
-              { label: 'Records',     value: td.occurrenceCount.toLocaleString(),    icon: '◉' },
-              { label: 'Species',     value: td.uniqueSpeciesCount.toLocaleString(), icon: '◈' },
-              { label: 'Observers',   value: td.uniqueObserverCount.toLocaleString(), icon: '◎' },
-              { label: 'Survey days', value: td.uniqueDateCount.toLocaleString(),     icon: '◇' },
-            ].map(({ label, value, icon }) => (
+            {(([
+              { label: 'Records',     value: td.occurrenceCount.toLocaleString(),    icon: '◉', tip: 'A GBIF occurrence — one documented observation of one species at this location, from a researcher, institution, or citizen scientist (e.g. iNaturalist).', section: 'data-source' },
+              { label: 'Species',     value: td.uniqueSpeciesCount.toLocaleString(), icon: '◈', tip: null, section: null },
+              { label: 'Observers',   value: td.uniqueObserverCount.toLocaleString(), icon: '◎', tip: null, section: null },
+              { label: 'Survey days', value: td.uniqueDateCount.toLocaleString(),    icon: '◇', tip: null, section: null },
+            ]) as Array<{ label: string; value: string; icon: string; tip: string | null; section: string | null }>).map(({ label, value, icon, tip, section }) => (
               <div
                 key={label}
                 className="rounded-lg px-3 py-2.5"
-                style={{
-                  background: 'rgba(30,41,59,0.8)',
-                  border: '1px solid rgba(148,163,184,0.07)',
-                }}
+                style={{ background: 'rgba(30,41,59,0.8)', border: '1px solid rgba(148,163,184,0.07)' }}
               >
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="text-[10px]" style={{ color: `${accentColor}99` }}>{icon}</span>
                   <span className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">{label}</span>
+                  {tip && (
+                    <InfoTooltip
+                      content={tip}
+                      learnMore={section ? { sectionId: section } : undefined}
+                      onLearnMore={section ? onOpenMethodology : undefined}
+                    />
+                  )}
                 </div>
                 <div className="text-lg font-mono font-bold text-slate-200 tabular-nums leading-none">
                   {value}
@@ -181,10 +192,7 @@ export default function HexDetail({ hex, taxonFilter, onClose }: Props) {
           {td.firstDate && (
             <div
               className="mt-2 px-3 py-2 rounded-lg text-[11px] font-mono text-slate-500 tracking-wide"
-              style={{
-                background: 'rgba(30,41,59,0.5)',
-                border: '1px solid rgba(148,163,184,0.06)',
-              }}
+              style={{ background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(148,163,184,0.06)' }}
             >
               <span className="text-slate-600">PERIOD</span>
               &nbsp;&nbsp;
@@ -198,12 +206,26 @@ export default function HexDetail({ hex, taxonFilter, onClose }: Props) {
 
         {/* Score breakdown */}
         <div className="px-4 py-4 space-y-3.5">
-          <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">
-            Score Breakdown
-          </h3>
+          <div className="flex items-center">
+            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">
+              Score Breakdown
+            </h3>
+            <InfoTooltip
+              content="Frontier Score = (1 − survey effort) × 0.53 + habitat quality × 0.47. Each component is normalised across all SC hexbins."
+              learnMore={{ sectionId: 'frontier-score' }}
+              onLearnMore={onOpenMethodology}
+            />
+          </div>
 
           <AnimatedBar
             label="Frontier potential"
+            labelExtra={
+              <InfoTooltip
+                content="Combined score: how little this area has been surveyed plus how much Atlantic Forest habitat remains."
+                learnMore={{ sectionId: 'frontier-score' }}
+                onLearnMore={onOpenMethodology}
+              />
+            }
             value={hex.frontierScore}
             color={accentColor}
             animate={shouldAnimate}
@@ -211,21 +233,31 @@ export default function HexDetail({ hex, taxonFilter, onClose }: Props) {
 
           <AnimatedBar
             label="Habitat quality"
+            labelExtra={
+              <InfoTooltip
+                content="Estimated Atlantic Forest coverage fraction. Currently a uniform placeholder (0.5) — real values require downloading forest-cover data."
+                learnMore={{ sectionId: 'habitat-quality' }}
+                onLearnMore={onOpenMethodology}
+              />
+            }
             value={hex.habitatQuality}
             color="rgb(34,197,94)"
             animate={shouldAnimate}
           />
 
-          {/* Survey gap — inverted effort score */}
-          <div className="space-y-1">
-            <div className="flex justify-between items-baseline">
-              <span className="text-[11px] text-slate-400 tracking-wide uppercase font-medium">Survey gap</span>
-              <span className="text-xs font-mono text-slate-300 tabular-nums">{surveyGapPct}%</span>
-            </div>
-            <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden border border-slate-700/50">
-              <SurveyGapBar pct={surveyGapPct} animate={shouldAnimate} />
-            </div>
-          </div>
+          <AnimatedBar
+            label="Survey gap"
+            labelExtra={
+              <InfoTooltip
+                content="How little this hexbin has been surveyed relative to all others in SC. 100% = never surveyed; 0% = most intensively surveyed."
+                learnMore={{ sectionId: 'survey-effort' }}
+                onLearnMore={onOpenMethodology}
+              />
+            }
+            value={1 - hex.effortScore}
+            color="rgb(249,115,22)"
+            animate={shouldAnimate}
+          />
 
           {/* Score detail annotation */}
           <div
@@ -242,9 +274,17 @@ export default function HexDetail({ hex, taxonFilter, onClose }: Props) {
           <>
             <div className="mx-4 border-t border-slate-800" />
             <div className="px-4 py-4">
-              <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em] mb-3">
-                Top Recorded Species
-              </h3>
+              <div className="flex items-center mb-3">
+                <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">
+                  Top Recorded Species
+                </h3>
+                <InfoTooltip
+                  content="Most-recorded species across all taxa (plants, fungi, animals). Species group (kingdom/class) is not shown because it was not retained during data aggregation. Click any name to see full taxonomy on GBIF."
+                  learnMore={{ sectionId: 'taxa-coverage' }}
+                  onLearnMore={onOpenMethodology}
+                  align="right"
+                />
+              </div>
               <ul className="space-y-1.5">
                 {td.topSpecies.map(({ name, count }) => (
                   <li key={name} className="flex items-center justify-between gap-2 group">
@@ -282,32 +322,5 @@ export default function HexDetail({ hex, taxonFilter, onClose }: Props) {
         DATA&nbsp;·&nbsp;GBIF&nbsp;&nbsp;/&nbsp;&nbsp;SCORES&nbsp;·&nbsp;ATLANTIC FOREST HABITAT + SURVEY GAP
       </div>
     </div>
-  )
-}
-
-// Separate component to keep survey gap bar animation self-contained
-function SurveyGapBar({ pct, animate }: { pct: number; animate: boolean }) {
-  const barRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!barRef.current || !animate) return
-    const el = barRef.current
-    el.style.width = '0%'
-    const raf = requestAnimationFrame(() => {
-      el.style.transition = 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)'
-      el.style.width = `${pct}%`
-    })
-    return () => cancelAnimationFrame(raf)
-  }, [pct, animate])
-
-  return (
-    <div
-      ref={barRef}
-      className="h-full rounded-full"
-      style={{
-        width: animate ? '0%' : `${pct}%`,
-        background: 'rgb(249,115,22)',
-      }}
-    />
   )
 }
