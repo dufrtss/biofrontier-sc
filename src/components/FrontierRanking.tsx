@@ -3,12 +3,14 @@
 import type { ScoredHexbin } from '@/lib/types'
 import { scoreToColor } from '@/lib/color'
 import { hexCenter } from '@/lib/h3-utils'
+import InfoTooltip from './InfoTooltip'
 
 interface Props {
   rankedHexIds: string[]
   hexbins: Record<string, ScoredHexbin>
   selectedHexId: string | null
   onSelect: (hexId: string) => void
+  onOpenMethodology: (sectionId: string) => void
   limit?: number
 }
 
@@ -17,15 +19,22 @@ function formatCoords(hexId: string): string {
   return `${Math.abs(lat).toFixed(2)}°S, ${Math.abs(lng).toFixed(2)}°W`
 }
 
-export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, onSelect, limit = 20 }: Props) {
+export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, onSelect, onOpenMethodology, limit = 20 }: Props) {
   const topIds = rankedHexIds.slice(0, limit)
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-700/60">
-        <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">
-          Top {limit} Frontier Locations
-        </h2>
+        <div className="flex items-center">
+          <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">
+            Top {limit} Frontier Locations
+          </h2>
+          <InfoTooltip
+            content="Ranked by Frontier Score among hexbins with at least one recorded observation. Higher score = more under-surveyed relative to habitat quality."
+            learnMore={{ sectionId: 'frontier-score' }}
+            onLearnMore={onOpenMethodology}
+          />
+        </div>
         <p className="text-xs text-slate-500 mt-0.5">Highest discovery potential in Santa Catarina</p>
       </div>
 
