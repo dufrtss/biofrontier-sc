@@ -27,7 +27,7 @@ interface RawOccurrence {
   eventDate?: string
 }
 
-async function fetchPage(offset: number): Promise<{ results: RawOccurrence[]; endOfRecords: boolean }> {
+async function fetchPage(offset: number, attempt = 0): Promise<{ results: RawOccurrence[]; endOfRecords: boolean }> {
   const params = new URLSearchParams({
     country: 'BR',
     stateProvince: 'Santa Catarina',
@@ -35,30 +35,53 @@ async function fetchPage(offset: number): Promise<{ results: RawOccurrence[]; en
     limit: String(PAGE_SIZE),
     offset: String(offset),
   })
-  const res = await fetch(`${GBIF_BASE}/occurrence/search?${params}`)
-  if (!res.ok) throw new Error(`GBIF ${res.status}: ${await res.text()}`)
-  const json = await res.json()
-  return { results: json.results, endOfRecords: json.endOfRecords }
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 60_000)
+  try {
+    const res = await fetch(`${GBIF_BASE}/occurrence/search?${params}`, { signal: controller.signal })
+    if (!res.ok) throw new Error(`GBIF ${res.status}: ${await res.text()}`)
+    const json = await res.json()
+    return { results: json.results, endOfRecords: json.endOfRecords }
+  } catch (err) {
+    if (attempt < 3) {
+      await new Promise(r => setTimeout(r, 2000 * (attempt + 1)))
+      return fetchPage(offset, attempt + 1)
+    }
+    throw err
+  } finally {
+    clearTimeout(timeout)
+  }
 }
 
 async function fetchAll(): Promise<RawOccurrence[]> {
   const collected: RawOccurrence[] = []
   let offset = 0
+  let failedPages = 0
   process.stdout.write('Fetching GBIF records')
   while (collected.length < MAX_RECORDS) {
-    const { results, endOfRecords } = await fetchPage(offset)
-    const valid = results.filter(r =>
+    let pageResult: { results: RawOccurrence[]; endOfRecords: boolean }
+    try {
+      pageResult = await fetchPage(offset)
+    } catch {
+      failedPages++
+      process.stdout.write(`\r  ${collected.length} records fetched (page @${offset} skipped)...`)
+      offset += PAGE_SIZE
+      if (failedPages > 10) { console.log('\nToo many failed pages, stopping early.'); break }
+      continue
+    }
+    const valid = pageResult.results.filter(r =>
       r.decimalLatitude != null &&
       r.decimalLongitude != null &&
       isInSCBounds(r.decimalLatitude, r.decimalLongitude)
     )
     collected.push(...valid)
     process.stdout.write(`\r  ${collected.length} records fetched...`)
-    if (endOfRecords) break
+    if (pageResult.endOfRecords) break
     offset += PAGE_SIZE
-    await new Promise(r => setTimeout(r, 200))  // stay well within GBIF rate limit
+    await new Promise(r => setTimeout(r, 200))
   }
   console.log()
+  if (failedPages > 0) console.warn(`Warning: ${failedPages} pages skipped due to GBIF timeouts.`)
   return collected.slice(0, MAX_RECORDS)
 }
 
