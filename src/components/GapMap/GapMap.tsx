@@ -20,6 +20,7 @@ export interface GapMapProps {
   hexbins: Record<string, ScoredHexbin>
   selectedHexId: string | null
   onHexSelect: (hexId: string | null) => void
+  onOpenMethodology: (sectionId: string) => void
 }
 
 export default function GapMap(props: GapMapProps) {
