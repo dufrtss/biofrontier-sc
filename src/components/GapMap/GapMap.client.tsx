@@ -7,8 +7,9 @@ import type { ScoredHexbin } from '@/lib/types'
 import { hexBoundary } from '@/lib/h3-utils'
 import { scoreToColor, scoreToOpacity } from '@/lib/color'
 import type { GapMapProps } from './GapMap'
+import InfoTooltip from '@/components/InfoTooltip'
 
-export default function GapMapClient({ hexbins, selectedHexId, onHexSelect }: GapMapProps) {
+export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOpenMethodology }: GapMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<L.Map | null>(null)
   const polygonsRef  = useRef<Map<string, L.Polygon>>(new Map())
@@ -106,8 +107,15 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect }: Ga
       <div ref={containerRef} className="w-full h-full" />
 
       {/* Legend */}
-      <div className="absolute bottom-8 left-4 z-[1000] bg-slate-900/90 backdrop-blur rounded-lg px-3 py-2 text-xs text-slate-300 border border-slate-700 pointer-events-none">
-        <p className="text-slate-400 uppercase tracking-widest text-[10px] mb-2 font-semibold">Survey Coverage</p>
+      <div className="absolute bottom-8 left-4 z-[1000] bg-slate-900/90 backdrop-blur rounded-lg px-3 py-2 text-xs text-slate-300 border border-slate-700">
+        <div className="flex items-center mb-2">
+          <p className="text-slate-400 uppercase tracking-widest text-[10px] font-semibold">Survey Coverage</p>
+          <InfoTooltip
+            content="Each cell is an H3 hexagonal grid unit (~36 km²). Boundaries are algorithmic, not administrative — they don't align with municipalities or protected areas."
+            learnMore={{ sectionId: 'geographic-scope' }}
+            onLearnMore={onOpenMethodology}
+          />
+        </div>
         <div className="flex items-center gap-2 mb-1">
           <span className="w-3 h-3 rounded-sm inline-block" style={{ background: 'rgb(59,130,246)' }} />
           Well surveyed
