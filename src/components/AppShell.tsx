@@ -1,17 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import type { TaxonFilter } from '@/lib/types'
 import { useBiofrontierData } from '@/hooks/useBiofrontierData'
 import GapMap from './GapMap/GapMap'
 import FrontierRanking from './FrontierRanking'
 import TaxonSelector from './TaxonSelector'
 import HexDetail from './HexDetail'
+import DataSummaryBar from './DataSummaryBar'
+import MethodologyPanel from './MethodologyPanel'
 
 export default function AppShell() {
   const [taxonFilter, setTaxonFilter] = useState<TaxonFilter>('all')
-  const { hexbins, rankedHexIds, selectedHexId, loading, error, lastUpdated, selectHex } =
-    useBiofrontierData(taxonFilter)
+  const {
+    hexbins, rankedHexIds, selectedHexId, loading, error,
+    lastUpdated, speciesCount, selectHex,
+  } = useBiofrontierData(taxonFilter)
+
+  const [methodologyOpen, setMethodologyOpen]       = useState(false)
+  const [methodologySection, setMethodologySection] = useState<string | undefined>()
+
+  const openMethodology = useCallback((sectionId?: string) => {
+    setMethodologySection(sectionId)
+    setMethodologyOpen(true)
+  }, [])
 
   const selectedHex = selectedHexId ? hexbins[selectedHexId] ?? null : null
 
@@ -29,9 +41,7 @@ export default function AppShell() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 bg-slate-950">
-        <p className="text-red-400 text-sm font-condensed tracking-wide uppercase">
-          Error loading data
-        </p>
+        <p className="text-red-400 text-sm font-condensed tracking-wide uppercase">Error loading data</p>
         <p className="text-slate-600 text-xs">{error}</p>
       </div>
     )
@@ -39,7 +49,7 @@ export default function AppShell() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Top bar — thin emerald accent line signals the Atlantic Forest theme */}
+      {/* Top bar */}
       <header className="relative flex items-center justify-between px-5 py-3 bg-slate-900 border-b border-slate-700/60 shrink-0 z-10">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-emerald-600/60 via-emerald-500/40 to-transparent" />
         <div>
@@ -51,37 +61,45 @@ export default function AppShell() {
           </p>
         </div>
         <div className="flex items-center gap-4">
-          <TaxonSelector value={taxonFilter} onChange={setTaxonFilter} />
-          {lastUpdated && (
-            <span className="text-xs text-slate-600 hidden md:block tabular-nums">
-              Data: {new Date(lastUpdated).toLocaleDateString('pt-BR')}
-            </span>
-          )}
+          <TaxonSelector value={taxonFilter} onChange={setTaxonFilter} onOpenMethodology={openMethodology} />
+          <button
+            onClick={() => openMethodology()}
+            className="text-xs text-slate-500 hover:text-slate-300 transition-colors hidden md:block"
+          >
+            How it works →
+          </button>
         </div>
       </header>
 
+      {/* Data summary bar */}
+      <DataSummaryBar
+        speciesCount={speciesCount}
+        frontierCount={rankedHexIds.length}
+        lastUpdated={lastUpdated}
+        onOpenMethodology={openMethodology}
+      />
+
       {/* Body: sidebar + map + detail */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Left sidebar */}
         <aside className="w-80 shrink-0 bg-slate-900 border-r border-slate-700/60 overflow-hidden">
           <FrontierRanking
             rankedHexIds={rankedHexIds}
             hexbins={hexbins}
             selectedHexId={selectedHexId}
             onSelect={selectHex}
+            onOpenMethodology={openMethodology}
           />
         </aside>
 
-        {/* Map */}
         <main className="flex-1 relative overflow-hidden">
           <GapMap
             hexbins={hexbins}
             selectedHexId={selectedHexId}
             onHexSelect={selectHex}
+            onOpenMethodology={openMethodology}
           />
         </main>
 
-        {/* Right detail drawer — slides in when a hex is selected */}
         <aside
           className={[
             'shrink-0 bg-slate-900 border-l border-slate-700/60 overflow-hidden transition-all duration-200',
@@ -92,9 +110,17 @@ export default function AppShell() {
             hex={selectedHex}
             taxonFilter={taxonFilter}
             onClose={() => selectHex(null)}
+            onOpenMethodology={openMethodology}
           />
         </aside>
       </div>
+
+      {/* Methodology panel (fixed overlay) */}
+      <MethodologyPanel
+        open={methodologyOpen}
+        initialSection={methodologySection}
+        onClose={() => setMethodologyOpen(false)}
+      />
     </div>
   )
 }
