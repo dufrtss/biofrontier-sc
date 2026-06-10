@@ -1,0 +1,73 @@
+'use client'
+
+import type { ScoredHexbin } from '@/lib/types'
+import { scoreToColor } from '@/lib/color'
+import { hexCenter } from '@/lib/h3-utils'
+
+interface Props {
+  rankedHexIds: string[]
+  hexbins: Record<string, ScoredHexbin>
+  selectedHexId: string | null
+  onSelect: (hexId: string) => void
+  limit?: number
+}
+
+function formatCoords(hexId: string): string {
+  const [lat, lng] = hexCenter(hexId)
+  return `${Math.abs(lat).toFixed(2)}°S, ${Math.abs(lng).toFixed(2)}°W`
+}
+
+export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, onSelect, limit = 20 }: Props) {
+  const topIds = rankedHexIds.slice(0, limit)
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="px-4 py-3 border-b border-slate-700/60">
+        <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">
+          Top {limit} Frontier Locations
+        </h2>
+        <p className="text-xs text-slate-500 mt-0.5">Highest discovery potential in Santa Catarina</p>
+      </div>
+
+      <ul className="flex-1 overflow-y-auto divide-y divide-slate-700/40">
+        {topIds.map(hexId => {
+          const hex = hexbins[hexId]
+          if (!hex) return null
+          const isSelected = hexId === selectedHexId
+          const color = scoreToColor(hex.frontierScore)
+          const pct = (hex.frontierScore * 100).toFixed(0)
+          const td  = hex.all
+
+          return (
+            <li key={hexId}>
+              <button
+                onClick={() => onSelect(hexId)}
+                className={[
+                  'w-full text-left px-4 py-3 transition-colors hover:bg-slate-700/50',
+                  isSelected ? 'bg-slate-700/80 border-l-2 border-blue-400' : '',
+                ].join(' ')}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <span className="text-2xl font-bold leading-none" style={{ color }}>
+                    {hex.rank}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-slate-400 truncate">{formatCoords(hexId)}</div>
+                    {/* Score bar */}
+                    <div className="mt-1.5 h-1.5 rounded-full bg-slate-700 overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+                    </div>
+                    <div className="flex justify-between mt-1 text-xs text-slate-500">
+                      <span>{pct}% frontier</span>
+                      <span>{td.occurrenceCount} records</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+  )
+}
