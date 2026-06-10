@@ -24,3 +24,14 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Leaflet tooltip override */
+.biofrontier-tooltip {
+  background: #0f172a !important;
+  border: 1px solid #334155 !important;
+  color: #e2e8f0 !important;
+  border-radius: 6px !important;
+  font-size: 12px !important;
+  padding: 4px 8px !important;
+}
+.biofrontier-tooltip::before { display: none !important; }
