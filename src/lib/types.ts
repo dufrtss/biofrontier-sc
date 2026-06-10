@@ -40,4 +40,5 @@ export interface AppState {
   loading: boolean
   error: string | null
   lastUpdated: string | null
+  speciesCount: number                   // lower-bound unique species across all hexbins
 }
