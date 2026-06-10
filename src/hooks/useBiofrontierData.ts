@@ -65,6 +65,13 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     }
   }, [raw, taxonFilter])
 
+  const speciesCount = useMemo(() => {
+    if (!raw) return 0
+    const names = new Set<string>()
+    raw.hexbins.forEach(h => h.all.topSpecies.forEach(s => names.add(s.name)))
+    return names.size
+  }, [raw])
+
   return {
     hexbins,
     rankedHexIds,
@@ -73,6 +80,7 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     loading,
     error,
     lastUpdated: raw?.generatedAt ?? null,
+    speciesCount,
     selectHex: setSelected,
   }
 }
