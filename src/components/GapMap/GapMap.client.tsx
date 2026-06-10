@@ -48,17 +48,28 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect }: Ga
 
     Object.values(hexbins).forEach(hex => {
       const boundary = hexBoundary(hex.hexId)
-      const polygon  = L.polygon(boundary, {
+      const hasData  = hex.all.occurrenceCount > 0
+
+      const polygon = L.polygon(boundary, hasData ? {
         color:       'transparent',
         fillColor:   scoreToColor(hex.frontierScore),
         fillOpacity: scoreToOpacity(hex.frontierScore),
         weight:      0.8,
+      } : {
+        color:       'transparent',
+        fillColor:   '#475569',
+        fillOpacity: 0.10,
+        weight:      0,
       })
 
-      polygon.bindTooltip(
-        `<strong>#${hex.rank}</strong> Frontier: ${(hex.frontierScore * 100).toFixed(0)}%`,
-        { sticky: true, className: 'biofrontier-tooltip' }
-      )
+      if (hasData) {
+        polygon.bindTooltip(
+          `<strong>#${hex.rank}</strong> Frontier: ${(hex.frontierScore * 100).toFixed(0)}%`,
+          { sticky: true, className: 'biofrontier-tooltip' }
+        )
+      } else {
+        polygon.bindTooltip('Unsurveyed', { sticky: true, className: 'biofrontier-tooltip' })
+      }
 
       polygon.on('click', () => onHexSelectRef.current(hex.hexId))
       polygon.addTo(map)
@@ -75,10 +86,15 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect }: Ga
       } else {
         const hex = hexbins[hexId]
         if (hex) {
-          polygon.setStyle({
+          const hasData = hex.all.occurrenceCount > 0
+          polygon.setStyle(hasData ? {
             color:       'transparent',
             weight:      0.8,
             fillOpacity: scoreToOpacity(hex.frontierScore),
+          } : {
+            color:       'transparent',
+            weight:      0,
+            fillOpacity: 0.10,
           })
         }
       }
@@ -96,9 +112,13 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect }: Ga
           <span className="w-3 h-3 rounded-sm inline-block" style={{ background: 'rgb(59,130,246)' }} />
           Well surveyed
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-1">
           <span className="w-3 h-3 rounded-sm inline-block" style={{ background: 'rgb(239,68,68)' }} />
           High frontier potential
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-sm inline-block bg-slate-600 opacity-50" />
+          Unsurveyed
         </div>
       </div>
     </div>
