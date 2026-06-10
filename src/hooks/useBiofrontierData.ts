@@ -15,13 +15,18 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
   const [selectedHexId, setSelected] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('/data/hexbins.json')
+    const controller = new AbortController()
+    fetch('/data/hexbins.json', { signal: controller.signal })
       .then(r => {
         if (!r.ok) throw new Error(`hexbins.json returned ${r.status}`)
         return r.json() as Promise<HexbinsFile>
       })
       .then(data => { setRaw(data); setLoading(false) })
-      .catch(err  => { setError(err.message); setLoading(false) })
+      .catch(err  => {
+        if (err.name === 'AbortError') return
+        setError(err.message); setLoading(false)
+      })
+    return () => controller.abort()
   }, [])
 
   const { hexbins, rankedHexIds } = useMemo(() => {
@@ -46,12 +51,13 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
       rank:           0,  // assigned below
     }))
 
-    const sorted = [...scored].sort((a, b) => b.frontierScore - a.frontierScore)
-    sorted.forEach((h, idx) => { h.rank = idx + 1 })
+    const sortedWithRank = [...scored]
+      .sort((a, b) => b.frontierScore - a.frontierScore)
+      .map((h, idx) => ({ ...h, rank: idx + 1 }))
 
     return {
-      hexbins:      Object.fromEntries(scored.map(h => [h.hexId, h])),
-      rankedHexIds: sorted.map(h => h.hexId),
+      hexbins:      Object.fromEntries(sortedWithRank.map(h => [h.hexId, h])),
+      rankedHexIds: sortedWithRank.map(h => h.hexId),
     }
   }, [raw, taxonFilter])
 
