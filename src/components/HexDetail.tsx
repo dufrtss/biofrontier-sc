@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import type { ScoredHexbin, TaxonFilter } from '@/lib/types'
 import { scoreToColor } from '@/lib/color'
 import { hexCenter } from '@/lib/h3-utils'
@@ -39,12 +40,12 @@ function AnimatedBar({ label, labelExtra, value, color, animate }: AnimatedBarPr
   return (
     <div className="space-y-1">
       <div className="flex justify-between items-baseline">
-        <span className="flex items-center text-[11px] text-slate-400 tracking-wide uppercase font-medium">
+        <span className="flex items-center text-[11px] text-[--text-muted] tracking-wide uppercase font-medium">
           {label}{labelExtra}
         </span>
-        <span className="text-xs font-mono text-slate-300 tabular-nums">{pct}%</span>
+        <span className="text-xs font-mono text-[--text-secondary] tabular-nums">{pct}%</span>
       </div>
-      <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden border border-slate-700/50">
+      <div className="h-1.5 rounded-full bg-[--surface] overflow-hidden border border-[--border]">
         <div
           ref={barRef}
           className="h-full rounded-full"
@@ -56,6 +57,7 @@ function AnimatedBar({ label, labelExtra, value, color, animate }: AnimatedBarPr
 }
 
 export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology }: Props) {
+  const t = useTranslations('HexDetail')
   const prevHexId = useRef<string | null>(null)
   const shouldAnimate = hex !== null && hex.hexId !== prevHexId.current
 
@@ -69,19 +71,17 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
   const [lat, lng] = hexCenter(hex.hexId)
   const accentColor = scoreToColor(hex.frontierScore)
   const frontierPct = Math.round(hex.frontierScore * 100)
-  const effortPct = Math.round(hex.effortScore * 100)
-  const surveyGapPct = 100 - effortPct
 
   const frontierLabel =
-    hex.frontierScore >= 0.8 ? 'CRITICAL GAP' :
-    hex.frontierScore >= 0.6 ? 'HIGH POTENTIAL' :
-    hex.frontierScore >= 0.4 ? 'MODERATE' :
-    'WELL SURVEYED'
+    hex.frontierScore >= 0.8 ? t('criticalGap') :
+    hex.frontierScore >= 0.6 ? t('highPotential') :
+    hex.frontierScore >= 0.4 ? t('moderate') :
+    t('wellSurveyed')
 
   return (
-    <div className="flex flex-col h-full bg-slate-900" style={{ borderLeft: `1px solid rgba(148,163,184,0.12)` }}>
+    <div className="flex flex-col h-full bg-[--surface-raised]" style={{ borderLeft: `1px solid color-mix(in srgb, var(--border) 80%, transparent)` }}>
 
-      {/* Header band — color-coded by frontier score */}
+      {/* Header band */}
       <div
         className="relative px-4 pt-4 pb-3 overflow-hidden"
         style={{
@@ -92,19 +92,12 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
         <div
           className="absolute inset-0 opacity-[0.04] pointer-events-none"
           style={{
-            backgroundImage: `repeating-linear-gradient(
-              45deg,
-              ${accentColor} 0px,
-              ${accentColor} 1px,
-              transparent 1px,
-              transparent 8px
-            )`,
+            backgroundImage: `repeating-linear-gradient(45deg, ${accentColor} 0px, ${accentColor} 1px, transparent 1px, transparent 8px)`,
           }}
         />
 
         <div className="relative flex items-start justify-between">
           <div className="flex-1 min-w-0">
-            {/* Rank / unsurveyed badge */}
             <div className="flex items-baseline gap-3">
               {hex.rank > 0 ? (
                 <>
@@ -115,29 +108,22 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
                     #{hex.rank}
                   </span>
                   <div>
-                    <div
-                      className="text-2xl font-bold leading-none tabular-nums"
-                      style={{ color: accentColor }}
-                    >
+                    <div className="text-2xl font-bold leading-none tabular-nums" style={{ color: accentColor }}>
                       {frontierPct}%
                     </div>
-                    <div
-                      className="text-[9px] font-bold tracking-[0.15em] mt-0.5"
-                      style={{ color: `${accentColor}cc` }}
-                    >
+                    <div className="text-[9px] font-bold tracking-[0.15em] mt-0.5" style={{ color: `${accentColor}cc` }}>
                       {frontierLabel}
                     </div>
                   </div>
                 </>
               ) : (
-                <span className="text-sm font-semibold text-slate-500 bg-slate-800 rounded px-2 py-1">
-                  Unsurveyed
+                <span className="text-sm font-semibold text-[--text-muted] bg-[--surface] rounded px-2 py-1">
+                  {t('unsurveyed')}
                 </span>
               )}
             </div>
 
-            {/* Coordinates */}
-            <div className="mt-2 font-mono text-[11px] text-slate-500 tracking-wider">
+            <div className="mt-2 font-mono text-[11px] text-[--text-muted] tracking-wider">
               {Math.abs(lat).toFixed(4)}°S&nbsp;&nbsp;
               {Math.abs(lng).toFixed(4)}°W
             </div>
@@ -145,8 +131,8 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
 
           <button
             onClick={onClose}
-            className="text-slate-600 hover:text-slate-300 transition-colors text-base leading-none mt-0.5 ml-2 shrink-0 w-7 h-7 flex items-center justify-center rounded hover:bg-slate-700/60"
-            aria-label="Close panel"
+            className="text-[--text-muted] hover:text-[--text-secondary] transition-colors text-base leading-none mt-0.5 ml-2 shrink-0 w-7 h-7 flex items-center justify-center rounded hover:bg-[--surface]"
+            aria-label={t('closePanel')}
           >
             ✕
           </button>
@@ -160,19 +146,19 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
         <div className="px-4 pt-4 pb-3">
           <div className="grid grid-cols-2 gap-2">
             {(([
-              { label: 'Records',     value: td.occurrenceCount.toLocaleString(),    icon: '◉', tip: 'A GBIF occurrence — one documented observation of one species at this location, from a researcher, institution, or citizen scientist (e.g. iNaturalist).', section: 'data-source' },
-              { label: 'Species',     value: td.uniqueSpeciesCount.toLocaleString(), icon: '◈', tip: null, section: null },
-              { label: 'Observers',   value: td.uniqueObserverCount.toLocaleString(), icon: '◎', tip: null, section: null },
-              { label: 'Survey days', value: td.uniqueDateCount.toLocaleString(),    icon: '◇', tip: null, section: null },
+              { label: t('records'),    value: td.occurrenceCount.toLocaleString(),    icon: '◉', tip: t('tooltipRecords'), section: 'data-source' },
+              { label: t('species'),    value: td.uniqueSpeciesCount.toLocaleString(), icon: '◈', tip: null, section: null },
+              { label: t('observers'),  value: td.uniqueObserverCount.toLocaleString(), icon: '◎', tip: null, section: null },
+              { label: t('surveyDays'), value: td.uniqueDateCount.toLocaleString(),    icon: '◇', tip: null, section: null },
             ]) as Array<{ label: string; value: string; icon: string; tip: string | null; section: string | null }>).map(({ label, value, icon, tip, section }) => (
               <div
                 key={label}
                 className="rounded-lg px-3 py-2.5"
-                style={{ background: 'rgba(30,41,59,0.8)', border: '1px solid rgba(148,163,184,0.07)' }}
+                style={{ background: 'var(--surface-overlay)', border: `1px solid color-mix(in srgb, var(--border) 30%, transparent)` }}
               >
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="text-[10px]" style={{ color: `${accentColor}99` }}>{icon}</span>
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider font-medium">{label}</span>
+                  <span className="text-[10px] text-[--text-muted] uppercase tracking-wider font-medium">{label}</span>
                   {tip && (
                     <InfoTooltip
                       content={tip}
@@ -181,47 +167,44 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
                     />
                   )}
                 </div>
-                <div className="text-lg font-mono font-bold text-slate-200 tabular-nums leading-none">
+                <div className="text-lg font-mono font-bold text-[--text-primary] tabular-nums leading-none">
                   {value}
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Date range */}
           {td.firstDate && (
             <div
-              className="mt-2 px-3 py-2 rounded-lg text-[11px] font-mono text-slate-500 tracking-wide"
-              style={{ background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(148,163,184,0.06)' }}
+              className="mt-2 px-3 py-2 rounded-lg text-[11px] font-mono text-[--text-muted] tracking-wide"
+              style={{ background: 'var(--bg-overlay)', border: `1px solid color-mix(in srgb, var(--border) 20%, transparent)` }}
             >
-              <span className="text-slate-600">PERIOD</span>
-              &nbsp;&nbsp;
-              {td.firstDate}&nbsp;→&nbsp;{td.lastDate}
+              <span className="text-[--border-bright]">{t('period')}</span>
+              &nbsp;&nbsp;{td.firstDate}&nbsp;→&nbsp;{td.lastDate}
             </div>
           )}
         </div>
 
-        {/* Divider */}
-        <div className="mx-4 border-t border-slate-800" />
+        <div className="mx-4 border-t border-[--border]" />
 
         {/* Score breakdown */}
         <div className="px-4 py-4 space-y-3.5">
           <div className="flex items-center">
-            <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">
-              Score Breakdown
+            <h3 className="text-[10px] font-bold text-[--text-muted] uppercase tracking-[0.18em]">
+              {t('scoreBreakdown')}
             </h3>
             <InfoTooltip
-              content="Frontier Score = (1 − survey effort) × 0.53 + habitat quality × 0.47. Each component is normalised across all SC hexbins."
+              content={t('tooltipScoreBreakdown')}
               learnMore={{ sectionId: 'frontier-score' }}
               onLearnMore={onOpenMethodology}
             />
           </div>
 
           <AnimatedBar
-            label="Frontier potential"
+            label={t('frontierPotential')}
             labelExtra={
               <InfoTooltip
-                content="Combined score: how little this area has been surveyed plus how much Atlantic Forest habitat remains."
+                content={t('tooltipFrontierPotential')}
                 learnMore={{ sectionId: 'frontier-score' }}
                 onLearnMore={onOpenMethodology}
               />
@@ -232,54 +215,52 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
           />
 
           <AnimatedBar
-            label="Habitat quality"
+            label={t('habitatQuality')}
             labelExtra={
               <InfoTooltip
-                content="Estimated Atlantic Forest coverage fraction. Currently a uniform placeholder (0.5) — real values require downloading forest-cover data."
+                content={t('tooltipHabitatQuality')}
                 learnMore={{ sectionId: 'habitat-quality' }}
                 onLearnMore={onOpenMethodology}
               />
             }
             value={hex.habitatQuality}
-            color="rgb(34,197,94)"
+            color="var(--color-habitat)"
             animate={shouldAnimate}
           />
 
           <AnimatedBar
-            label="Survey gap"
+            label={t('surveyGap')}
             labelExtra={
               <InfoTooltip
-                content="How little this hexbin has been surveyed relative to all others in SC. 100% = never surveyed; 0% = most intensively surveyed."
+                content={t('tooltipSurveyGap')}
                 learnMore={{ sectionId: 'survey-effort' }}
                 onLearnMore={onOpenMethodology}
               />
             }
             value={1 - hex.effortScore}
-            color="rgb(249,115,22)"
+            color="var(--color-gap)"
             animate={shouldAnimate}
           />
 
-          {/* Score detail annotation */}
           <div
-            className="rounded px-2.5 py-2 text-[10px] leading-relaxed text-slate-600"
-            style={{ background: 'rgba(15,23,42,0.6)', border: '1px solid rgba(148,163,184,0.05)' }}
+            className="rounded px-2.5 py-2 text-[10px] leading-relaxed text-[--text-muted]"
+            style={{ background: 'var(--bg-overlay)', border: `1px solid color-mix(in srgb, var(--border) 15%, transparent)` }}
           >
-            Frontier&nbsp;=&nbsp;survey gap&nbsp;×&nbsp;habitat&nbsp;quality.
-            High habitat coverage with low observation density indicates discovery potential.
+            {t('scoreAnnotation')}
           </div>
         </div>
 
         {/* Top species */}
         {td.topSpecies.length > 0 && (
           <>
-            <div className="mx-4 border-t border-slate-800" />
+            <div className="mx-4 border-t border-[--border]" />
             <div className="px-4 py-4">
               <div className="flex items-center mb-3">
-                <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">
-                  Top Recorded Species
+                <h3 className="text-[10px] font-bold text-[--text-muted] uppercase tracking-[0.18em]">
+                  {t('topRecordedSpecies')}
                 </h3>
                 <InfoTooltip
-                  content="Most-recorded species across all taxa (plants, fungi, animals). Species group (kingdom/class) is not shown because it was not retained during data aggregation. Click any name to see full taxonomy on GBIF."
+                  content={t('tooltipTopSpecies')}
                   learnMore={{ sectionId: 'taxa-coverage' }}
                   onLearnMore={onOpenMethodology}
                   align="right"
@@ -292,14 +273,14 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
                       href={`https://www.gbif.org/species/search?q=${encodeURIComponent(name)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[12px] italic truncate text-blue-400/80 hover:text-blue-300 transition-colors flex-1 min-w-0"
+                      className="text-[12px] italic truncate text-[--accent-blue] hover:text-[--accent-blue-dim] transition-colors flex-1 min-w-0"
                       title={name}
                     >
                       {name}
                     </a>
                     <span
-                      className="text-[11px] font-mono text-slate-600 tabular-nums shrink-0 rounded px-1.5 py-0.5"
-                      style={{ background: 'rgba(30,41,59,0.8)', border: '1px solid rgba(148,163,184,0.07)' }}
+                      className="text-[11px] font-mono text-[--text-muted] tabular-nums shrink-0 rounded px-1.5 py-0.5"
+                      style={{ background: 'var(--surface-overlay)', border: `1px solid color-mix(in srgb, var(--border) 30%, transparent)` }}
                     >
                       {count}
                     </span>
@@ -310,16 +291,15 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
           </>
         )}
 
-        {/* Bottom spacer */}
         <div className="h-2" />
       </div>
 
       {/* Footer */}
       <div
-        className="px-4 py-2.5 text-[10px] font-mono text-slate-700 tracking-wide leading-relaxed"
-        style={{ borderTop: '1px solid rgba(148,163,184,0.07)' }}
+        className="px-4 py-2.5 text-[10px] font-mono text-[--text-muted] tracking-wide leading-relaxed"
+        style={{ borderTop: `1px solid color-mix(in srgb, var(--border) 40%, transparent)` }}
       >
-        DATA&nbsp;·&nbsp;GBIF&nbsp;&nbsp;/&nbsp;&nbsp;SCORES&nbsp;·&nbsp;ATLANTIC FOREST HABITAT + SURVEY GAP
+        {t('footer')}
       </div>
     </div>
   )
