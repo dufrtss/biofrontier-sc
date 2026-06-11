@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import type { TaxonFilter } from '@/lib/types'
 import { useBiofrontierData } from '@/hooks/useBiofrontierData'
 import GapMap from './GapMap/GapMap'
@@ -9,8 +10,11 @@ import TaxonSelector from './TaxonSelector'
 import HexDetail from './HexDetail'
 import DataSummaryBar from './DataSummaryBar'
 import MethodologyPanel from './MethodologyPanel'
+import ThemeToggle from './ThemeToggle'
+import LocaleSwitcher from './LocaleSwitcher'
 
 export default function AppShell() {
+  const t = useTranslations('AppShell')
   const [taxonFilter, setTaxonFilter] = useState<TaxonFilter>('all')
   const {
     hexbins, rankedHexIds, selectedHexId, loading, error,
@@ -29,10 +33,10 @@ export default function AppShell() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 bg-slate-950">
-        <div className="w-6 h-6 rounded-full border-2 border-slate-700 border-t-emerald-500 animate-spin" />
-        <p className="text-slate-500 text-sm tracking-widest uppercase font-condensed">
-          Loading biodiversity data
+      <div className="flex flex-col items-center justify-center h-full gap-3 bg-[--bg]">
+        <div className="w-6 h-6 rounded-full border-2 border-[--border] border-t-[--accent] animate-spin" />
+        <p className="text-[--text-muted] text-sm tracking-widest uppercase font-condensed">
+          {t('loadingData')}
         </p>
       </div>
     )
@@ -40,9 +44,9 @@ export default function AppShell() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-2 bg-slate-950">
-        <p className="text-red-400 text-sm font-condensed tracking-wide uppercase">Error loading data</p>
-        <p className="text-slate-600 text-xs">{error}</p>
+      <div className="flex flex-col items-center justify-center h-full gap-2 bg-[--bg]">
+        <p className="text-red-400 text-sm font-condensed tracking-wide uppercase">{t('errorLoading')}</p>
+        <p className="text-[--text-muted] text-xs">{error}</p>
       </div>
     )
   }
@@ -50,24 +54,26 @@ export default function AppShell() {
   return (
     <div className="flex flex-col h-full">
       {/* Top bar */}
-      <header className="relative flex items-center justify-between px-5 py-3 bg-slate-900 border-b border-slate-700/60 shrink-0 z-10">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-emerald-600/60 via-emerald-500/40 to-transparent" />
+      <header className="relative flex items-center justify-between px-5 py-3 bg-[--surface-raised] border-b border-[--border] shrink-0 z-10">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-[--accent]/60 via-[--accent]/40 to-transparent" />
         <div>
-          <h1 className="text-base font-bold text-white tracking-tight font-condensed uppercase leading-none">
+          <h1 className="text-base font-bold text-[--text-primary] tracking-tight font-condensed uppercase leading-none">
             BioFrontier SC
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Frontier intelligence · Santa Catarina · Atlantic Forest
+          <p className="text-xs text-[--text-muted] mt-0.5">
+            {t('tagline')}
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <TaxonSelector value={taxonFilter} onChange={setTaxonFilter} onOpenMethodology={openMethodology} />
           <button
             onClick={() => openMethodology()}
-            className="text-xs text-slate-500 hover:text-slate-300 transition-colors hidden md:block"
+            className="text-xs text-[--text-muted] hover:text-[--text-secondary] transition-colors hidden md:block"
           >
-            How it works →
+            {t('howItWorks')}
           </button>
+          <LocaleSwitcher />
+          <ThemeToggle />
         </div>
       </header>
 
@@ -81,7 +87,7 @@ export default function AppShell() {
 
       {/* Body: sidebar + map + detail */}
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-80 shrink-0 bg-slate-900 border-r border-slate-700/60 overflow-hidden">
+        <aside className="w-80 shrink-0 bg-[--surface-raised] border-r border-[--border] overflow-hidden">
           <FrontierRanking
             rankedHexIds={rankedHexIds}
             hexbins={hexbins}
@@ -102,7 +108,7 @@ export default function AppShell() {
 
         <aside
           className={[
-            'shrink-0 bg-slate-900 border-l border-slate-700/60 overflow-hidden transition-all duration-200',
+            'shrink-0 bg-[--surface-raised] border-l border-[--border] overflow-hidden transition-all duration-200',
             selectedHex ? 'w-80 opacity-100' : 'w-0 opacity-0 pointer-events-none',
           ].join(' ')}
         >
@@ -115,7 +121,7 @@ export default function AppShell() {
         </aside>
       </div>
 
-      {/* Methodology panel (fixed overlay) */}
+      {/* Methodology panel */}
       <MethodologyPanel
         open={methodologyOpen}
         initialSection={methodologySection}
