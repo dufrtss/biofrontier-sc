@@ -49,7 +49,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
 
     Object.values(hexbins).forEach(hex => {
       const boundary = hexBoundary(hex.hexId)
-      const hasData  = hex.all.occurrenceCount > 0
+      const hasData  = hex.rank > 0
 
       const polygon = L.polygon(boundary, hasData ? {
         color:       'transparent',
@@ -87,7 +87,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
       } else {
         const hex = hexbins[hexId]
         if (hex) {
-          const hasData = hex.all.occurrenceCount > 0
+          const hasData = hex.rank > 0
           polygon.setStyle(hasData ? {
             color:       'transparent',
             weight:      0.8,
