@@ -1,5 +1,6 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import type { ScoredHexbin } from '@/lib/types'
 import { scoreToColor } from '@/lib/color'
 import { hexCenter } from '@/lib/h3-utils'
@@ -20,25 +21,26 @@ function formatCoords(hexId: string): string {
 }
 
 export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, onSelect, onOpenMethodology, limit = 20 }: Props) {
+  const t = useTranslations('FrontierRanking')
   const topIds = rankedHexIds.slice(0, limit)
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="px-4 py-3 border-b border-slate-700/60">
+      <div className="px-4 py-3 border-b border-[--border]">
         <div className="flex items-center">
-          <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">
-            Top {limit} Frontier Locations
+          <h2 className="text-sm font-semibold text-[--text-primary] uppercase tracking-wider">
+            {t('title', { limit })}
           </h2>
           <InfoTooltip
-            content="Ranked by Frontier Score among hexbins with at least one recorded observation. Higher score = more under-surveyed relative to habitat quality."
+            content={t('tooltipRanking')}
             learnMore={{ sectionId: 'frontier-score' }}
             onLearnMore={onOpenMethodology}
           />
         </div>
-        <p className="text-xs text-slate-500 mt-0.5">Highest discovery potential in Santa Catarina</p>
+        <p className="text-xs text-[--text-muted] mt-0.5">{t('subtitle')}</p>
       </div>
 
-      <ul className="flex-1 overflow-y-auto divide-y divide-slate-700/40">
+      <ul className="flex-1 overflow-y-auto divide-y divide-[--border]">
         {topIds.map(hexId => {
           const hex = hexbins[hexId]
           if (!hex) return null
@@ -52,8 +54,8 @@ export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, 
               <button
                 onClick={() => onSelect(hexId)}
                 className={[
-                  'w-full text-left px-4 py-3 transition-colors hover:bg-slate-700/50',
-                  isSelected ? 'bg-slate-700/80 border-l-2 border-blue-400' : '',
+                  'w-full text-left px-4 py-3 transition-colors hover:bg-[--surface]/50',
+                  isSelected ? 'bg-[--surface] border-l-2 border-[--accent-blue]' : '',
                 ].join(' ')}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -61,14 +63,13 @@ export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, 
                     {hex.rank}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs text-slate-400 truncate">{formatCoords(hexId)}</div>
-                    {/* Score bar */}
-                    <div className="mt-1.5 h-1.5 rounded-full bg-slate-700 overflow-hidden">
+                    <div className="text-xs text-[--text-muted] truncate">{formatCoords(hexId)}</div>
+                    <div className="mt-1.5 h-1.5 rounded-full bg-[--surface] overflow-hidden">
                       <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
                     </div>
-                    <div className="flex justify-between mt-1 text-xs text-slate-500">
-                      <span>{pct}% frontier</span>
-                      <span>{td.occurrenceCount} records</span>
+                    <div className="flex justify-between mt-1 text-xs text-[--text-muted]">
+                      <span>{t('frontierPct', { pct })}</span>
+                      <span>{t('recordsCount', { count: td.occurrenceCount })}</span>
                     </div>
                   </div>
                 </div>
