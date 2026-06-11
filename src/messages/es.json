@@ -1,0 +1,179 @@
+{
+  "AppShell": {
+    "loadingData": "Cargando datos de biodiversidad",
+    "errorLoading": "Error al cargar datos",
+    "tagline": "Inteligencia de fronteras · Santa Catarina · Mata Atlántica",
+    "howItWorks": "Cómo funciona →"
+  },
+  "DataSummaryBar": {
+    "speciesRecorded": "≥ {count} especies registradas",
+    "source": "Fuente:",
+    "fetched": "obtenidos el {date}",
+    "frontierLocationsRanked": "{count} localidades de frontera clasificadas",
+    "tooltipSpecies": "Conteo mínimo de nombres de especies únicos en todos los hexbins. La lista topSpecies está limitada a 10 por hexbin, por lo que el número real es mayor.",
+    "tooltipSource": "Todos los registros de ocurrencias provienen de GBIF (Global Biodiversity Information Facility), que agrega datos de museos, herbarios, iNaturalist e instituciones de investigación de todo el mundo.",
+    "tooltipFrontier": "Hexbins relevados con al menos un registro de ocurrencia de GBIF, clasificados por Puntuación de Frontera. Los hexbins restantes se muestran como territorio no mapeado en el mapa."
+  },
+  "FrontierRanking": {
+    "title": "Top {limit} Localidades de Frontera",
+    "subtitle": "Mayor potencial de descubrimiento en Santa Catarina",
+    "tooltipRanking": "Clasificados por Puntuación de Frontera entre hexbins con al menos una observación registrada. Mayor puntuación = menos relevado en relación a la calidad del hábitat.",
+    "frontierPct": "{pct}% frontera",
+    "recordsCount": "{count} registros"
+  },
+  "TaxonSelector": {
+    "allTaxa": "Todos los Taxa",
+    "vertebrates": "Vertebrados",
+    "tooltipAll": "Todos los organismos registrados en GBIF para SC — plantas, hongos, animales (vertebrados e invertebrados), bacterias, protozoos y más. Una planta en la lista de especies es comportamiento esperado.",
+    "tooltipVertebrates": "Solo animales con columna vertebral: Mamíferos, Aves, Reptiles, Anfibios y Peces (Actinopterygii). Invertebrados y todos los reinos no animales excluidos."
+  },
+  "HexDetail": {
+    "unsurveyed": "No relevado",
+    "criticalGap": "BRECHA CRÍTICA",
+    "highPotential": "ALTO POTENCIAL",
+    "moderate": "MODERADO",
+    "wellSurveyed": "BIEN RELEVADO",
+    "records": "Registros",
+    "species": "Especies",
+    "observers": "Observadores",
+    "surveyDays": "Días de relevamiento",
+    "period": "PERÍODO",
+    "scoreBreakdown": "Desglose de Puntuación",
+    "frontierPotential": "Potencial de frontera",
+    "habitatQuality": "Calidad del hábitat",
+    "surveyGap": "Brecha de relevamiento",
+    "scoreAnnotation": "Frontera = brecha de relevamiento × calidad del hábitat. Alta cobertura de hábitat con baja densidad de observaciones indica potencial de descubrimiento.",
+    "topRecordedSpecies": "Especies Más Registradas",
+    "footer": "DATOS · GBIF  /  PUNTUACIONES · MATA ATLÁNTICA + BRECHA DE RELEVAMIENTO",
+    "closePanel": "Cerrar panel",
+    "tooltipRecords": "Una ocurrencia de GBIF — una observación documentada de una especie en esta ubicación, por un investigador, institución o científico ciudadano (ej.: iNaturalist).",
+    "tooltipScoreBreakdown": "Puntuación de Frontera = (1 − esfuerzo de relevamiento) × 0,53 + calidad del hábitat × 0,47. Cada componente se normaliza en todos los hexbins de SC.",
+    "tooltipFrontierPotential": "Puntuación combinada: cuánto se ha relevado esta área más cuánta Mata Atlántica queda.",
+    "tooltipHabitatQuality": "Fracción estimada del hexbin cubierta por Mata Atlántica. Actualmente un placeholder uniforme (0,5) — los valores reales requieren descargar datos de cobertura forestal.",
+    "tooltipSurveyGap": "Cuánto se ha relevado este hexbin en relación a todos los demás en SC. 100% = nunca relevado; 0% = más intensamente relevado.",
+    "tooltipTopSpecies": "Especies más registradas en todos los taxa (plantas, hongos, animales). El grupo de especie (reino/clase) no se muestra porque no se retuvo durante la agregación de datos. Haga clic en cualquier nombre para ver la taxonomía completa en GBIF."
+  },
+  "GapMap": {
+    "surveyCoverage": "Cobertura de Relevamiento",
+    "wellSurveyed": "Bien relevado",
+    "highFrontier": "Alto potencial de frontera",
+    "unsurveyed": "No relevado",
+    "tooltipCoverage": "Cada celda es una unidad hexagonal H3 (~36 km²). Los límites son algorítmicos, no administrativos — no coinciden con municipios ni áreas protegidas."
+  },
+  "MethodologyPanel": {
+    "title": "Cómo Funciona",
+    "subtitle": "Metodología, fuentes de datos y advertencias científicas",
+    "close": "Cerrar panel de metodología",
+    "frontierScore": {
+      "title": "Puntuación de Frontera",
+      "intro": "Cada hexbin relevado recibe una Puntuación de Frontera que combina cuánto ha sido estudiado con cuánto hábitat adecuado queda.",
+      "weightsNote": "Los pesos (0,53 / 0,47) favorecen ligeramente la brecha de relevamiento porque los datos de hábitat son actualmente un placeholder. Una vez cargados datos reales de cobertura forestal, estos pesos deben reevaluarse.",
+      "caveat": "Esta fórmula está derivada del modelo y no ha sido calibrada con tasas de descubrimiento en campo.",
+      "tableHeaders": ["Componente", "Rango", "Significado"],
+      "tableRows": [
+        ["survey_effort", "0 – 1", "Intensidad con que el hexbin ha sido relevado en relación a todos los demás en SC. 0 = nunca relevado; 1 = más relevado."],
+        ["habitat_quality", "0 – 1", "Fracción estimada del hexbin cubierta por Mata Atlántica. Actualmente un placeholder uniforme (0,5)."]
+      ]
+    },
+    "surveyEffort": {
+      "title": "Puntuación de Esfuerzo de Relevamiento",
+      "intro": "Calculado a partir de cuatro métricas derivadas de GBIF, cada una normalizada de 0 a 1 en todos los hexbins de SC (mín-máx), luego combinadas con pesos fijos.",
+      "normNote": "La normalización es relativa al filtro de taxon activo — las puntuaciones cambian al alternar entre Todos los Taxa y Vertebrados, porque la población de referencia cambia.",
+      "tableHeaders": ["Entrada", "Definición", "Peso"],
+      "tableRows": [
+        ["unique_observers", "Conteo de valores distintos de recordedBy", "0,30"],
+        ["unique_survey_days", "Conteo de valores distintos de eventDate", "0,30"],
+        ["record_density", "occurrenceCount ÷ área del hexbin (≈ 36 km²)", "0,25"],
+        ["temporal_span", "Años entre el primer y último registro", "0,15"]
+      ]
+    },
+    "habitatQuality": {
+      "title": "Calidad del Hábitat",
+      "intro": "Destinado a representar la fracción de cada hexbin cubierta por Mata Atlántica — el bioma con mayor riqueza de especies endémicas en Santa Catarina.",
+      "warning": "⚠ Estado actual: valor placeholder de 0,5 asignado a cada hexbin. La calidad del hábitat no diferencia actualmente las localidades de frontera.",
+      "computePre": "Para calcular valores reales, descargue un GeoJSON del límite de la Mata Atlántica y ejecute",
+      "computeMid": "dentro de",
+      "computePost": ". Esto calcula las fracciones de superposición por hexbin y regenera los datos.",
+      "sourcesLabel": "Fuentes de datos para GeoJSON de cobertura forestal:",
+      "sources": [
+        "SOS Mata Atlântica — sosma.org.br",
+        "MapBiomas Collection (cuenta gratuita) — mapbiomas.org",
+        "IBGE Biomas — ibge.gov.br"
+      ]
+    },
+    "dataSource": {
+      "title": "Fuente de Datos",
+      "introPre": "Todos los registros de ocurrencias provienen de",
+      "introPost": "(Global Biodiversity Information Facility), una infraestructura de acceso abierto que agrega datos de biodiversidad de instituciones de todo el mundo.",
+      "contributingLabel": "Plataformas contribuyentes:",
+      "contributing": [
+        "iNaturalist — ciencia ciudadana de grado investigación",
+        "speciesLink — colecciones de historia natural brasileñas",
+        "CRIA — Centro de Referência em Informação Ambiental",
+        "Especímenes de museos y herbarios digitalizados en todo el mundo"
+      ],
+      "excludedLabel": "Lo que NO está incluido:",
+      "excluded": [
+        "Conjuntos de datos de investigación privados o no publicados",
+        "Especímenes aún no digitalizados",
+        "Observaciones registradas después de la fecha de obtención de datos",
+        "Registros sin coordenadas GPS (filtro hasCoordinate=true aplicado)"
+      ],
+      "fetchPre": "Esta compilación obtuvo hasta 50.000 registros con",
+      "fetchMid": ". Debido a la intermitencia de la API de GBIF, se recopilaron aproximadamente 10.189 registros. Vuelva a ejecutar",
+      "fetchPost": "para un conjunto de datos más completo."
+    },
+    "taxaCoverage": {
+      "title": "Cobertura de Taxa",
+      "allIntro": "Todos los Taxa incluye todos los organismos con registro en GBIF para SC — no solo animales. Esto incluye plantas registradas por botánicos y naturalistas ciudadanos, por lo que las especies vegetales pueden aparecer en la lista.",
+      "vertebratesIntro": "Vertebrados filtra solo animales con columna vertebral, usando estas cinco clases taxonómicas de GBIF:",
+      "taxaTableHeaders": ["Reino", "Ejemplos"],
+      "taxaTableRows": [
+        ["Animalia", "Todos los animales — vertebrados E invertebrados (insectos, crustáceos, moluscos, gusanos…)"],
+        ["Plantae", "Plantas vasculares, musgos, helechos, plantas con flores"],
+        ["Fungi", "Hongos, levaduras, mohos"],
+        ["Bacteria", "Procariotas con registros en GBIF (relativamente pocos)"],
+        ["Protozoa", "Eucariotas unicelulares"],
+        ["Chromista", "Algas, mohos acuáticos, diatomeas"]
+      ],
+      "classTableHeaders": ["Clase", "Clave GBIF", "Ejemplos"],
+      "classTableRows": [
+        ["Mammalia", "359", "Murciélagos, pumas, tapires, pequeños roedores"],
+        ["Aves", "212", "Todas las aves"],
+        ["Reptilia", "358", "Serpientes, lagartos, tortugas, caimanes"],
+        ["Amphibia", "131", "Ranas, salamandras, cecilias"],
+        ["Actinopterygii", "204", "Peces de aletas radiadas"]
+      ],
+      "groupsNote": "Las etiquetas de grupo de especies (ej.: \"(Aves)\") no se muestran junto a los nombres porque la información de reino/clase no se retuvo durante la agregación de datos actual. Volver a ejecutar el pipeline con campos extendidos lo habilitaría."
+    },
+    "geographicScope": {
+      "title": "Alcance Geográfico y Cuadrícula",
+      "intro": "SC se divide usando la cuadrícula hexagonal H3 en resolución 6, produciendo celdas de aproximadamente 36,1 km² cada una. Los hexágonos se prefieren sobre los cuadrados porque todos los vecinos son equidistantes, reduciendo el sesgo direccional en el análisis espacial.",
+      "bboxLabel": "La cuadrícula cubre este cuadro delimitador — no el límite administrativo de SC:",
+      "edgeNote": "Algunos hexbins cerca de los bordes pueden estar parcial o totalmente fuera de SC (en Paraná al norte, Rio Grande do Sul al sur, o el Océano Atlántico al este). Estos hexbins de borde tendrán cero o pocos registros, lo cual es esperado y no indica un error en los datos.",
+      "statsHeaders": ["Estadística", "Valor"],
+      "statsRows": [
+        ["Total de hexbins en el cuadro delimitador", "6.272"],
+        ["Hexbins con ≥ 1 registro GBIF", "795"],
+        ["Área del hexbin", "≈ 36,1 km²"],
+        ["Resolución H3", "6"]
+      ]
+    },
+    "scientificCaveats": {
+      "title": "Advertencias Científicas",
+      "intro": "Esta herramienta es un auxiliar exploratorio de investigación, no un producto revisado por pares. Use los rankings para generar hipótesis sobre áreas poco relevadas — no para sacar conclusiones. Consulte el conocimiento local, listas de flora/fauna publicadas y mapas de áreas protegidas antes de planificar expediciones.",
+      "tableHeaders": ["Afirmación", "Estado"],
+      "tableRows": [
+        ["Ecuación de puntuación de frontera", "Derivada del modelo. Pesos no calibrados con tasas de descubrimiento en campo."],
+        ["Valores de calidad del hábitat", "Placeholder (0,5 uniforme). No se cargaron datos reales de cobertura forestal."],
+        ["Riqueza de especies por hexbin", "Límite inferior — topSpecies limitado a 10 por hexbin."],
+        ["Completitud de registros GBIF", "Parcial. Muchas observaciones válidas no están en GBIF."],
+        ["Límites de hexbins", "Algorítmicos, no ecológicos ni administrativos."],
+        ["Clasificación de taxa", "Taxonomía backbone de GBIF. Puede diferir de otros sistemas."]
+      ],
+      "reproLabel": "Reproducibilidad:",
+      "reproText": "El pipeline de datos y el código de puntuación son de código abierto en",
+      "reproSuffix": "en"
+    }
+  }
+}
