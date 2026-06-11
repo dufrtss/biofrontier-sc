@@ -1,0 +1,179 @@
+{
+  "AppShell": {
+    "loadingData": "Loading biodiversity data",
+    "errorLoading": "Error loading data",
+    "tagline": "Frontier intelligence · Santa Catarina · Atlantic Forest",
+    "howItWorks": "How it works →"
+  },
+  "DataSummaryBar": {
+    "speciesRecorded": "≥ {count} species recorded",
+    "source": "Source:",
+    "fetched": "fetched {date}",
+    "frontierLocationsRanked": "{count} frontier locations ranked",
+    "tooltipSpecies": "Lower-bound count of unique species names across all hexbins. The topSpecies list is capped at 10 per hexbin, so the true number is higher.",
+    "tooltipSource": "All occurrence records come from GBIF (Global Biodiversity Information Facility), aggregating data from museums, herbaria, iNaturalist, and research institutions worldwide.",
+    "tooltipFrontier": "Surveyed hexbins with at least one GBIF occurrence record, ranked by Frontier Score. The remaining hexbins are shown as unmapped territory on the map."
+  },
+  "FrontierRanking": {
+    "title": "Top {limit} Frontier Locations",
+    "subtitle": "Highest discovery potential in Santa Catarina",
+    "tooltipRanking": "Ranked by Frontier Score among hexbins with at least one recorded observation. Higher score = more under-surveyed relative to habitat quality.",
+    "frontierPct": "{pct}% frontier",
+    "recordsCount": "{count} records"
+  },
+  "TaxonSelector": {
+    "allTaxa": "All Taxa",
+    "vertebrates": "Vertebrates",
+    "tooltipAll": "Every organism recorded in GBIF for SC — plants, fungi, animals (vertebrates & invertebrates), bacteria, protozoa, and more. A plant appearing in the species list is expected behaviour.",
+    "tooltipVertebrates": "Animals with a backbone only: Mammals, Birds, Reptiles, Amphibians, and Fish (Actinopterygii). Invertebrates and all non-animal kingdoms excluded."
+  },
+  "HexDetail": {
+    "unsurveyed": "Unsurveyed",
+    "criticalGap": "CRITICAL GAP",
+    "highPotential": "HIGH POTENTIAL",
+    "moderate": "MODERATE",
+    "wellSurveyed": "WELL SURVEYED",
+    "records": "Records",
+    "species": "Species",
+    "observers": "Observers",
+    "surveyDays": "Survey days",
+    "period": "PERIOD",
+    "scoreBreakdown": "Score Breakdown",
+    "frontierPotential": "Frontier potential",
+    "habitatQuality": "Habitat quality",
+    "surveyGap": "Survey gap",
+    "scoreAnnotation": "Frontier = survey gap × habitat quality. High habitat coverage with low observation density indicates discovery potential.",
+    "topRecordedSpecies": "Top Recorded Species",
+    "footer": "DATA · GBIF  /  SCORES · ATLANTIC FOREST HABITAT + SURVEY GAP",
+    "closePanel": "Close panel",
+    "tooltipRecords": "A GBIF occurrence — one documented observation of one species at this location, from a researcher, institution, or citizen scientist (e.g. iNaturalist).",
+    "tooltipScoreBreakdown": "Frontier Score = (1 − survey effort) × 0.53 + habitat quality × 0.47. Each component is normalised across all SC hexbins.",
+    "tooltipFrontierPotential": "Combined score: how little this area has been surveyed plus how much Atlantic Forest habitat remains.",
+    "tooltipHabitatQuality": "Estimated Atlantic Forest coverage fraction. Currently a uniform placeholder (0.5) — real values require downloading forest-cover data.",
+    "tooltipSurveyGap": "How little this hexbin has been surveyed relative to all others in SC. 100% = never surveyed; 0% = most intensively surveyed.",
+    "tooltipTopSpecies": "Most-recorded species across all taxa (plants, fungi, animals). Species group (kingdom/class) is not shown because it was not retained during data aggregation. Click any name to see full taxonomy on GBIF."
+  },
+  "GapMap": {
+    "surveyCoverage": "Survey Coverage",
+    "wellSurveyed": "Well surveyed",
+    "highFrontier": "High frontier potential",
+    "unsurveyed": "Unsurveyed",
+    "tooltipCoverage": "Each cell is an H3 hexagonal grid unit (~36 km²). Boundaries are algorithmic, not administrative — they don't align with municipalities or protected areas."
+  },
+  "MethodologyPanel": {
+    "title": "How It Works",
+    "subtitle": "Methodology, data sources & scientific caveats",
+    "close": "Close methodology panel",
+    "frontierScore": {
+      "title": "Frontier Score",
+      "intro": "Each surveyed hexbin receives a Frontier Score combining how little it has been studied with how much suitable habitat remains.",
+      "weightsNote": "Weights (0.53 / 0.47) favour the survey gap slightly because habitat data is currently a placeholder. Once real forest-cover data is loaded these weights should be re-evaluated.",
+      "caveat": "This formula is model-deduced and has not been calibrated against field discovery rates.",
+      "tableHeaders": ["Component", "Range", "Meaning"],
+      "tableRows": [
+        ["survey_effort", "0 – 1", "How intensively the hexbin has been surveyed relative to all others in SC. 0 = never surveyed; 1 = most surveyed."],
+        ["habitat_quality", "0 – 1", "Estimated fraction of the hexbin covered by Atlantic Forest. Currently a uniform placeholder (0.5)."]
+      ]
+    },
+    "surveyEffort": {
+      "title": "Survey Effort Score",
+      "intro": "Computed from four GBIF-derived metrics, each normalised 0–1 across all SC hexbins (min-max), then combined with fixed weights.",
+      "normNote": "Normalisation is relative to the active taxon filter — scores change when you switch between All Taxa and Vertebrates, because the reference population changes.",
+      "tableHeaders": ["Input", "Definition", "Weight"],
+      "tableRows": [
+        ["unique_observers", "Count of distinct recordedBy values", "0.30"],
+        ["unique_survey_days", "Count of distinct eventDate values", "0.30"],
+        ["record_density", "occurrenceCount ÷ hexbin area (≈ 36 km²)", "0.25"],
+        ["temporal_span", "Years between first and last record", "0.15"]
+      ]
+    },
+    "habitatQuality": {
+      "title": "Habitat Quality",
+      "intro": "Intended to represent the fraction of each hexbin covered by Atlantic Forest — the biome with the highest endemic species richness in Santa Catarina.",
+      "warning": "⚠ Current status: placeholder value of 0.5 assigned to every hexbin. Habitat quality does not currently differentiate frontier locations.",
+      "computePre": "To compute real values, download an Atlantic Forest boundary GeoJSON and run",
+      "computeMid": "inside",
+      "computePost": ". This computes per-hexbin overlap fractions and regenerates the data.",
+      "sourcesLabel": "Data sources for forest-cover GeoJSON:",
+      "sources": [
+        "SOS Mata Atlântica — sosma.org.br",
+        "MapBiomas Collection (free account) — mapbiomas.org",
+        "IBGE Biomas — ibge.gov.br"
+      ]
+    },
+    "dataSource": {
+      "title": "Data Source",
+      "introPre": "All occurrence records come from",
+      "introPost": "(Global Biodiversity Information Facility), an open-access infrastructure that aggregates biodiversity data from institutions worldwide.",
+      "contributingLabel": "Contributing platforms include:",
+      "contributing": [
+        "iNaturalist — research-grade citizen science",
+        "speciesLink — Brazilian natural history collections",
+        "CRIA — Centro de Referência em Informação Ambiental",
+        "Digitised museum and herbarium specimens worldwide"
+      ],
+      "excludedLabel": "What is NOT included:",
+      "excluded": [
+        "Private or unpublished research datasets",
+        "Specimens not yet digitised",
+        "Observations recorded after the data fetch date",
+        "Records without GPS coordinates (hasCoordinate=true filter applied)"
+      ],
+      "fetchPre": "This build fetched up to 50,000 records with",
+      "fetchMid": ". Due to GBIF API intermittency, approximately 10,189 records were collected. Re-run",
+      "fetchPost": "for a more complete dataset."
+    },
+    "taxaCoverage": {
+      "title": "Taxa Coverage",
+      "allIntro": "All Taxa includes every organism with a GBIF record in SC — not just animals. This includes plants found by botanists and citizen naturalists, which is why plant species occasionally appear in the recorded species list.",
+      "vertebratesIntro": "Vertebrates filters to animals with a backbone only, using these five GBIF taxonomic classes:",
+      "taxaTableHeaders": ["Kingdom", "Examples"],
+      "taxaTableRows": [
+        ["Animalia", "All animals — vertebrates AND invertebrates (insects, crustaceans, molluscs, worms…)"],
+        ["Plantae", "Vascular plants, mosses, ferns, flowering plants"],
+        ["Fungi", "Mushrooms, yeasts, moulds"],
+        ["Bacteria", "Prokaryotes with GBIF records (relatively few)"],
+        ["Protozoa", "Single-celled eukaryotes"],
+        ["Chromista", "Algae, water moulds, diatoms"]
+      ],
+      "classTableHeaders": ["Class", "GBIF key", "Examples"],
+      "classTableRows": [
+        ["Mammalia", "359", "Bats, pumas, tapirs, small rodents"],
+        ["Aves", "212", "All birds"],
+        ["Reptilia", "358", "Snakes, lizards, turtles, caimans"],
+        ["Amphibia", "131", "Frogs, salamanders, caecilians"],
+        ["Actinopterygii", "204", "Ray-finned fish"]
+      ],
+      "groupsNote": "Species group labels (e.g. \"(Aves)\") are not shown next to species names because kingdom/class information was not retained during the current data aggregation. Re-running the pipeline with extended fields would enable this."
+    },
+    "geographicScope": {
+      "title": "Geographic Scope & Grid",
+      "intro": "SC is divided using the H3 hexagonal grid at resolution 6, producing cells of approximately 36.1 km² each. Hexagons are preferred over squares because all neighbours are equidistant, reducing directional bias in spatial analysis.",
+      "bboxLabel": "The grid covers this bounding box — not SC's administrative boundary:",
+      "edgeNote": "Some hexbins near the edges may partially or fully fall outside SC proper (into Paraná to the north, Rio Grande do Sul to the south, or the Atlantic Ocean to the east). These edge hexbins will have zero or few records, which is expected and does not indicate a data error.",
+      "statsHeaders": ["Stat", "Value"],
+      "statsRows": [
+        ["Total hexbins in bounding box", "6,272"],
+        ["Hexbins with ≥ 1 GBIF record", "795"],
+        ["Hexbin area", "≈ 36.1 km²"],
+        ["H3 resolution", "6"]
+      ]
+    },
+    "scientificCaveats": {
+      "title": "Scientific Caveats",
+      "intro": "This tool is an exploratory research aid, not a peer-reviewed output. Use rankings to generate hypotheses about under-surveyed areas — not to draw conclusions. Cross-reference with local knowledge, published flora/fauna checklists, and protected area maps before planning expeditions.",
+      "tableHeaders": ["Claim", "Status"],
+      "tableRows": [
+        ["Frontier score equation", "Model-deduced. Weights not calibrated against field discovery rates."],
+        ["Habitat quality values", "Placeholder (0.5 uniform). No real forest-cover data loaded."],
+        ["Species richness per hexbin", "Lower bound — topSpecies capped at 10 per hexbin."],
+        ["GBIF record completeness", "Partial. Many valid observations are not in GBIF."],
+        ["Hexbin boundaries", "Algorithmic, not ecological or administrative."],
+        ["Taxa classification", "GBIF backbone taxonomy. May differ from other systems."]
+      ],
+      "reproLabel": "Reproducibility:",
+      "reproText": "Data pipeline and scoring code are open source at",
+      "reproSuffix": "under"
+    }
+  }
+}
