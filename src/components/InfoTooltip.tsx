@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 
 interface InfoTooltipProps {
   content: string
@@ -19,12 +20,17 @@ export default function InfoTooltip({
   align = 'left',
 }: InfoTooltipProps) {
   const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const popoverRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!open) return
     const onMouse = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+      if (
+        popoverRef.current && !popoverRef.current.contains(e.target as Node) &&
+        btnRef.current && !btnRef.current.contains(e.target as Node)
+      ) setOpen(false)
     }
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
     document.addEventListener('mousedown', onMouse)
@@ -35,22 +41,34 @@ export default function InfoTooltip({
     }
   }, [open])
 
+  const handleOpen = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!open && btnRef.current) {
+      const rect = btnRef.current.getBoundingClientRect()
+      setPos({
+        top: rect.bottom + 6,
+        left: align === 'right' ? rect.right - 256 : rect.left,
+      })
+    }
+    setOpen(o => !o)
+  }
+
   return (
-    <div className="relative inline-flex items-center" ref={ref}>
+    <div className="inline-flex items-center">
       <button
-        onClick={e => { e.stopPropagation(); setOpen(o => !o) }}
+        ref={btnRef}
+        onClick={handleOpen}
         className="w-4 h-4 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-400 hover:text-slate-200 text-[9px] font-bold leading-none flex items-center justify-center transition-colors ml-1 shrink-0"
         aria-label="More information"
         type="button"
       >
         ?
       </button>
-      {open && (
+      {open && pos && createPortal(
         <div
-          className={[
-            'absolute top-6 z-50 w-64 bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-xl text-xs text-slate-300 leading-relaxed',
-            align === 'right' ? 'right-0' : 'left-0',
-          ].join(' ')}
+          ref={popoverRef}
+          style={{ top: pos.top, left: pos.left }}
+          className="fixed z-[9999] w-64 bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-xl text-xs text-slate-300 leading-relaxed"
         >
           <p>{content}</p>
           {learnMore && onLearnMore && (
@@ -62,7 +80,8 @@ export default function InfoTooltip({
               {learnMore.label ?? 'Full methodology →'}
             </button>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
