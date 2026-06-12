@@ -1,4 +1,3 @@
-// src/hooks/useBiofrontierData.ts
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'

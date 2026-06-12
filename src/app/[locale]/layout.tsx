@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { Barlow, Barlow_Condensed } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
-import { ThemeProvider } from 'next-themes'
 import '../globals.css'
 
 const barlow = Barlow({
@@ -40,14 +39,11 @@ export default async function RootLayout({
     <html
       lang={locale}
       className={`${barlow.variable} ${barlowCondensed.variable} h-full`}
-      suppressHydrationWarning
     >
-      <body className="bg-[--bg] text-[--text-primary] h-full overflow-hidden font-sans antialiased">
-        <ThemeProvider attribute="data-theme" defaultTheme="dark" disableTransitionOnChange>
-          <NextIntlClientProvider messages={messages}>
-            {children}
-          </NextIntlClientProvider>
-        </ThemeProvider>
+      <body className="bg-slate-950 text-slate-100 h-full overflow-hidden font-sans antialiased">
+        <NextIntlClientProvider messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   )
