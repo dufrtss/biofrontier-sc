@@ -21,44 +21,44 @@
   --color-gap:             var(--color-gap-val);
 }
 
-/* ── Dark theme (xenobiology, default) ───────────────────────── */
+/* ── Dark theme (default) ────────────────────────────────────── */
 :root,
 [data-theme="dark"] {
-  --bg:              #030c08;
-  --surface:         #071510;
-  --surface-raised:  #0d1f17;
-  --border:          #1a3828;
-  --border-bright:   #2d5c42;
-  --text-primary:    #dcfce7;
-  --text-secondary:  #6ee7b7;
-  --text-muted:      #2d5c42;
-  --accent:          #00ff88;
-  --accent-dim:      #00cc6a;
-  --accent-blue:     #22d3ee;
-  --accent-blue-dim: #0ea5e9;
-  --surface-overlay: rgba(13, 31, 23, 0.85);
-  --bg-overlay:      rgba(3, 12, 8, 0.6);
-  --color-habitat-val: #39ff7a;
+  --bg:              #020617;
+  --surface:         #0f172a;
+  --surface-raised:  #1e293b;
+  --border:          #334155;
+  --border-bright:   #475569;
+  --text-primary:    #f1f5f9;
+  --text-secondary:  #94a3b8;
+  --text-muted:      #64748b;
+  --accent:          #34d399;
+  --accent-dim:      #10b981;
+  --accent-blue:     #60a5fa;
+  --accent-blue-dim: #93c5fd;
+  --surface-overlay: rgba(15, 23, 42, 0.85);
+  --bg-overlay:      rgba(2, 6, 23, 0.6);
+  --color-habitat-val: #34d399;
   --color-gap-val:     #f97316;
 }
 
-/* ── Light theme (clinical lab) ─────────────────────────────── */
+/* ── Light theme ─────────────────────────────────────────────── */
 [data-theme="light"] {
-  --bg:              #f0fdf4;
+  --bg:              #f8fafc;
   --surface:         #ffffff;
-  --surface-raised:  #f7fdf9;
-  --border:          #bbf7d0;
-  --border-bright:   #86efac;
-  --text-primary:    #052e16;
-  --text-secondary:  #166534;
-  --text-muted:      #4ade80;
-  --accent:          #16a34a;
-  --accent-dim:      #15803d;
-  --accent-blue:     #0284c7;
-  --accent-blue-dim: #0369a1;
-  --surface-overlay: rgba(247, 253, 249, 0.85);
-  --bg-overlay:      rgba(240, 253, 244, 0.6);
-  --color-habitat-val: #16a34a;
+  --surface-raised:  #f1f5f9;
+  --border:          #cbd5e1;
+  --border-bright:   #94a3b8;
+  --text-primary:    #0f172a;
+  --text-secondary:  #334155;
+  --text-muted:      #94a3b8;
+  --accent:          #059669;
+  --accent-dim:      #047857;
+  --accent-blue:     #2563eb;
+  --accent-blue-dim: #1d4ed8;
+  --surface-overlay: rgba(241, 245, 249, 0.85);
+  --bg-overlay:      rgba(248, 250, 252, 0.6);
+  --color-habitat-val: #059669;
   --color-gap-val:     #ea580c;
 }
 
