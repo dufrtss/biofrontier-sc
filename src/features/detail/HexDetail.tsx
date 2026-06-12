@@ -143,7 +143,7 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
       </div>
 
       {/* Scrollable body */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin">
+      <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
 
         {/* Key metric grid */}
         <div className="px-4 pt-4 pb-3">
