@@ -71,6 +71,14 @@ export default function AppShell() {
           >
             {t('howItWorks')}
           </button>
+          <a
+            href="https://www.paypal.com/donate/?cmd=_donations&business=eduardofragadefreitas@gmail.com&item_name=BioFrontier%20SC&currency_code=BRL"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-slate-500 hover:text-slate-300 transition-colors hidden md:block"
+          >
+            ♥ Donate
+          </a>
           <span className="hidden sm:contents">
             <LocaleSwitcher />
           </span>
@@ -143,9 +151,17 @@ export default function AppShell() {
         </aside>
       </div>
 
-      {/* Mobile footer — locale switcher only */}
-      <footer className="sm:hidden shrink-0 flex items-center justify-center px-3 py-2 bg-slate-900 border-t border-slate-700/60">
+      {/* Mobile footer — locale switcher + donate */}
+      <footer className="sm:hidden shrink-0 flex items-center justify-between px-4 py-2 bg-slate-900 border-t border-slate-700/60">
         <LocaleSwitcher />
+        <a
+          href="https://www.paypal.com/donate/?cmd=_donations&business=eduardofragadefreitas@gmail.com&item_name=BioFrontier%20SC&currency_code=BRL"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+        >
+          ♥ Donate
+        </a>
       </footer>
 
       {/* Methodology panel */}
