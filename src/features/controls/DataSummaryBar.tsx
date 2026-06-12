@@ -1,7 +1,7 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import InfoTooltip from './InfoTooltip'
+import InfoTooltip from '@/components/ui/InfoTooltip'
 
 interface DataSummaryBarProps {
   speciesCount: number

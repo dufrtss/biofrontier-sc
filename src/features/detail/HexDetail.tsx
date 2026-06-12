@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { ScoredHexbin, TaxonFilter } from '@/lib/types'
 import { scoreToColor } from '@/lib/color'
 import { hexCenter } from '@/lib/h3-utils'
-import InfoTooltip from './InfoTooltip'
+import InfoTooltip from '@/components/ui/InfoTooltip'
 
 interface Props {
   hex: ScoredHexbin | null
@@ -58,11 +58,14 @@ function AnimatedBar({ label, labelExtra, value, color, animate }: AnimatedBarPr
 
 export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology }: Props) {
   const t = useTranslations('HexDetail')
-  const prevHexId = useRef<string | null>(null)
-  const shouldAnimate = hex !== null && hex.hexId !== prevHexId.current
+  const prevHexIdRef = useRef<string | null>(null)
+  const [shouldAnimate, setShouldAnimate] = useState(false)
 
   useEffect(() => {
-    if (hex) prevHexId.current = hex.hexId
+    if (hex) {
+      setShouldAnimate(hex.hexId !== prevHexIdRef.current)
+      prevHexIdRef.current = hex.hexId
+    }
   }, [hex])
 
   if (!hex) return null

@@ -8,7 +8,7 @@ import type { ScoredHexbin } from '@/lib/types'
 import { hexBoundary } from '@/lib/h3-utils'
 import { scoreToColor, scoreToOpacity } from '@/lib/color'
 import type { GapMapProps } from './GapMap'
-import InfoTooltip from '@/components/InfoTooltip'
+import InfoTooltip from '@/components/ui/InfoTooltip'
 
 export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOpenMethodology }: GapMapProps) {
   const t = useTranslations('GapMap')

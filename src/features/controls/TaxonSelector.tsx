@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl'
 import type { TaxonFilter } from '@/lib/types'
-import InfoTooltip from './InfoTooltip'
+import InfoTooltip from '@/components/ui/InfoTooltip'
 
 interface Props {
   value: TaxonFilter
