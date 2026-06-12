@@ -47,10 +47,12 @@ export default function InfoTooltip({
     e.stopPropagation()
     if (!open && btnRef.current) {
       const rect = btnRef.current.getBoundingClientRect()
-      setPos({
-        top: rect.bottom + 6,
-        left: align === 'right' ? rect.right - 256 : rect.left,
-      })
+      const TOOLTIP_W = 256
+      const MARGIN = 8
+      let left = align === 'right' ? rect.right - TOOLTIP_W : rect.left
+      left = Math.min(left, window.innerWidth - TOOLTIP_W - MARGIN)
+      left = Math.max(left, MARGIN)
+      setPos({ top: rect.bottom + 6, left })
     }
     setOpen(o => !o)
   }
