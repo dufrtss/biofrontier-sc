@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl'
 import type { ScoredHexbin } from '@/lib/types'
 import { scoreToColor } from '@/lib/color'
 import { hexCenter } from '@/lib/h3-utils'
-import InfoTooltip from './InfoTooltip'
+import InfoTooltip from '@/components/ui/InfoTooltip'
 
 interface Props {
   rankedHexIds: string[]
