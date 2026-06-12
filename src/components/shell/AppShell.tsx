@@ -71,7 +71,9 @@ export default function AppShell() {
           >
             {t('howItWorks')}
           </button>
-          <LocaleSwitcher />
+          <span className="hidden sm:contents">
+            <LocaleSwitcher />
+          </span>
         </div>
       </header>
 
@@ -89,7 +91,7 @@ export default function AppShell() {
           className={[
             'bg-slate-900 border-r border-slate-700/60 overflow-hidden',
             rankingOpen
-              ? 'fixed inset-0 z-50 sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
+              ? 'fixed inset-0 z-[1500] sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
               : 'hidden sm:block sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
           ].join(' ')}
         >
@@ -128,7 +130,7 @@ export default function AppShell() {
           className={[
             'bg-slate-900 border-l border-slate-700 overflow-hidden',
             selectedHex
-              ? 'fixed inset-0 z-50 sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
+              ? 'fixed inset-0 z-[1500] sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
               : 'hidden sm:block sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
           ].join(' ')}
         >
@@ -140,6 +142,11 @@ export default function AppShell() {
           />
         </aside>
       </div>
+
+      {/* Mobile footer — locale switcher only */}
+      <footer className="sm:hidden shrink-0 flex items-center justify-center px-3 py-2 bg-slate-900 border-t border-slate-700/60">
+        <LocaleSwitcher />
+      </footer>
 
       {/* Methodology panel */}
       <MethodologyPanel
