@@ -12,6 +12,7 @@ interface Props {
   selectedHexId: string | null
   onSelect: (hexId: string) => void
   onOpenMethodology: (sectionId: string) => void
+  onClose?: () => void
   limit?: number
 }
 
@@ -20,7 +21,7 @@ function formatCoords(hexId: string): string {
   return `${Math.abs(lat).toFixed(2)}°S, ${Math.abs(lng).toFixed(2)}°W`
 }
 
-export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, onSelect, onOpenMethodology, limit = 20 }: Props) {
+export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, onSelect, onOpenMethodology, onClose, limit = 20 }: Props) {
   const t = useTranslations('FrontierRanking')
   const topIds = rankedHexIds.slice(0, limit)
 
@@ -28,6 +29,16 @@ export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, 
     <div className="flex flex-col h-full overflow-hidden">
       <div className="px-4 py-3 border-b border-slate-700/60">
         <div className="flex items-center">
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="sm:hidden mr-3 text-slate-400 hover:text-slate-200 transition-colors text-base leading-none"
+              aria-label="Close ranking panel"
+              type="button"
+            >
+              ←
+            </button>
+          )}
           <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">
             {t('title', { limit })}
           </h2>
