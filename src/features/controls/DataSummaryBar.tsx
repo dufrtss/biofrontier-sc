@@ -23,8 +23,11 @@ export default function DataSummaryBar({
     : null
 
   return (
-    <div className="flex items-center gap-x-4 px-5 py-1.5 bg-slate-950 border-b border-slate-700/60 text-xs text-slate-500 tabular-nums shrink-0 flex-wrap gap-y-1">
-      <span className="flex items-center">
+    <div
+      className="flex items-center gap-x-4 px-5 py-1.5 bg-slate-950 border-b border-slate-700/60 text-xs text-slate-500 tabular-nums shrink-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+      style={{ scrollbarWidth: 'none' }}
+    >
+      <span className="flex items-center shrink-0">
         <span className="text-slate-300 font-medium">
           {t('speciesRecorded', { count: speciesCount.toLocaleString() })}
         </span>
@@ -35,9 +38,9 @@ export default function DataSummaryBar({
         />
       </span>
 
-      <span className="text-slate-600">·</span>
+      <span className="text-slate-600 shrink-0">·</span>
 
-      <span className="flex items-center">
+      <span className="flex items-center shrink-0">
         {t('source')}&nbsp;<span className="text-slate-300 font-medium">GBIF</span>
         <InfoTooltip
           content={t('tooltipSource')}
@@ -47,9 +50,9 @@ export default function DataSummaryBar({
         {date && <span className="ml-1 hidden sm:inline">{t('fetched', { date })}</span>}
       </span>
 
-      <span className="text-slate-600">·</span>
+      <span className="text-slate-600 shrink-0">·</span>
 
-      <span className="flex items-center">
+      <span className="flex items-center shrink-0">
         <span className="text-slate-300 font-medium">
           {t('frontierLocationsRanked', { count: frontierCount.toLocaleString() })}
         </span>
