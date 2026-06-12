@@ -20,6 +20,7 @@ export default function AppShell() {
     lastUpdated, speciesCount, selectHex,
   } = useBiofrontierData(taxonFilter)
 
+  const [rankingOpen, setRankingOpen]               = useState(true)
   const [methodologyOpen, setMethodologyOpen]       = useState(false)
   const [methodologySection, setMethodologySection] = useState<string | undefined>()
 
@@ -84,7 +85,12 @@ export default function AppShell() {
 
       {/* Body: sidebar + map + detail */}
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-80 shrink-0 bg-slate-900 border-r border-slate-700/60 overflow-hidden">
+        <aside
+          className={[
+            'shrink-0 bg-slate-900 border-r border-slate-700/60 overflow-hidden transition-all duration-200',
+            rankingOpen ? 'w-80 opacity-100' : 'w-0 opacity-0 pointer-events-none',
+          ].join(' ')}
+        >
           <FrontierRanking
             rankedHexIds={rankedHexIds}
             hexbins={hexbins}
@@ -101,6 +107,18 @@ export default function AppShell() {
             onHexSelect={selectHex}
             onOpenMethodology={openMethodology}
           />
+          <button
+            onClick={() => setRankingOpen(o => !o)}
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-[1000] h-10 w-5 flex items-center justify-center bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded text-slate-400 hover:text-slate-200 transition-colors"
+            aria-label={rankingOpen ? 'Hide ranking panel' : 'Show ranking panel'}
+          >
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+              {rankingOpen
+                ? <><polyline points="7,2 3,5 7,8" /></>
+                : <><polyline points="3,2 7,5 3,8" /></>
+              }
+            </svg>
+          </button>
         </main>
 
         <aside
