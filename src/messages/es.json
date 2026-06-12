@@ -118,7 +118,7 @@
         "Especímenes aún no digitalizados",
         "Observaciones registradas después de la fecha de obtención de datos",
         "Registros sin coordenadas GPS (filtro hasCoordinate=true aplicado)"
-      ],
+      ]
     },
     "taxaCoverage": {
       "title": "Cobertura de Taxa",
@@ -167,7 +167,7 @@
         ["Completitud de registros GBIF", "Parcial. Muchas observaciones válidas no están en GBIF."],
         ["Límites de hexbins", "Algorítmicos, no ecológicos ni administrativos."],
         ["Clasificación de taxa", "Taxonomía backbone de GBIF. Puede diferir de otros sistemas."]
-      ],
+      ]
     }
   }
 }

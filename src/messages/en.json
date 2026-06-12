@@ -118,7 +118,7 @@
         "Specimens not yet digitised",
         "Observations recorded after the data fetch date",
         "Records without GPS coordinates (hasCoordinate=true filter applied)"
-      ],
+      ]
     },
     "taxaCoverage": {
       "title": "Taxa Coverage",
@@ -167,7 +167,7 @@
         ["GBIF record completeness", "Partial. Many valid observations are not in GBIF."],
         ["Hexbin boundaries", "Algorithmic, not ecological or administrative."],
         ["Taxa classification", "GBIF backbone taxonomy. May differ from other systems."]
-      ],
+      ]
     }
   }
 }
