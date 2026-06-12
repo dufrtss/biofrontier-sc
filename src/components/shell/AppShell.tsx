@@ -20,7 +20,7 @@ export default function AppShell() {
     lastUpdated, speciesCount, selectHex,
   } = useBiofrontierData(taxonFilter)
 
-  const [rankingOpen, setRankingOpen]               = useState(true)
+  const [rankingOpen, setRankingOpen]               = useState(false)
   const [methodologyOpen, setMethodologyOpen]       = useState(false)
   const [methodologySection, setMethodologySection] = useState<string | undefined>()
 
