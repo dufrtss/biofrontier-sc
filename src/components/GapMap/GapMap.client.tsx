@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { ScoredHexbin } from '@/lib/types'
@@ -10,9 +11,14 @@ import type { GapMapProps } from './GapMap'
 import InfoTooltip from '@/components/InfoTooltip'
 
 export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOpenMethodology }: GapMapProps) {
+  const t = useTranslations('GapMap')
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<L.Map | null>(null)
   const polygonsRef  = useRef<Map<string, L.Polygon>>(new Map())
+
+  // Stable ref so polygon effects can read current translations without re-running
+  const tRef = useRef(t)
+  useEffect(() => { tRef.current = t }, [t])
 
   // Stable callback ref to avoid re-running polygon effect when parent re-renders
   const onHexSelectRef = useRef(onHexSelect)
@@ -69,7 +75,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
           { sticky: true, className: 'biofrontier-tooltip' }
         )
       } else {
-        polygon.bindTooltip('Unsurveyed', { sticky: true, className: 'biofrontier-tooltip' })
+        polygon.bindTooltip(tRef.current('unsurveyed'), { sticky: true, className: 'biofrontier-tooltip' })
       }
 
       polygon.on('click', () => onHexSelectRef.current(hex.hexId))
@@ -109,24 +115,24 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
       {/* Legend */}
       <div className="absolute bottom-8 left-4 z-[1000] bg-slate-900/90 backdrop-blur rounded-lg px-3 py-2 text-xs text-slate-300 border border-slate-700">
         <div className="flex items-center mb-2">
-          <p className="text-slate-400 uppercase tracking-widest text-[10px] font-semibold">Survey Coverage</p>
+          <p className="text-slate-400 uppercase tracking-widest text-[10px] font-semibold">{t('surveyCoverage')}</p>
           <InfoTooltip
-            content="Each cell is an H3 hexagonal grid unit (~36 km²). Boundaries are algorithmic, not administrative — they don't align with municipalities or protected areas."
+            content={t('tooltipCoverage')}
             learnMore={{ sectionId: 'geographic-scope' }}
             onLearnMore={onOpenMethodology}
           />
         </div>
         <div className="flex items-center gap-2 mb-1">
           <span className="w-3 h-3 rounded-sm inline-block" style={{ background: 'rgb(59,130,246)' }} />
-          Well surveyed
+          {t('wellSurveyed')}
         </div>
         <div className="flex items-center gap-2 mb-1">
           <span className="w-3 h-3 rounded-sm inline-block" style={{ background: 'rgb(239,68,68)' }} />
-          High frontier potential
+          {t('highFrontier')}
         </div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 rounded-sm inline-block bg-slate-600 opacity-50" />
-          Unsurveyed
+          {t('unsurveyed')}
         </div>
       </div>
     </div>

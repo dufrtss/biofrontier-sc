@@ -18,17 +18,17 @@ interface SectionProps {
 function Section({ id, title, children }: SectionProps) {
   return (
     <section id={`methodology-${id}`} className="scroll-mt-4">
-      <h3 className="text-sm font-semibold text-[--text-primary] uppercase tracking-wider mb-3 pb-2 border-b border-[--border]">
+      <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-wider mb-3 pb-2 border-b border-slate-700/60">
         {title}
       </h3>
-      <div className="text-xs text-[--text-secondary] leading-relaxed space-y-2">{children}</div>
+      <div className="text-xs text-slate-400 leading-relaxed space-y-2">{children}</div>
     </section>
   )
 }
 
 function Code({ children }: { children: string }) {
   return (
-    <pre className="bg-[--surface] border border-[--border] rounded px-3 py-2 font-mono text-[--accent] text-[11px] overflow-x-auto whitespace-pre-wrap">
+    <pre className="bg-slate-800 border border-slate-700 rounded px-3 py-2 font-mono text-emerald-400 text-[11px] overflow-x-auto whitespace-pre-wrap">
       {children}
     </pre>
   )
@@ -41,7 +41,7 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
         <thead>
           <tr>
             {headers.map(h => (
-              <th key={h} className="text-left text-[--text-muted] font-medium px-2 py-1.5 border-b border-[--border]">
+              <th key={h} className="text-left text-slate-500 font-medium px-2 py-1.5 border-b border-slate-700">
                 {h}
               </th>
             ))}
@@ -49,9 +49,9 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={i} className="border-b border-[--border]">
+            <tr key={i} className="border-b border-slate-800">
               {row.map((cell, j) => (
-                <td key={j} className="px-2 py-1.5 text-[--text-secondary] align-top">{cell}</td>
+                <td key={j} className="px-2 py-1.5 text-slate-400 align-top">{cell}</td>
               ))}
             </tr>
           ))}
@@ -82,22 +82,22 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
       )}
       <div
         className={[
-          'fixed right-0 top-0 h-full w-full md:w-[480px] bg-[--surface-raised] border-l border-[--border] z-[2000] flex flex-col transition-transform duration-200',
+          'fixed right-0 top-0 h-full w-full md:w-[480px] bg-slate-900 border-l border-slate-700 z-[2000] flex flex-col transition-transform duration-200',
           open ? 'translate-x-0' : 'translate-x-full',
         ].join(' ')}
         aria-hidden={!open}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[--border] shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/60 shrink-0">
           <div>
-            <h2 className="text-sm font-semibold text-[--text-primary] uppercase tracking-wider font-condensed">
+            <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider font-condensed">
               {t('title')}
             </h2>
-            <p className="text-xs text-[--text-muted] mt-0.5">{t('subtitle')}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{t('subtitle')}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-[--text-muted] hover:text-[--text-secondary] text-lg leading-none"
+            className="text-slate-500 hover:text-slate-300 text-lg leading-none"
             aria-label={t('close')}
           >
             ✕
@@ -115,7 +115,7 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
               rows={t.raw('frontierScore.tableRows') as string[][]}
             />
             <p>{t('frontierScore.weightsNote')}</p>
-            <p className="text-[--text-muted] italic">{t('frontierScore.caveat')}</p>
+            <p className="text-slate-500 italic">{t('frontierScore.caveat')}</p>
           </Section>
 
           <Section id="survey-effort" title={t('surveyEffort.title')}>
@@ -133,13 +133,13 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
             <p className="text-amber-400/80 font-medium">{t('habitatQuality.warning')}</p>
             <p>
               {t('habitatQuality.computePre')}{' '}
-              <span className="font-mono text-[--accent]">npm run data:habitat</span>{' '}
+              <span className="font-mono text-emerald-400">npm run data:habitat</span>{' '}
               {t('habitatQuality.computeMid')}{' '}
-              <span className="font-mono text-[--text-secondary]">projects/biofrontier-sc/</span>
+              <span className="font-mono text-slate-300">projects/biofrontier-sc/</span>
               {t('habitatQuality.computePost')}
             </p>
-            <p className="text-[--text-muted]">{t('habitatQuality.sourcesLabel')}</p>
-            <ul className="list-disc pl-4 space-y-1 text-[--text-muted]">
+            <p className="text-slate-500">{t('habitatQuality.sourcesLabel')}</p>
+            <ul className="list-disc pl-4 space-y-1 text-slate-500">
               {(t.raw('habitatQuality.sources') as string[]).map(s => <li key={s}>{s}</li>)}
             </ul>
           </Section>
@@ -147,29 +147,29 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
           <Section id="data-source" title={t('dataSource.title')}>
             <p>
               {t('dataSource.introPre')}{' '}
-              <strong className="text-[--text-primary]">GBIF</strong>{' '}
+              <strong className="text-slate-200">GBIF</strong>{' '}
               {t('dataSource.introPost')}
             </p>
-            <p className="text-[--text-muted]">{t('dataSource.contributingLabel')}</p>
-            <ul className="list-disc pl-4 space-y-1 text-[--text-muted]">
+            <p className="text-slate-500">{t('dataSource.contributingLabel')}</p>
+            <ul className="list-disc pl-4 space-y-1 text-slate-500">
               {(t.raw('dataSource.contributing') as string[]).map(s => <li key={s}>{s}</li>)}
             </ul>
-            <p className="text-[--text-muted] mt-2">{t('dataSource.excludedLabel')}</p>
-            <ul className="list-disc pl-4 space-y-1 text-[--text-muted]">
+            <p className="text-slate-500 mt-2">{t('dataSource.excludedLabel')}</p>
+            <ul className="list-disc pl-4 space-y-1 text-slate-500">
               {(t.raw('dataSource.excluded') as string[]).map(s => <li key={s}>{s}</li>)}
             </ul>
-            <p className="text-[--text-muted] mt-2">
+            <p className="text-slate-500 mt-2">
               {t('dataSource.fetchPre')}{' '}
-              <span className="font-mono text-[--text-secondary]">stateProvince=Santa Catarina, country=BR, hasCoordinate=true</span>
+              <span className="font-mono text-slate-300">stateProvince=Santa Catarina, country=BR, hasCoordinate=true</span>
               {t('dataSource.fetchMid')}{' '}
-              <span className="font-mono text-[--accent]">npm run data:fetch</span>{' '}
+              <span className="font-mono text-emerald-400">npm run data:fetch</span>{' '}
               {t('dataSource.fetchPost')}
             </p>
           </Section>
 
           <Section id="taxa-coverage" title={t('taxaCoverage.title')}>
             <p>
-              <strong className="text-[--text-primary]">{tTaxon('allTaxa')}</strong>{' '}
+              <strong className="text-slate-200">{tTaxon('allTaxa')}</strong>{' '}
               {t('taxaCoverage.allIntro')}
             </p>
             <Table
@@ -177,14 +177,14 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
               rows={t.raw('taxaCoverage.taxaTableRows') as string[][]}
             />
             <p className="mt-2">
-              <strong className="text-[--text-primary]">{tTaxon('vertebrates')}</strong>{' '}
+              <strong className="text-slate-200">{tTaxon('vertebrates')}</strong>{' '}
               {t('taxaCoverage.vertebratesIntro')}
             </p>
             <Table
               headers={t.raw('taxaCoverage.classTableHeaders') as string[]}
               rows={t.raw('taxaCoverage.classTableRows') as string[][]}
             />
-            <p className="text-[--text-muted] mt-2">{t('taxaCoverage.groupsNote')}</p>
+            <p className="text-slate-500 mt-2">{t('taxaCoverage.groupsNote')}</p>
           </Section>
 
           <Section id="geographic-scope" title={t('geographicScope.title')}>
@@ -205,18 +205,18 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
               rows={t.raw('scientificCaveats.tableRows') as string[][]}
             />
             <p className="mt-2">
-              <strong className="text-[--text-primary]">{t('scientificCaveats.reproLabel')}</strong>{' '}
+              <strong className="text-slate-200">{t('scientificCaveats.reproLabel')}</strong>{' '}
               {t('scientificCaveats.reproText')}{' '}
               <a
                 href="https://github.com/dufrtss/omega"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-[--accent-blue] hover:text-[--accent-blue-dim]"
+                className="text-blue-400 hover:text-blue-300"
               >
                 github.com/dufrtss/omega
               </a>{' '}
               {t('scientificCaveats.reproSuffix')}{' '}
-              <span className="font-mono text-[--text-secondary]">projects/biofrontier-sc/</span>.
+              <span className="font-mono text-slate-300">projects/biofrontier-sc/</span>.
             </p>
           </Section>
 
