@@ -40,7 +40,7 @@ export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, 
         <p className="text-xs text-slate-500 mt-0.5">{t('subtitle')}</p>
       </div>
 
-      <ul className="flex-1 overflow-y-auto divide-y divide-slate-700/40">
+      <ul className="flex-1 overflow-y-auto divide-y divide-slate-700/40 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
         {topIds.map(hexId => {
           const hex = hexbins[hexId]
           if (!hex) return null
