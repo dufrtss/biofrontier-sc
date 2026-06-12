@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BioFrontier SC
 
-## Getting Started
+Interactive frontier intelligence map for biodiversity discovery in Santa Catarina, Brazil. Combines GBIF occurrence data with survey effort scoring and H3 hexagonal grids to rank locations by probability of undescribed species discovery.
 
-First, run the development server:
+**Languages:** PT-BR · EN · ES
+
+---
+
+## Prerequisites
+
+- Node.js 20+
+- npm
+- Docker (optional — for production container and dev container)
+
+---
+
+## Local Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Dev Container
 
-## Learn More
+Requires VS Code with the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension.
 
-To learn more about Next.js, take a look at the following resources:
+1. Open this folder in VS Code
+2. When prompted, click **Reopen in Container**
+3. `npm install` runs automatically
+4. Run `npm run dev` inside the container
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Lint
 
-## Deploy on Vercel
+```bash
+npm run lint
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Test
+
+```bash
+npm run test            # run once
+npm run test:watch      # watch mode
+npm run test:coverage   # with coverage report
+```
+
+Tests cover pure scoring and geometry logic in `src/lib/`.
+
+---
+
+## Production Build (local)
+
+```bash
+npm run build
+npm start
+```
+
+---
+
+## Docker (production)
+
+```bash
+docker compose up --build
+```
+
+Open [http://localhost:3000](http://localhost:3000). Stop with `docker compose down`.
+
+---
+
+## Data Scripts
+
+Pre-computed data is bundled in `public/data/`. To regenerate:
+
+```bash
+npm run data:fetch             # fetch GBIF occurrences for SC → public/data/hexbins.json
+npm run data:habitat           # compute habitat scores → public/data/habitat-by-hex.json
+npm run data:habitat-fallback  # fallback habitat computation (no external API)
+```
+
+Bulk GBIF downloads (>100k records) require a free GBIF account. See `scripts/` for details.
+
+---
+
+## Architecture
+
+```
+src/
+├── app/[locale]/        # Next.js app router — locale routing
+├── features/
+│   ├── map/             # GapMap — Leaflet hex grid visualisation
+│   ├── ranking/         # FrontierRanking — top 20 ranked hexbins sidebar
+│   ├── detail/          # HexDetail — selected hex information panel
+│   ├── controls/        # TaxonSelector, LocaleSwitcher, DataSummaryBar
+│   └── methodology/     # MethodologyPanel — scoring methodology docs
+├── components/
+│   ├── shell/           # AppShell — top-level layout orchestrator
+│   └── ui/              # InfoTooltip — shared stateless primitives
+├── hooks/               # useBiofrontierData — data fetching and derived state
+├── lib/                 # Pure functions: scoring, h3-utils, color, types
+├── i18n/                # next-intl routing and request config
+└── messages/            # Translation files: en, pt-BR, es
+```
+
+Features do not import from each other. Cross-feature data flows through `hooks/` or props via `AppShell`.
