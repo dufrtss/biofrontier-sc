@@ -1,4 +1,7 @@
 {
+  "InfoTooltip": {
+    "learnMore": "Full methodology →"
+  },
   "AppShell": {
     "loadingData": "Loading biodiversity data",
     "errorLoading": "Error loading data",

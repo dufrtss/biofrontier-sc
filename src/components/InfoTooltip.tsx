@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslations } from 'next-intl'
 
 interface InfoTooltipProps {
   content: string
@@ -19,6 +20,7 @@ export default function InfoTooltip({
   onLearnMore,
   align = 'left',
 }: InfoTooltipProps) {
+  const t = useTranslations('InfoTooltip')
   const [open, setOpen] = useState(false)
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
@@ -77,7 +79,7 @@ export default function InfoTooltip({
               className="mt-2 block text-blue-400 hover:text-blue-300 transition-colors"
               type="button"
             >
-              {learnMore.label ?? 'Full methodology →'}
+              {learnMore.label ?? t('learnMore')}
             </button>
           )}
         </div>,
