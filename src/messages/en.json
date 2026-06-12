@@ -91,9 +91,6 @@
       "title": "Habitat Quality",
       "intro": "Intended to represent the fraction of each hexbin covered by Atlantic Forest — the biome with the highest endemic species richness in Santa Catarina.",
       "warning": "⚠ Current status: placeholder value of 0.5 assigned to every hexbin. Habitat quality does not currently differentiate frontier locations.",
-      "computePre": "To compute real values, download an Atlantic Forest boundary GeoJSON and run",
-      "computeMid": "inside",
-      "computePost": ". This computes per-hexbin overlap fractions and regenerates the data.",
       "sourcesLabel": "Data sources for forest-cover GeoJSON:",
       "sources": [
         "SOS Mata Atlântica — sosma.org.br",
@@ -119,9 +116,6 @@
         "Observations recorded after the data fetch date",
         "Records without GPS coordinates (hasCoordinate=true filter applied)"
       ],
-      "fetchPre": "This build fetched up to 50,000 records with",
-      "fetchMid": ". Due to GBIF API intermittency, approximately 10,189 records were collected. Re-run",
-      "fetchPost": "for a more complete dataset."
     },
     "taxaCoverage": {
       "title": "Taxa Coverage",
@@ -171,9 +165,6 @@
         ["Hexbin boundaries", "Algorithmic, not ecological or administrative."],
         ["Taxa classification", "GBIF backbone taxonomy. May differ from other systems."]
       ],
-      "reproLabel": "Reproducibility:",
-      "reproText": "Data pipeline and scoring code are open source at",
-      "reproSuffix": "under"
     }
   }
 }

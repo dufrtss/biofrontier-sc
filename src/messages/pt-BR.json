@@ -91,9 +91,6 @@
       "title": "Qualidade do Habitat",
       "intro": "Destinado a representar a fração de cada hexbin coberta pela Mata Atlântica — o bioma com maior riqueza de espécies endêmicas em Santa Catarina.",
       "warning": "⚠ Status atual: valor placeholder de 0,5 atribuído a cada hexbin. A qualidade do habitat não diferencia as localidades de fronteira no momento.",
-      "computePre": "Para calcular valores reais, baixe um GeoJSON do limite da Mata Atlântica e execute",
-      "computeMid": "dentro de",
-      "computePost": ". Isso calcula as frações de sobreposição por hexbin e regenera os dados.",
       "sourcesLabel": "Fontes de dados para GeoJSON de cobertura florestal:",
       "sources": [
         "SOS Mata Atlântica — sosma.org.br",
@@ -119,9 +116,6 @@
         "Observações registradas após a data de coleta dos dados",
         "Registros sem coordenadas GPS (filtro hasCoordinate=true aplicado)"
       ],
-      "fetchPre": "Esta compilação coletou até 50.000 registros com",
-      "fetchMid": ". Devido à intermitência da API do GBIF, aproximadamente 10.189 registros foram coletados. Execute novamente",
-      "fetchPost": "para um conjunto de dados mais completo."
     },
     "taxaCoverage": {
       "title": "Cobertura de Táxons",
@@ -171,9 +165,6 @@
         ["Limites dos hexbins", "Algorítmicos, não ecológicos ou administrativos."],
         ["Classificação de táxons", "Taxonomia backbone do GBIF. Pode diferir de outros sistemas."]
       ],
-      "reproLabel": "Reprodutibilidade:",
-      "reproText": "O pipeline de dados e o código de pontuação são de código aberto em",
-      "reproSuffix": "em"
     }
   }
 }

@@ -131,13 +131,6 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
           <Section id="habitat-quality" title={t('habitatQuality.title')}>
             <p>{t('habitatQuality.intro')}</p>
             <p className="text-amber-400/80 font-medium">{t('habitatQuality.warning')}</p>
-            <p>
-              {t('habitatQuality.computePre')}{' '}
-              <span className="font-mono text-emerald-400">npm run data:habitat</span>{' '}
-              {t('habitatQuality.computeMid')}{' '}
-              <span className="font-mono text-slate-300">projects/biofrontier-sc/</span>
-              {t('habitatQuality.computePost')}
-            </p>
             <p className="text-slate-500">{t('habitatQuality.sourcesLabel')}</p>
             <ul className="list-disc pl-4 space-y-1 text-slate-500">
               {(t.raw('habitatQuality.sources') as string[]).map(s => <li key={s}>{s}</li>)}
@@ -158,13 +151,6 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
             <ul className="list-disc pl-4 space-y-1 text-slate-500">
               {(t.raw('dataSource.excluded') as string[]).map(s => <li key={s}>{s}</li>)}
             </ul>
-            <p className="text-slate-500 mt-2">
-              {t('dataSource.fetchPre')}{' '}
-              <span className="font-mono text-slate-300">stateProvince=Santa Catarina, country=BR, hasCoordinate=true</span>
-              {t('dataSource.fetchMid')}{' '}
-              <span className="font-mono text-emerald-400">npm run data:fetch</span>{' '}
-              {t('dataSource.fetchPost')}
-            </p>
           </Section>
 
           <Section id="taxa-coverage" title={t('taxaCoverage.title')}>
@@ -204,20 +190,6 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
               headers={t.raw('scientificCaveats.tableHeaders') as string[]}
               rows={t.raw('scientificCaveats.tableRows') as string[][]}
             />
-            <p className="mt-2">
-              <strong className="text-slate-200">{t('scientificCaveats.reproLabel')}</strong>{' '}
-              {t('scientificCaveats.reproText')}{' '}
-              <a
-                href="https://github.com/dufrtss/omega"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300"
-              >
-                github.com/dufrtss/omega
-              </a>{' '}
-              {t('scientificCaveats.reproSuffix')}{' '}
-              <span className="font-mono text-slate-300">projects/biofrontier-sc/</span>.
-            </p>
           </Section>
 
         </div>
