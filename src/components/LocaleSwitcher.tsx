@@ -29,7 +29,7 @@ export default function LocaleSwitcher() {
             className={[
               'text-[11px] font-semibold tracking-wider px-1.5 py-0.5 rounded transition-colors',
               locale === currentLocale
-                ? 'text-emerald-400 underline underline-offset-2'
+                ? 'text-blue-400 underline underline-offset-2'
                 : 'text-slate-500 hover:text-slate-400',
             ].join(' ')}
             type="button"

@@ -54,7 +54,6 @@ export default function AppShell() {
     <div className="flex flex-col h-full">
       {/* Top bar */}
       <header className="relative flex items-center justify-between px-5 py-3 bg-slate-900 border-b border-slate-700/60 shrink-0 z-10">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-emerald-600/60 via-emerald-500/40 to-transparent" />
         <div>
           <h1 className="text-base font-bold text-white tracking-tight font-condensed uppercase leading-none">
             BioFrontier SC
