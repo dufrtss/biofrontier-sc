@@ -105,7 +105,7 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
         </div>
 
         {/* Scrollable content */}
-        <div ref={contentRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-8">
+        <div ref={contentRef} className="flex-1 overflow-y-auto px-5 py-5 space-y-8 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
 
           <Section id="frontier-score" title={t('frontierScore.title')}>
             <p>{t('frontierScore.intro')}</p>
