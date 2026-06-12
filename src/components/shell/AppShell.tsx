@@ -54,12 +54,12 @@ export default function AppShell() {
   return (
     <div className="flex flex-col h-full">
       {/* Top bar */}
-      <header className="relative flex items-center justify-between px-5 py-3 bg-slate-900 border-b border-slate-700/60 shrink-0 z-10">
+      <header className="relative flex items-center justify-between px-3 py-2 sm:px-5 sm:py-3 bg-slate-900 border-b border-slate-700/60 shrink-0 z-10">
         <div>
           <h1 className="text-base font-bold text-white tracking-tight font-condensed uppercase leading-none">
             BioFrontier SC
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">
             {t('tagline')}
           </p>
         </div>
@@ -87,8 +87,10 @@ export default function AppShell() {
       <div className="flex flex-1 overflow-hidden">
         <aside
           className={[
-            'shrink-0 bg-slate-900 border-r border-slate-700/60 overflow-hidden transition-all duration-200',
-            rankingOpen ? 'w-80 opacity-100' : 'w-0 opacity-0 pointer-events-none',
+            'bg-slate-900 border-r border-slate-700/60 overflow-hidden',
+            rankingOpen
+              ? 'fixed inset-0 z-50 sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
+              : 'hidden sm:block sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
           ].join(' ')}
         >
           <FrontierRanking
@@ -97,6 +99,7 @@ export default function AppShell() {
             selectedHexId={selectedHexId}
             onSelect={selectHex}
             onOpenMethodology={openMethodology}
+            onClose={() => setRankingOpen(false)}
           />
         </aside>
 
@@ -123,8 +126,10 @@ export default function AppShell() {
 
         <aside
           className={[
-            'shrink-0 bg-slate-900 border-l border-slate-700 overflow-hidden transition-all duration-200',
-            selectedHex ? 'w-80 opacity-100' : 'w-0 opacity-0 pointer-events-none',
+            'bg-slate-900 border-l border-slate-700 overflow-hidden',
+            selectedHex
+              ? 'fixed inset-0 z-50 sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
+              : 'hidden sm:block sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
           ].join(' ')}
         >
           <HexDetail
