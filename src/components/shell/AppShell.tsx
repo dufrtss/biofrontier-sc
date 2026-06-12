@@ -97,7 +97,7 @@ export default function AppShell() {
             rankedHexIds={rankedHexIds}
             hexbins={hexbins}
             selectedHexId={selectedHexId}
-            onSelect={selectHex}
+            onSelect={(hexId) => { selectHex(hexId); setRankingOpen(false) }}
             onOpenMethodology={openMethodology}
             onClose={() => setRankingOpen(false)}
           />
