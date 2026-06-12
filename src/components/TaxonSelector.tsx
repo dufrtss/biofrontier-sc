@@ -25,7 +25,7 @@ export default function TaxonSelector({ value, onChange, onOpenMethodology }: Pr
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex gap-1 bg-[--surface-raised] rounded-full p-1">
+      <div className="flex gap-1 bg-slate-800 rounded-full p-1">
         {OPTIONS.map(opt => (
           <button
             key={opt.value}
@@ -33,8 +33,8 @@ export default function TaxonSelector({ value, onChange, onOpenMethodology }: Pr
             className={[
               'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
               value === opt.value
-                ? 'bg-[--accent-blue] text-[--bg] shadow'
-                : 'text-[--text-muted] hover:text-[--text-primary]',
+                ? 'bg-blue-600 text-white shadow'
+                : 'text-slate-400 hover:text-slate-200',
             ].join(' ')}
           >
             {opt.label}

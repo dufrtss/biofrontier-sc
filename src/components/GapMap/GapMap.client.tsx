@@ -113,9 +113,9 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
       <div ref={containerRef} className="w-full h-full" />
 
       {/* Legend */}
-      <div className="absolute bottom-8 left-4 z-[1000] bg-[--surface]/90 backdrop-blur rounded-lg px-3 py-2 text-xs text-[--text-secondary] border border-[--border]">
+      <div className="absolute bottom-8 left-4 z-[1000] bg-slate-900/90 backdrop-blur rounded-lg px-3 py-2 text-xs text-slate-300 border border-slate-700">
         <div className="flex items-center mb-2">
-          <p className="text-[--text-muted] uppercase tracking-widest text-[10px] font-semibold">{t('surveyCoverage')}</p>
+          <p className="text-slate-400 uppercase tracking-widest text-[10px] font-semibold">{t('surveyCoverage')}</p>
           <InfoTooltip
             content={t('tooltipCoverage')}
             learnMore={{ sectionId: 'geographic-scope' }}
@@ -131,7 +131,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
           {t('highFrontier')}
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-sm inline-block bg-[--border-bright] opacity-50" />
+          <span className="w-3 h-3 rounded-sm inline-block bg-slate-600 opacity-50" />
           {t('unsurveyed')}
         </div>
       </div>
