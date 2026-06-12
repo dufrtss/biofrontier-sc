@@ -10,7 +10,6 @@ import TaxonSelector from './TaxonSelector'
 import HexDetail from './HexDetail'
 import DataSummaryBar from './DataSummaryBar'
 import MethodologyPanel from './MethodologyPanel'
-import ThemeToggle from './ThemeToggle'
 import LocaleSwitcher from './LocaleSwitcher'
 
 export default function AppShell() {
@@ -73,7 +72,6 @@ export default function AppShell() {
             {t('howItWorks')}
           </button>
           <LocaleSwitcher />
-          <ThemeToggle />
         </div>
       </header>
 

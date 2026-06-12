@@ -28,7 +28,6 @@ export function computeEffortScores(hexbins: EffortInputs[]): number[] {
   )
 }
 
-// MVP 2-component frontier score
 export function computeFrontierScore(effortScore: number, habitatQuality: number): number {
   return (1 - effortScore) * 0.53 + habitatQuality * 0.47
 }
