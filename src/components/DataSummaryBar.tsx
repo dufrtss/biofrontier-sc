@@ -23,9 +23,9 @@ export default function DataSummaryBar({
     : null
 
   return (
-    <div className="flex items-center gap-x-4 px-5 py-1.5 bg-slate-950 border-b border-slate-700/60 text-xs text-slate-500 tabular-nums shrink-0 flex-wrap gap-y-1">
+    <div className="flex items-center gap-x-4 px-5 py-1.5 bg-[--bg] border-b border-[--border]/60 text-xs text-[--text-muted] tabular-nums shrink-0 flex-wrap gap-y-1">
       <span className="flex items-center">
-        <span className="text-slate-300 font-medium">
+        <span className="text-[--text-secondary] font-medium">
           {t('speciesRecorded', { count: speciesCount.toLocaleString() })}
         </span>
         <InfoTooltip
@@ -35,10 +35,10 @@ export default function DataSummaryBar({
         />
       </span>
 
-      <span className="text-slate-600">·</span>
+      <span className="text-[--border-bright]">·</span>
 
       <span className="flex items-center">
-        {t('source')}&nbsp;<span className="text-slate-300 font-medium">GBIF</span>
+        {t('source')}&nbsp;<span className="text-[--text-secondary] font-medium">GBIF</span>
         <InfoTooltip
           content={t('tooltipSource')}
           learnMore={{ sectionId: 'data-source' }}
@@ -47,10 +47,10 @@ export default function DataSummaryBar({
         {date && <span className="ml-1 hidden sm:inline">{t('fetched', { date })}</span>}
       </span>
 
-      <span className="text-slate-600">·</span>
+      <span className="text-[--border-bright]">·</span>
 
       <span className="flex items-center">
-        <span className="text-slate-300 font-medium">
+        <span className="text-[--text-secondary] font-medium">
           {t('frontierLocationsRanked', { count: frontierCount.toLocaleString() })}
         </span>
         <InfoTooltip

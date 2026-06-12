@@ -32,6 +32,10 @@
   --text-primary:    #f1f5f9;
   --text-secondary:  #94a3b8;
   --text-muted:      #64748b;
+  --text-faint:      #334155;   /* slate-700 — footer / very muted */
+  --track:           #334155;   /* slate-700 — progress bar tracks */
+  --hover-bg:        rgba(51, 65, 85, 0.5);
+  --hover-bg-strong: rgba(51, 65, 85, 0.8);
   --accent:          #34d399;
   --accent-dim:      #10b981;
   --accent-blue:     #60a5fa;
@@ -52,6 +56,10 @@
   --text-primary:    #0f172a;
   --text-secondary:  #334155;
   --text-muted:      #94a3b8;
+  --text-faint:      #94a3b8;   /* slate-400 */
+  --track:           #e2e8f0;   /* slate-200 */
+  --hover-bg:        rgba(203, 213, 225, 0.4);
+  --hover-bg-strong: rgba(203, 213, 225, 0.7);
   --accent:          #059669;
   --accent-dim:      #047857;
   --accent-blue:     #2563eb;
