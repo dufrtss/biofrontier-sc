@@ -1,4 +1,4 @@
-import { latLngToCell, cellToLatLng, cellToBoundary, polygonToCells } from 'h3-js'
+import { latLngToCell, cellToLatLng, cellToBoundary, polygonToCells, gridDisk } from 'h3-js'
 
 export const SC_RESOLUTION = 6
 
@@ -31,6 +31,15 @@ export function isInSCBounds(lat: number, lng: number): boolean {
     lat >= SC_BBOX.south && lat <= SC_BBOX.north &&
     lng >= SC_BBOX.west  && lng <= SC_BBOX.east
   )
+}
+
+/**
+ * Hexbins within `radius` grid steps of `hexId`, excluding `hexId` itself.
+ * Used to build the ecologically-similar neighbourhood for taxonomic
+ * incompleteness scoring.
+ */
+export function hexNeighbours(hexId: string, radius: number): string[] {
+  return gridDisk(hexId, radius).filter(id => id !== hexId)
 }
 
 // All H3 hexbins intersecting Santa Catarina's bounding box at resolution 6
