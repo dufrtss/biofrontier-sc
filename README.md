@@ -80,12 +80,55 @@ Open [http://localhost:3000](http://localhost:3000). Stop with `docker compose d
 Pre-computed data is bundled in `public/data/`. To regenerate:
 
 ```bash
-npm run data:fetch             # fetch GBIF occurrences for SC → public/data/hexbins.json
-npm run data:habitat           # compute habitat scores → public/data/habitat-by-hex.json
-npm run data:habitat-fallback  # fallback habitat computation (no external API)
+npm run data:habitat-fallback  # habitat placeholder (no download needed) — run first
+npm run data:habitat           # real habitat scores (needs a GeoJSON, see below)
+npm run data:fetch             # fetch occurrences → public/data/hexbins.json
 ```
 
-Bulk GBIF downloads (>100k records) require a free GBIF account. See `scripts/` for details.
+`data:fetch` must run after one of the habitat scripts — it reads
+`habitat-by-hex.json` and will refuse to start without it.
+
+### Occurrence sources
+
+```bash
+npm run data:fetch -- --list-sources                      # what is available
+npm run data:fetch                                        # default: gbif,inaturalist
+npm run data:fetch -- --sources=gbif                      # single source
+npm run data:fetch -- --sources=gbif,inaturalist --max=100000
+```
+
+| Source | Auth | Notes |
+|---|---|---|
+| `gbif` | none | Museums, herbaria, research datasets. Also re-publishes iNaturalist research-grade records. |
+| `inaturalist` | none | Research-grade observations only (community-verified IDs). |
+| `specieslink` | API key | Brazilian collections, many never propagated to GBIF. Set `SPECIESLINK_API_KEY` — free registration at [specieslink.net](https://specieslink.net/). Skipped with a warning when unset. |
+
+Records reaching us from more than one source are deduplicated on species,
+rounded coordinates and date. This is not cosmetic: GBIF re-publishes
+iNaturalist observations, and double-counting them would inflate the survey
+effort score for exactly the well-observed areas that already dominate.
+
+Adding a source means implementing `OccurrenceSource` in `scripts/sources/` and
+registering it in `scripts/sources/index.ts` — the orchestrator needs no changes.
+
+### Habitat data
+
+`data:habitat-fallback` writes a uniform `0.5` for every hexbin. The app detects
+a uniform value, **drops the habitat component from the frontier score**, and
+says so in the UI rather than presenting a placeholder as a measurement.
+
+For real coverage, download an Atlantic Forest remnants GeoJSON to
+`public/data/sc-atlantic-forest.geojson` and run `npm run data:habitat`. Sources
+are listed in the header of `scripts/compute-habitat.ts` (MapBiomas, SOS Mata
+Atlântica, IBGE).
+
+### Data schema
+
+`hexbins.json` is versioned. Schema 2 adds a global `speciesIndex` with per-hexbin
+`speciesIds`, plus per-source provenance. Schema 1 files still load — the app
+reconstructs a partial species index from the top-10 lists and flags the result
+as incomplete, disabling taxonomic incompleteness scoring rather than computing
+it from data too sparse to support it. See `src/lib/hexbins-file.ts`.
 
 ---
 
@@ -94,19 +137,50 @@ Bulk GBIF downloads (>100k records) require a free GBIF account. See `scripts/` 
 ```
 src/
 ├── app/[locale]/        # Next.js app router — locale routing
+├── proxy.ts             # next-intl middleware (Next 16 renamed this from middleware.ts)
 ├── features/
 │   ├── map/             # GapMap — Leaflet hex grid visualisation
 │   ├── ranking/         # FrontierRanking — top 20 ranked hexbins sidebar
 │   ├── detail/          # HexDetail — selected hex information panel
 │   ├── controls/        # TaxonSelector, LocaleSwitcher, DataSummaryBar
+│   ├── export/          # ExportButton — CSV download of the ranking
 │   └── methodology/     # MethodologyPanel — scoring methodology docs
 ├── components/
 │   ├── shell/           # AppShell — top-level layout orchestrator
 │   └── ui/              # InfoTooltip — shared stateless primitives
 ├── hooks/               # useBiofrontierData — data fetching and derived state
-├── lib/                 # Pure functions: scoring, h3-utils, color, types
+├── lib/                 # Pure functions — see below
 ├── i18n/                # next-intl routing and request config
 └── messages/            # Translation files: en, pt-BR, es
+
+scripts/
+├── fetch-occurrences.ts # Orchestrator: fetch → dedupe → aggregate → write
+└── sources/             # One adapter per provider behind a shared interface
 ```
 
 Features do not import from each other. Cross-feature data flows through `hooks/` or props via `AppShell`.
+
+### `src/lib/`
+
+| Module | Responsibility |
+|---|---|
+| `scoring-config.ts` | **Every tunable weight lives here.** Recalibrating means editing this file and nothing else. |
+| `scoring.ts` | Survey effort and composite frontier score. |
+| `incompleteness.ts` | Taxonomic incompleteness against ecologically similar H3 neighbours. |
+| `hexbins-file.ts` | Normalises the data file across schema versions; detects placeholder habitat data. |
+| `csv.ts` | CSV serialisation (pure — the DOM side lives in `features/export/`). |
+| `h3-utils.ts` | Hex grid geometry and neighbour lookup. |
+| `color.ts` / `types.ts` | Score→colour mapping; shared types. |
+
+### Scoring
+
+The frontier score combines three components, weighted in `scoring-config.ts`:
+survey gap, habitat quality, and taxonomic incompleteness.
+
+Components that cannot be computed for a hexbin are **dropped, with the
+remaining weights renormalised** — never treated as zero. Treating a missing
+component as zero would push data-poor hexbins down the ranking, and data-poor
+hexbins are precisely what the tool exists to surface.
+
+The weights are an uncalibrated hypothesis. `scoring-config.ts` documents what
+that means for interpreting the output.
