@@ -1,112 +1,161 @@
-// Fetches GBIF occurrence records for Santa Catarina, aggregates to H3 hexbins,
-// and writes public/data/hexbins.json.
-// Prerequisite: public/data/habitat-by-hex.json (run data:habitat-fallback first)
-// Run: npm run data:fetch
-// Duration: ~5–15 min depending on record count and network.
+/**
+ * Builds `public/data/hexbins.json` — the single data file the app loads.
+ *
+ * Fetches occurrence records from every selected source, deduplicates across
+ * them, aggregates to H3 hexbins, and writes a schema v2 file with a global
+ * species index.
+ *
+ * Prerequisite: `public/data/habitat-by-hex.json` (`npm run data:habitat` for
+ * real forest cover, or `npm run data:habitat-fallback` for the placeholder).
+ *
+ * Usage:
+ *   npm run data:fetch
+ *   npm run data:fetch -- --sources=gbif
+ *   npm run data:fetch -- --sources=gbif,inaturalist --max=100000
+ *   npm run data:fetch -- --list-sources
+ *
+ * Duration: minutes to tens of minutes depending on sources and record cap.
+ */
 import { writeFileSync, readFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
-import { occurrenceToHex, isInSCBounds, generateSCHexgrid, H3_RES6_AREA_KM2 } from '../src/lib/h3-utils'
-import type { HexbinRecord, TaxonRecord, HexbinsFile } from '../src/lib/types'
+import { occurrenceToHex, generateSCHexgrid } from '../src/lib/h3-utils'
+import type {
+  HexbinRecord,
+  HexbinsFile,
+  SourceId,
+  SourceMeta,
+  TaxonRecord,
+} from '../src/lib/types'
+import { CURRENT_SCHEMA_VERSION } from '../src/lib/hexbins-file'
+import { ALL_SOURCES, getSource, isSourceId } from './sources'
+import { dedupeOccurrences } from './sources/dedup'
+import type { Occurrence } from './sources/types'
 
-const OUTPUT      = resolve('public/data/hexbins.json')
-const HABITAT     = resolve('public/data/habitat-by-hex.json')
-const GBIF_BASE   = 'https://api.gbif.org/v1'
-const MAX_RECORDS = 50_000
-const PAGE_SIZE   = 300
+const OUTPUT  = resolve('public/data/hexbins.json')
+const HABITAT = resolve('public/data/habitat-by-hex.json')
 
-// classKey values in GBIF backbone taxonomy
-const VERTEBRATE_CLASS_KEYS = new Set([359, 212, 358, 131, 204])
-// Mammalia=359, Aves=212, Reptilia=358, Amphibia=131, Actinopterygii=204
+const DEFAULT_MAX_RECORDS = 50_000
+const DEFAULT_SOURCES: SourceId[] = ['gbif', 'inaturalist']
 
-interface RawOccurrence {
-  decimalLatitude?: number
-  decimalLongitude?: number
-  species?: string
-  classKey?: number
-  recordedBy?: string
-  eventDate?: string
+interface CliOptions {
+  sources: SourceId[]
+  maxRecords: number
+  listSources: boolean
 }
 
-async function fetchPage(offset: number, attempt = 0): Promise<{ results: RawOccurrence[]; endOfRecords: boolean }> {
-  const params = new URLSearchParams({
-    country: 'BR',
-    stateProvince: 'Santa Catarina',
-    hasCoordinate: 'true',
-    limit: String(PAGE_SIZE),
-    offset: String(offset),
-  })
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 60_000)
-  try {
-    const res = await fetch(`${GBIF_BASE}/occurrence/search?${params}`, { signal: controller.signal })
-    if (!res.ok) throw new Error(`GBIF ${res.status}: ${await res.text()}`)
-    const json = await res.json()
-    return { results: json.results, endOfRecords: json.endOfRecords }
-  } catch (err) {
-    if (attempt < 3) {
-      await new Promise(r => setTimeout(r, 2000 * (attempt + 1)))
-      return fetchPage(offset, attempt + 1)
-    }
-    throw err
-  } finally {
-    clearTimeout(timeout)
+function parseArgs(argv: string[]): CliOptions {
+  const options: CliOptions = {
+    sources: DEFAULT_SOURCES,
+    maxRecords: DEFAULT_MAX_RECORDS,
+    listSources: false,
   }
-}
 
-async function fetchAll(): Promise<RawOccurrence[]> {
-  const collected: RawOccurrence[] = []
-  let offset = 0
-  let failedPages = 0
-  process.stdout.write('Fetching GBIF records')
-  while (collected.length < MAX_RECORDS) {
-    let pageResult: { results: RawOccurrence[]; endOfRecords: boolean }
-    try {
-      pageResult = await fetchPage(offset)
-    } catch {
-      failedPages++
-      process.stdout.write(`\r  ${collected.length} records fetched (page @${offset} skipped)...`)
-      offset += PAGE_SIZE
-      if (failedPages > 10) { console.log('\nToo many failed pages, stopping early.'); break }
-      continue
+  for (const arg of argv) {
+    if (arg === '--list-sources') {
+      options.listSources = true
+    } else if (arg.startsWith('--sources=')) {
+      const requested = arg.slice('--sources='.length).split(',').map(s => s.trim()).filter(Boolean)
+      const invalid = requested.filter(s => !isSourceId(s))
+      if (invalid.length > 0) {
+        console.error(
+          `Unknown source(s): ${invalid.join(', ')}\n` +
+          `Available: ${ALL_SOURCES.map(s => s.id).join(', ')}`,
+        )
+        process.exit(1)
+      }
+      options.sources = requested as SourceId[]
+    } else if (arg.startsWith('--max=')) {
+      const n = Number(arg.slice('--max='.length))
+      if (!Number.isFinite(n) || n <= 0) {
+        console.error(`--max must be a positive number, got: ${arg}`)
+        process.exit(1)
+      }
+      options.maxRecords = n
+    } else if (arg.startsWith('--')) {
+      console.error(`Unknown flag: ${arg}`)
+      process.exit(1)
     }
-    const valid = pageResult.results.filter(r =>
-      r.decimalLatitude != null &&
-      r.decimalLongitude != null &&
-      isInSCBounds(r.decimalLatitude, r.decimalLongitude)
-    )
-    collected.push(...valid)
-    process.stdout.write(`\r  ${collected.length} records fetched...`)
-    if (pageResult.endOfRecords) break
-    offset += PAGE_SIZE
-    await new Promise(r => setTimeout(r, 200))
   }
-  console.log()
-  if (failedPages > 0) console.warn(`Warning: ${failedPages} pages skipped due to GBIF timeouts.`)
-  return collected.slice(0, MAX_RECORDS)
+
+  return options
 }
 
-type HexAccumulator = {
+function listSources(): void {
+  console.log('Available occurrence sources:\n')
+  for (const source of ALL_SOURCES) {
+    const availability = source.isAvailable()
+    const status = availability.ok ? 'ready' : 'unavailable'
+    console.log(`  ${source.id.padEnd(13)} ${source.label.padEnd(14)} [${status}]`)
+    if (!availability.ok) console.log(`  ${' '.repeat(13)} ${availability.reason}`)
+  }
+  console.log(`\nDefault: --sources=${DEFAULT_SOURCES.join(',')}`)
+}
+
+// ─── Aggregation ─────────────────────────────────────────────────────────────
+
+interface HexAccumulator {
   occurrenceCount: number
-  species: Map<string, number>
+  /** speciesId → record count. */
+  species: Map<number, number>
   observers: Set<string>
   dates: Set<string>
   firstDate: string | null
   lastDate: string | null
+  countsBySource: Partial<Record<SourceId, number>>
 }
 
-function newAcc(): HexAccumulator {
-  return { occurrenceCount: 0, species: new Map(), observers: new Set(), dates: new Set(), firstDate: null, lastDate: null }
+function newAccumulator(): HexAccumulator {
+  return {
+    occurrenceCount: 0,
+    species: new Map(),
+    observers: new Set(),
+    dates: new Set(),
+    firstDate: null,
+    lastDate: null,
+    countsBySource: {},
+  }
 }
 
-function accToRecord(acc: HexAccumulator | undefined): TaxonRecord {
-  if (!acc) return { occurrenceCount: 0, uniqueSpeciesCount: 0, uniqueObserverCount: 0, uniqueDateCount: 0, temporalSpanYears: 0, firstDate: null, lastDate: null, topSpecies: [] }
+function accumulate(acc: HexAccumulator, record: Occurrence, speciesId: number | null): void {
+  acc.occurrenceCount++
+  acc.countsBySource[record.source] = (acc.countsBySource[record.source] ?? 0) + 1
+
+  if (speciesId !== null) {
+    acc.species.set(speciesId, (acc.species.get(speciesId) ?? 0) + 1)
+  }
+  if (record.observer) acc.observers.add(record.observer)
+  if (record.date) {
+    acc.dates.add(record.date)
+    if (!acc.firstDate || record.date < acc.firstDate) acc.firstDate = record.date
+    if (!acc.lastDate  || record.date > acc.lastDate)  acc.lastDate  = record.date
+  }
+}
+
+const EMPTY_TAXON_RECORD: TaxonRecord = {
+  occurrenceCount: 0,
+  uniqueSpeciesCount: 0,
+  uniqueObserverCount: 0,
+  uniqueDateCount: 0,
+  temporalSpanYears: 0,
+  firstDate: null,
+  lastDate: null,
+  topSpecies: [],
+  speciesIds: [],
+  countsBySource: {},
+}
+
+function toTaxonRecord(acc: HexAccumulator | undefined, speciesIndex: string[]): TaxonRecord {
+  if (!acc) return { ...EMPTY_TAXON_RECORD }
+
   const span = acc.firstDate && acc.lastDate
     ? Math.max(0, new Date(acc.lastDate).getFullYear() - new Date(acc.firstDate).getFullYear())
     : 0
+
   const topSpecies = [...acc.species.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, 10)
-    .map(([name, count]) => ({ name, count }))
+    .map(([id, count]) => ({ name: speciesIndex[id], count }))
+
   return {
     occurrenceCount: acc.occurrenceCount,
     uniqueSpeciesCount: acc.species.size,
@@ -116,58 +165,135 @@ function accToRecord(acc: HexAccumulator | undefined): TaxonRecord {
     firstDate: acc.firstDate,
     lastDate: acc.lastDate,
     topSpecies,
+    speciesIds: [...acc.species.keys()],
+    countsBySource: acc.countsBySource,
   }
 }
 
-async function main() {
+// ─── Main ────────────────────────────────────────────────────────────────────
+
+async function main(): Promise<void> {
+  const options = parseArgs(process.argv.slice(2))
+
+  if (options.listSources) {
+    listSources()
+    return
+  }
+
   if (!existsSync(HABITAT)) {
-    console.error(`Missing ${HABITAT}. Run: npm run data:habitat-fallback`)
+    console.error(`Missing ${HABITAT}\nRun: npm run data:habitat-fallback`)
     process.exit(1)
   }
 
   const habitatByHex: Record<string, number> = JSON.parse(readFileSync(HABITAT, 'utf-8'))
   const allHexIds = generateSCHexgrid()
-  const records = await fetchAll()
 
-  console.log('Aggregating to hexbins...')
+  // ── Fetch ──
+  const allRecords: Occurrence[] = []
+  const sourceMeta: SourceMeta[] = []
+
+  for (const sourceId of options.sources) {
+    const source = getSource(sourceId)!
+    const availability = source.isAvailable()
+
+    if (!availability.ok) {
+      console.warn(`\n⚠ Skipping ${source.label}: ${availability.reason}`)
+      continue
+    }
+
+    console.log(`\nFetching from ${source.label}...`)
+    const started = Date.now()
+
+    const records = await source.fetchAll({
+      maxRecords: options.maxRecords,
+      log: message => process.stdout.write(`\r  ${message}`.padEnd(72)),
+    })
+
+    process.stdout.write('\n')
+    console.log(`  ${records.length} records in ${((Date.now() - started) / 1000).toFixed(1)}s`)
+
+    allRecords.push(...records)
+    sourceMeta.push({
+      id: sourceId,
+      recordCount: records.length,
+      duplicatesDropped: 0,  // filled in after deduplication
+      fetchedAt: new Date().toISOString(),
+    })
+  }
+
+  if (allRecords.length === 0) {
+    console.error('\nNo records fetched from any source. Aborting without writing output.')
+    process.exit(1)
+  }
+
+  // ── Deduplicate ──
+  console.log(`\nDeduplicating ${allRecords.length} records across sources...`)
+  const { records, droppedBySource } = dedupeOccurrences(allRecords)
+  for (const meta of sourceMeta) {
+    meta.duplicatesDropped = droppedBySource[meta.id] ?? 0
+  }
+  const dropped = allRecords.length - records.length
+  console.log(`  ${records.length} unique (${dropped} duplicates dropped)`)
+  for (const meta of sourceMeta) {
+    if (meta.duplicatesDropped > 0) {
+      console.log(`    ${meta.id}: ${meta.duplicatesDropped} dropped as already seen`)
+    }
+  }
+
+  // ── Aggregate ──
+  console.log('\nAggregating to hexbins...')
+  const speciesIndex: string[] = []
+  const speciesIdByName = new Map<string, number>()
+
+  const internSpecies = (name: string | null): number | null => {
+    if (!name) return null
+    let id = speciesIdByName.get(name)
+    if (id === undefined) {
+      id = speciesIndex.length
+      speciesIndex.push(name)
+      speciesIdByName.set(name, id)
+    }
+    return id
+  }
+
   const allAcc  = new Map<string, HexAccumulator>()
   const vertAcc = new Map<string, HexAccumulator>()
 
-  for (const r of records) {
-    const hexId = occurrenceToHex(r.decimalLatitude!, r.decimalLongitude!)
-    const isVert = r.classKey != null && VERTEBRATE_CLASS_KEYS.has(r.classKey)
+  for (const record of records) {
+    const hexId = occurrenceToHex(record.lat, record.lng)
+    const speciesId = internSpecies(record.species)
 
-    for (const [map, include] of [[allAcc, true], [vertAcc, isVert]] as const) {
+    for (const [map, include] of [[allAcc, true], [vertAcc, record.isVertebrate]] as const) {
       if (!include) continue
-      if (!map.has(hexId)) map.set(hexId, newAcc())
-      const acc = map.get(hexId)!
-      acc.occurrenceCount++
-      if (r.species) acc.species.set(r.species, (acc.species.get(r.species) ?? 0) + 1)
-      if (r.recordedBy) acc.observers.add(r.recordedBy.slice(0, 60))
-      const dateStr = r.eventDate?.slice(0, 10) ?? null
-      if (dateStr) {
-        acc.dates.add(dateStr)
-        if (!acc.firstDate || dateStr < acc.firstDate) acc.firstDate = dateStr
-        if (!acc.lastDate  || dateStr > acc.lastDate)  acc.lastDate  = dateStr
-      }
+      let acc = map.get(hexId)
+      if (!acc) { acc = newAccumulator(); map.set(hexId, acc) }
+      accumulate(acc, record, speciesId)
     }
   }
 
   const hexbins: HexbinRecord[] = allHexIds.map(hexId => ({
     hexId,
-    all:         accToRecord(allAcc.get(hexId)),
-    vertebrates: accToRecord(vertAcc.get(hexId)),
+    all:            toTaxonRecord(allAcc.get(hexId), speciesIndex),
+    vertebrates:    toTaxonRecord(vertAcc.get(hexId), speciesIndex),
     habitatQuality: habitatByHex[hexId] ?? 0,
   }))
 
   const output: HexbinsFile = {
+    schemaVersion: CURRENT_SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
     hexbinCount: hexbins.length,
+    speciesIndex,
+    sources: sourceMeta,
     hexbins,
   }
 
   writeFileSync(OUTPUT, JSON.stringify(output))
-  console.log(`Done. ${hexbins.length} hexbins written to ${OUTPUT}`)
+
+  const populated = hexbins.filter(h => h.all.occurrenceCount > 0).length
+  console.log(`\nDone → ${OUTPUT}`)
+  console.log(`  ${hexbins.length} hexbins (${populated} with records)`)
+  console.log(`  ${speciesIndex.length} unique species`)
+  console.log(`  sources: ${sourceMeta.map(s => `${s.id} (${s.recordCount})`).join(', ')}`)
 }
 
 main().catch(err => { console.error(err); process.exit(1) })
