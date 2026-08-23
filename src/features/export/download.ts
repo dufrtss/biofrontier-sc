@@ -4,6 +4,13 @@
  */
 
 /**
+ * Written as an escape rather than a literal: the character is invisible in an
+ * editor, and a literal one is easily stripped in transit without anyone
+ * noticing the export has silently regressed.
+ */
+const UTF8_BOM = '\uFEFF'
+
+/**
  * Triggers a client-side download of `content` as a file.
  *
  * The BOM matters: Excel on Windows assumes the system codepage for a bare
@@ -16,7 +23,7 @@ export function downloadTextFile(
   content: string,
   mimeType = 'text/csv;charset=utf-8',
 ): void {
-  const blob = new Blob(['﻿', content], { type: mimeType })
+  const blob = new Blob([UTF8_BOM, content], { type: mimeType })
   const url = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
