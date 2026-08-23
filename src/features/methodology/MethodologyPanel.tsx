@@ -2,6 +2,36 @@
 
 import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
+import {
+  EFFORT_WEIGHTS,
+  FRONTIER_WEIGHTS,
+  INCOMPLETENESS_CONFIG,
+} from '@/lib/scoring-config'
+
+/**
+ * The formulas below are rendered from `scoring-config` rather than hardcoded,
+ * so recalibrating the weights updates the published methodology in the same
+ * commit. Documentation drifting from the actual scoring is the failure mode
+ * most likely to cost this tool its scientific credibility.
+ */
+function formatFrontierFormula(): string {
+  const w = FRONTIER_WEIGHTS
+  return [
+    `frontier_score = (1 − survey_effort)         × ${w.gap.toFixed(2)}`,
+    `               + habitat_quality             × ${w.habitat.toFixed(2)}`,
+    `               + taxonomic_incompleteness    × ${w.incompleteness.toFixed(2)}`,
+  ].join('\n')
+}
+
+function formatEffortFormula(): string {
+  const w = EFFORT_WEIGHTS
+  return [
+    `effort = unique_observers   × ${w.observers.toFixed(2)}`,
+    `       + unique_survey_days × ${w.dates.toFixed(2)}`,
+    `       + record_density     × ${w.density.toFixed(2)}`,
+    `       + temporal_span      × ${w.span.toFixed(2)}`,
+  ].join('\n')
+}
 
 interface MethodologyPanelProps {
   open: boolean
@@ -109,18 +139,45 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
 
           <Section id="frontier-score" title={t('frontierScore.title')}>
             <p>{t('frontierScore.intro')}</p>
-            <Code>{'frontier_score = (1 − survey_effort) × 0.53\n               + habitat_quality  × 0.47'}</Code>
+            <Code>{formatFrontierFormula()}</Code>
             <Table
               headers={t.raw('frontierScore.tableHeaders') as string[]}
               rows={t.raw('frontierScore.tableRows') as string[][]}
             />
             <p>{t('frontierScore.weightsNote')}</p>
+            <p>{t('frontierScore.renormalisationNote')}</p>
+            <p className="text-amber-400/80 font-medium">{t('frontierScore.calibrationStatus')}</p>
             <p className="text-slate-500 italic">{t('frontierScore.caveat')}</p>
+          </Section>
+
+          <Section id="taxonomic-incompleteness" title={t('taxonomicIncompleteness.title')}>
+            <p>{t('taxonomicIncompleteness.intro')}</p>
+            <Code>{'incompleteness = species_in_similar_neighbours_but_not_here\n                 ÷ species_in_similar_neighbours'}</Code>
+            <p>{t('taxonomicIncompleteness.neighbourhood')}</p>
+            <Table
+              headers={t.raw('taxonomicIncompleteness.paramHeaders') as string[]}
+              rows={[
+                [t('taxonomicIncompleteness.paramRadius'), String(INCOMPLETENESS_CONFIG.neighbourRadius)],
+                [t('taxonomicIncompleteness.paramTolerance'), String(INCOMPLETENESS_CONFIG.habitatSimilarityTolerance)],
+                [t('taxonomicIncompleteness.paramMinNeighbours'), String(INCOMPLETENESS_CONFIG.minNeighboursWithData)],
+                [t('taxonomicIncompleteness.paramMinSpecies'), String(INCOMPLETENESS_CONFIG.minExpectedSpecies)],
+                [
+                  t('taxonomicIncompleteness.paramPrevalence'),
+                  `${Math.round(INCOMPLETENESS_CONFIG.minNeighbourPrevalence * 100)}%`,
+                ],
+              ]}
+            />
+            <p>{t('taxonomicIncompleteness.prevalenceNote')}</p>
+            <p>{t('taxonomicIncompleteness.ambiguity')}</p>
+            <p className="text-slate-500">{t('taxonomicIncompleteness.limitationsLabel')}</p>
+            <ul className="list-disc pl-4 space-y-1 text-slate-500">
+              {(t.raw('taxonomicIncompleteness.limitations') as string[]).map(s => <li key={s}>{s}</li>)}
+            </ul>
           </Section>
 
           <Section id="survey-effort" title={t('surveyEffort.title')}>
             <p>{t('surveyEffort.intro')}</p>
-            <Code>{'effort = unique_observers   × 0.30\n       + unique_survey_days × 0.30\n       + record_density     × 0.25\n       + temporal_span      × 0.15'}</Code>
+            <Code>{formatEffortFormula()}</Code>
             <Table
               headers={t.raw('surveyEffort.tableHeaders') as string[]}
               rows={t.raw('surveyEffort.tableRows') as string[][]}

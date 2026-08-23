@@ -10,6 +10,8 @@ import InfoTooltip from '@/components/ui/InfoTooltip'
 interface Props {
   hex: ScoredHexbin | null
   taxonFilter: TaxonFilter
+  /** When true the habitat figure is a uniform placeholder, not a measurement. */
+  habitatIsPlaceholder: boolean
   onClose: () => void
   onOpenMethodology: (sectionId: string) => void
 }
@@ -56,7 +58,7 @@ function AnimatedBar({ label, labelExtra, value, color, animate }: AnimatedBarPr
   )
 }
 
-export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology }: Props) {
+export default function HexDetail({ hex, taxonFilter, habitatIsPlaceholder, onClose, onOpenMethodology }: Props) {
   const t = useTranslations('HexDetail')
   const prevHexIdRef = useRef<string | null>(null)
   const [shouldAnimate, setShouldAnimate] = useState(false)
@@ -217,19 +219,38 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
             animate={shouldAnimate}
           />
 
-          <AnimatedBar
-            label={t('habitatQuality')}
-            labelExtra={
-              <InfoTooltip
-                content={t('tooltipHabitatQuality')}
-                learnMore={{ sectionId: 'habitat-quality' }}
-                onLearnMore={onOpenMethodology}
-              />
-            }
-            value={hex.habitatQuality}
-            color="rgb(34,197,94)"
-            animate={shouldAnimate}
-          />
+          {habitatIsPlaceholder ? (
+            <div className="space-y-1">
+              <div className="flex justify-between items-baseline">
+                <span className="flex items-center text-[11px] text-slate-600 tracking-wide uppercase font-medium">
+                  {t('habitatQuality')}
+                  <InfoTooltip
+                    content={t('tooltipHabitatPlaceholder')}
+                    learnMore={{ sectionId: 'habitat-quality' }}
+                    onLearnMore={onOpenMethodology}
+                  />
+                </span>
+                <span className="text-xs font-mono text-slate-600">—</span>
+              </div>
+              <p className="text-[10px] text-slate-600 leading-relaxed">
+                {t('habitatPlaceholderNote')}
+              </p>
+            </div>
+          ) : (
+            <AnimatedBar
+              label={t('habitatQuality')}
+              labelExtra={
+                <InfoTooltip
+                  content={t('tooltipHabitatQuality')}
+                  learnMore={{ sectionId: 'habitat-quality' }}
+                  onLearnMore={onOpenMethodology}
+                />
+              }
+              value={hex.habitatQuality}
+              color="rgb(34,197,94)"
+              animate={shouldAnimate}
+            />
+          )}
 
           <AnimatedBar
             label={t('surveyGap')}
@@ -244,6 +265,47 @@ export default function HexDetail({ hex, taxonFilter, onClose, onOpenMethodology
             color="rgb(249,115,22)"
             animate={shouldAnimate}
           />
+
+          {hex.taxonomicIncompleteness !== null ? (
+            <div className="space-y-1">
+              <AnimatedBar
+                label={t('taxonomicIncompleteness')}
+                labelExtra={
+                  <InfoTooltip
+                    content={t('tooltipIncompleteness')}
+                    learnMore={{ sectionId: 'taxonomic-incompleteness' }}
+                    onLearnMore={onOpenMethodology}
+                  />
+                }
+                value={hex.taxonomicIncompleteness}
+                color="rgb(168,85,247)"
+                animate={shouldAnimate}
+              />
+              <p className="text-[10px] text-slate-600 leading-relaxed">
+                {t('incompletenessDetail', {
+                  missing: hex.missingSpeciesCount,
+                  expected: hex.expectedSpeciesCount,
+                })}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-1">
+              <div className="flex justify-between items-baseline">
+                <span className="flex items-center text-[11px] text-slate-600 tracking-wide uppercase font-medium">
+                  {t('taxonomicIncompleteness')}
+                  <InfoTooltip
+                    content={t('tooltipIncompleteness')}
+                    learnMore={{ sectionId: 'taxonomic-incompleteness' }}
+                    onLearnMore={onOpenMethodology}
+                  />
+                </span>
+                <span className="text-xs font-mono text-slate-600">—</span>
+              </div>
+              <p className="text-[10px] text-slate-600 leading-relaxed">
+                {t('incompletenessUnavailable')}
+              </p>
+            </div>
+          )}
 
           <div
             className="rounded px-2.5 py-2 text-[10px] leading-relaxed text-slate-600"

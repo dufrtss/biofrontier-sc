@@ -11,13 +11,18 @@ import HexDetail from '@/features/detail/HexDetail'
 import DataSummaryBar from '@/features/controls/DataSummaryBar'
 import MethodologyPanel from '@/features/methodology/MethodologyPanel'
 import LocaleSwitcher from '@/features/controls/LocaleSwitcher'
+import ExportButton from '@/features/export/ExportButton'
+
+/** Hexbins shown in the ranking sidebar, and the default CSV export scope. */
+const RANKING_LIMIT = 20
 
 export default function AppShell() {
   const t = useTranslations('AppShell')
   const [taxonFilter, setTaxonFilter] = useState<TaxonFilter>('all')
   const {
     hexbins, rankedHexIds, selectedHexId, loading, error,
-    lastUpdated, speciesCount, selectHex,
+    lastUpdated, speciesCount, speciesDataIsPartial, habitatIsPlaceholder, sources,
+    selectHex,
   } = useBiofrontierData(taxonFilter)
 
   const [rankingOpen, setRankingOpen]               = useState(false)
@@ -79,6 +84,8 @@ export default function AppShell() {
         speciesCount={speciesCount}
         frontierCount={rankedHexIds.length}
         lastUpdated={lastUpdated}
+        speciesDataIsPartial={speciesDataIsPartial}
+        sources={sources}
         onOpenMethodology={openMethodology}
       />
 
@@ -88,17 +95,26 @@ export default function AppShell() {
           className={[
             'bg-slate-900 border-r border-slate-700/60 overflow-hidden',
             rankingOpen
-              ? 'fixed inset-0 z-[1500] sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
-              : 'hidden sm:block sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
+              ? 'fixed inset-0 z-[1500] flex flex-col sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
+              : 'hidden sm:flex sm:flex-col sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
           ].join(' ')}
         >
-          <FrontierRanking
+          <div className="flex-1 min-h-0">
+            <FrontierRanking
+              rankedHexIds={rankedHexIds}
+              hexbins={hexbins}
+              selectedHexId={selectedHexId}
+              onSelect={(hexId) => { selectHex(hexId); setRankingOpen(false) }}
+              onOpenMethodology={openMethodology}
+              onClose={() => setRankingOpen(false)}
+              limit={RANKING_LIMIT}
+            />
+          </div>
+          <ExportButton
             rankedHexIds={rankedHexIds}
             hexbins={hexbins}
-            selectedHexId={selectedHexId}
-            onSelect={(hexId) => { selectHex(hexId); setRankingOpen(false) }}
-            onOpenMethodology={openMethodology}
-            onClose={() => setRankingOpen(false)}
+            taxonFilter={taxonFilter}
+            visibleCount={RANKING_LIMIT}
           />
         </aside>
 
@@ -134,6 +150,7 @@ export default function AppShell() {
           <HexDetail
             hex={selectedHex}
             taxonFilter={taxonFilter}
+            habitatIsPlaceholder={habitatIsPlaceholder}
             onClose={() => selectHex(null)}
             onOpenMethodology={openMethodology}
           />
