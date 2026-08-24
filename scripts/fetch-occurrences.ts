@@ -11,7 +11,7 @@
  * Usage:
  *   npm run data:fetch
  *   npm run data:fetch -- --sources=gbif
- *   npm run data:fetch -- --sources=gbif,inaturalist --max=100000
+ *   npm run data:fetch -- --sources=gbif,inaturalist --max-per-source=100000
  *   npm run data:fetch -- --list-sources
  *
  * Duration: minutes to tens of minutes depending on sources and record cap.
@@ -34,19 +34,21 @@ import type { Occurrence } from './sources/types'
 const OUTPUT  = resolve('public/data/hexbins.json')
 const HABITAT = resolve('public/data/habitat-by-hex.json')
 
-const DEFAULT_MAX_RECORDS = 50_000
+/** Cap applied to each source independently, not to the combined total. */
+const DEFAULT_MAX_PER_SOURCE = 50_000
 const DEFAULT_SOURCES: SourceId[] = ['gbif', 'inaturalist']
 
 interface CliOptions {
   sources: SourceId[]
-  maxRecords: number
+  /** Per-source cap. Each adapter applies it independently. */
+  maxPerSource: number
   listSources: boolean
 }
 
 function parseArgs(argv: string[]): CliOptions {
   const options: CliOptions = {
     sources: DEFAULT_SOURCES,
-    maxRecords: DEFAULT_MAX_RECORDS,
+    maxPerSource: DEFAULT_MAX_PER_SOURCE,
     listSources: false,
   }
 
@@ -64,13 +66,13 @@ function parseArgs(argv: string[]): CliOptions {
         process.exit(1)
       }
       options.sources = requested as SourceId[]
-    } else if (arg.startsWith('--max=')) {
-      const n = Number(arg.slice('--max='.length))
+    } else if (arg.startsWith('--max-per-source=') || arg.startsWith('--max=')) {
+      const n = Number(arg.slice(arg.indexOf('=') + 1))
       if (!Number.isFinite(n) || n <= 0) {
-        console.error(`--max must be a positive number, got: ${arg}`)
+        console.error(`--max-per-source must be a positive number, got: ${arg}`)
         process.exit(1)
       }
-      options.maxRecords = n
+      options.maxPerSource = n
     } else if (arg.startsWith('--')) {
       console.error(`Unknown flag: ${arg}`)
       process.exit(1)
@@ -89,6 +91,7 @@ function listSources(): void {
     if (!availability.ok) console.log(`  ${' '.repeat(13)} ${availability.reason}`)
   }
   console.log(`\nDefault: --sources=${DEFAULT_SOURCES.join(',')}`)
+  console.log(`--max-per-source applies to each source independently (default ${DEFAULT_MAX_PER_SOURCE}).`)
 }
 
 // ─── Aggregation ─────────────────────────────────────────────────────────────
@@ -131,21 +134,29 @@ function accumulate(acc: HexAccumulator, record: Occurrence, speciesId: number |
   }
 }
 
-const EMPTY_TAXON_RECORD: TaxonRecord = {
-  occurrenceCount: 0,
-  uniqueSpeciesCount: 0,
-  uniqueObserverCount: 0,
-  uniqueDateCount: 0,
-  temporalSpanYears: 0,
-  firstDate: null,
-  lastDate: null,
-  topSpecies: [],
-  speciesIds: [],
-  countsBySource: {},
+/**
+ * Built fresh per call rather than spread from a shared constant: a shallow
+ * copy would leave all ~5,900 empty hexbins sharing one `topSpecies`,
+ * `speciesIds` and `countsBySource` instance, so a single downstream push or
+ * assignment would mutate every empty hexbin at once.
+ */
+function emptyTaxonRecord(): TaxonRecord {
+  return {
+    occurrenceCount: 0,
+    uniqueSpeciesCount: 0,
+    uniqueObserverCount: 0,
+    uniqueDateCount: 0,
+    temporalSpanYears: 0,
+    firstDate: null,
+    lastDate: null,
+    topSpecies: [],
+    speciesIds: [],
+    countsBySource: {},
+  }
 }
 
 function toTaxonRecord(acc: HexAccumulator | undefined, speciesIndex: string[]): TaxonRecord {
-  if (!acc) return { ...EMPTY_TAXON_RECORD }
+  if (!acc) return emptyTaxonRecord()
 
   const span = acc.firstDate && acc.lastDate
     ? Math.max(0, new Date(acc.lastDate).getFullYear() - new Date(acc.firstDate).getFullYear())
@@ -205,7 +216,7 @@ async function main(): Promise<void> {
     const started = Date.now()
 
     const records = await source.fetchAll({
-      maxRecords: options.maxRecords,
+      maxRecords: options.maxPerSource,
       log: message => process.stdout.write(`\r  ${message}`.padEnd(72)),
     })
 

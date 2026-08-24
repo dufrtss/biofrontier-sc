@@ -48,13 +48,13 @@
     "frontierPotential": "Frontier potential",
     "habitatQuality": "Habitat quality",
     "surveyGap": "Survey gap",
-    "scoreAnnotation": "Frontier = survey gap × habitat quality. High habitat coverage with low observation density indicates discovery potential.",
+    "scoreAnnotation": "Components are combined as a weighted sum, not multiplied. A large survey gap alongside intact habitat is the signal that matters; components missing from this dataset are left out of the score entirely.",
     "topRecordedSpecies": "Top Recorded Species",
-    "footer": "DATA · GBIF  /  SCORES · ATLANTIC FOREST HABITAT + SURVEY GAP",
+    "footer": "DATA · GBIF + INATURALIST  /  SCORES · SEE METHODOLOGY",
     "closePanel": "Close panel",
     "tooltipRecords": "A GBIF occurrence — one documented observation of one species at this location, from a researcher, institution, or citizen scientist (e.g. iNaturalist).",
-    "tooltipScoreBreakdown": "Frontier Score = (1 − survey effort) × 0.53 + habitat quality × 0.47. Each component is normalised across all SC hexbins.",
-    "tooltipFrontierPotential": "Combined score: how little this area has been surveyed plus how much Atlantic Forest habitat remains.",
+    "tooltipScoreBreakdown": "The Frontier Score is a weighted combination of survey gap, habitat quality and taxonomic incompleteness. Each component is normalised across all SC hexbins, and any component unavailable for this dataset is excluded rather than guessed. See the methodology for the exact weights in use.",
+    "tooltipFrontierPotential": "Combined score: how little this area has been surveyed, how much Atlantic Forest habitat remains, and how many species found in comparable neighbouring areas have never been recorded here.",
     "tooltipHabitatQuality": "Estimated Atlantic Forest coverage fraction. Currently a uniform placeholder (0.5) — real values require downloading forest-cover data.",
     "tooltipSurveyGap": "How little this hexbin has been surveyed relative to all others in SC. 100% = never surveyed; 0% = most intensively surveyed.",
     "tooltipTopSpecies": "Most-recorded species across all taxa (plants, fungi, animals). Species group (kingdom/class) is not shown because it was not retained during data aggregation. Click any name to see full taxonomy on GBIF.",
@@ -78,8 +78,8 @@
     "close": "Close methodology panel",
     "frontierScore": {
       "title": "Frontier Score",
-      "intro": "Each surveyed hexbin receives a Frontier Score combining how little it has been studied with how much suitable habitat remains.",
-      "weightsNote": "Weights (0.53 / 0.47) favour the survey gap slightly because habitat data is currently a placeholder. Once real forest-cover data is loaded these weights should be re-evaluated.",
+      "intro": "Each surveyed hexbin receives a Frontier Score combining how little it has been studied, how much suitable habitat remains, and how many species recorded in comparable neighbouring hexbins are missing here.",
+      "weightsNote": "The gap component carries the largest weight because it is the one measurement resting entirely on observed data. The formula above is rendered directly from the scoring configuration, so it always reflects the weights actually in use.",
       "caveat": "This formula is model-deduced and has not been calibrated against field discovery rates.",
       "tableHeaders": [
         "Component",
@@ -90,12 +90,17 @@
         [
           "survey_effort",
           "0 – 1",
-          "How intensively the hexbin has been surveyed relative to all others in SC. 0 = never surveyed; 1 = most surveyed."
+          "How intensively the hexbin has been surveyed relative to all others in SC. 0 = never surveyed; 1 = most surveyed. The score uses the gap, 1 − survey_effort."
         ],
         [
           "habitat_quality",
           "0 – 1",
-          "Estimated fraction of the hexbin covered by Atlantic Forest. Currently a uniform placeholder (0.5)."
+          "Fraction of the hexbin covered by Atlantic Forest remnants. Excluded from the score while the dataset carries only the uniform placeholder."
+        ],
+        [
+          "taxonomic_incompleteness",
+          "0 – 1",
+          "Share of species recorded in ecologically similar neighbours that have never been recorded here. Excluded from the score unless computable for every ranked hexbin."
         ]
       ],
       "renormalisationNote": "When a component cannot be computed for a hexbin, it is dropped and the remaining weights are rescaled to sum to 1 — rather than treating the missing value as zero, which would penalise exactly the under-studied hexbins this tool exists to surface.",

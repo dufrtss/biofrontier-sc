@@ -48,13 +48,13 @@
     "frontierPotential": "Potencial de frontera",
     "habitatQuality": "Calidad del hábitat",
     "surveyGap": "Brecha de relevamiento",
-    "scoreAnnotation": "Frontera = brecha de relevamiento × calidad del hábitat. Alta cobertura de hábitat con baja densidad de observaciones indica potencial de descubrimiento.",
+    "scoreAnnotation": "Los componentes se combinan como suma ponderada, no se multiplican. Una gran brecha de muestreo junto a hábitat conservado es la señal que importa; los componentes ausentes en este conjunto de datos quedan totalmente fuera del puntaje.",
     "topRecordedSpecies": "Especies Más Registradas",
-    "footer": "DATOS · GBIF  /  PUNTUACIONES · MATA ATLÁNTICA + BRECHA DE RELEVAMIENTO",
+    "footer": "DATOS · GBIF + INATURALIST  /  PUNTAJES · VER METODOLOGÍA",
     "closePanel": "Cerrar panel",
     "tooltipRecords": "Una ocurrencia de GBIF — una observación documentada de una especie en esta ubicación, por un investigador, institución o científico ciudadano (ej.: iNaturalist).",
-    "tooltipScoreBreakdown": "Puntuación de Frontera = (1 − esfuerzo de relevamiento) × 0,53 + calidad del hábitat × 0,47. Cada componente se normaliza en todos los hexbins de SC.",
-    "tooltipFrontierPotential": "Puntuación combinada: cuánto se ha relevado esta área más cuánta Mata Atlántica queda.",
+    "tooltipScoreBreakdown": "El Puntaje de Frontera es una combinación ponderada de brecha de muestreo, calidad del hábitat e incompletitud taxonómica. Cada componente se normaliza entre todos los hexágonos de SC, y cualquier componente no disponible en este conjunto de datos se excluye en lugar de estimarse. Consulte la metodología para los pesos en uso.",
+    "tooltipFrontierPotential": "Puntaje combinado: cuán poco se ha muestreado esta área, cuánto hábitat de Bosque Atlántico queda y cuántas especies encontradas en áreas vecinas comparables nunca se han registrado aquí.",
     "tooltipHabitatQuality": "Fracción estimada del hexbin cubierta por Mata Atlántica. Actualmente un placeholder uniforme (0,5) — los valores reales requieren descargar datos de cobertura forestal.",
     "tooltipSurveyGap": "Cuánto se ha relevado este hexbin en relación a todos los demás en SC. 100% = nunca relevado; 0% = más intensamente relevado.",
     "tooltipTopSpecies": "Especies más registradas en todos los taxa (plantas, hongos, animales). El grupo de especie (reino/clase) no se muestra porque no se retuvo durante la agregación de datos. Haga clic en cualquier nombre para ver la taxonomía completa en GBIF.",
@@ -78,9 +78,9 @@
     "close": "Cerrar panel de metodología",
     "frontierScore": {
       "title": "Puntuación de Frontera",
-      "intro": "Cada hexbin relevado recibe una Puntuación de Frontera que combina cuánto ha sido estudiado con cuánto hábitat adecuado queda.",
-      "weightsNote": "Los pesos (0,53 / 0,47) favorecen ligeramente la brecha de relevamiento porque los datos de hábitat son actualmente un placeholder. Una vez cargados datos reales de cobertura forestal, estos pesos deben reevaluarse.",
-      "caveat": "Esta fórmula está derivada del modelo y no ha sido calibrada con tasas de descubrimiento en campo.",
+      "intro": "Cada hexágono muestreado recibe un Puntaje de Frontera que combina cuán poco se ha estudiado, cuánto hábitat adecuado queda y cuántas especies registradas en hexágonos vecinos comparables faltan aquí.",
+      "weightsNote": "El componente de brecha lleva el mayor peso por ser la única medida que se apoya enteramente en datos observados. La fórmula de arriba se genera directamente de la configuración de puntuación, por lo que siempre refleja los pesos realmente en uso.",
+      "caveat": "Esta fórmula fue deducida por modelo y no se ha calibrado contra tasas de descubrimiento en campo.",
       "tableHeaders": [
         "Componente",
         "Rango",
@@ -90,12 +90,17 @@
         [
           "survey_effort",
           "0 – 1",
-          "Intensidad con que el hexbin ha sido relevado en relación a todos los demás en SC. 0 = nunca relevado; 1 = más relevado."
+          "Cuán intensamente se ha muestreado el hexágono en relación con todos los demás en SC. 0 = nunca muestreado; 1 = más muestreado. El puntaje usa la brecha, 1 − survey_effort."
         ],
         [
           "habitat_quality",
           "0 – 1",
-          "Fracción estimada del hexbin cubierta por Mata Atlántica. Actualmente un placeholder uniforme (0,5)."
+          "Fracción del hexágono cubierta por remanentes de Bosque Atlántico. Excluida del puntaje mientras el conjunto de datos solo tenga el valor uniforme provisional."
+        ],
+        [
+          "taxonomic_incompleteness",
+          "0 – 1",
+          "Proporción de especies registradas en vecinos ecológicamente similares que nunca se han registrado aquí. Excluida del puntaje salvo que sea calculable para todos los hexágonos clasificados."
         ]
       ],
       "renormalisationNote": "Cuando un componente no puede calcularse para un hexágono, se descarta y los pesos restantes se reescalan para sumar 1 — en lugar de tratar el valor faltante como cero, lo que penalizaría precisamente a los hexágonos poco estudiados que esta herramienta existe para revelar.",

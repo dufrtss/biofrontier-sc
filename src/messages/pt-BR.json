@@ -48,13 +48,13 @@
     "frontierPotential": "Potencial de fronteira",
     "habitatQuality": "Qualidade do habitat",
     "surveyGap": "Lacuna de levantamento",
-    "scoreAnnotation": "Fronteira = lacuna de levantamento × qualidade do habitat. Alta cobertura de habitat com baixa densidade de observações indica potencial de descoberta.",
+    "scoreAnnotation": "Os componentes são combinados como soma ponderada, não multiplicados. Uma grande lacuna amostral junto a habitat preservado é o sinal que importa; componentes ausentes neste conjunto de dados ficam totalmente fora do escore.",
     "topRecordedSpecies": "Espécies Mais Registradas",
-    "footer": "DADOS · GBIF  /  PONTUAÇÕES · MATA ATLÂNTICA + LACUNA DE LEVANTAMENTO",
+    "footer": "DADOS · GBIF + INATURALIST  /  ESCORES · VER METODOLOGIA",
     "closePanel": "Fechar painel",
     "tooltipRecords": "Uma ocorrência GBIF — uma observação documentada de uma espécie neste local, por pesquisador, instituição ou cientista cidadão (ex.: iNaturalist).",
-    "tooltipScoreBreakdown": "Pontuação de Fronteira = (1 − esforço de levantamento) × 0,53 + qualidade do habitat × 0,47. Cada componente é normalizado em todos os hexbins de SC.",
-    "tooltipFrontierPotential": "Pontuação combinada: o quanto esta área foi levantada mais a quantidade de Mata Atlântica remanescente.",
+    "tooltipScoreBreakdown": "O Escore de Fronteira é uma combinação ponderada de lacuna amostral, qualidade do habitat e incompletude taxonômica. Cada componente é normalizado entre todos os hexágonos de SC, e qualquer componente indisponível neste conjunto de dados é excluído em vez de estimado. Veja a metodologia para os pesos em uso.",
+    "tooltipFrontierPotential": "Escore combinado: o quão pouco esta área foi amostrada, quanto de habitat de Mata Atlântica resta e quantas espécies encontradas em áreas vizinhas comparáveis nunca foram registradas aqui.",
     "tooltipHabitatQuality": "Fração estimada do hexbin coberta pela Mata Atlântica. Atualmente um placeholder uniforme (0,5) — valores reais exigem download de dados de cobertura florestal.",
     "tooltipSurveyGap": "O quanto este hexbin foi levantado em relação a todos os outros em SC. 100% = nunca levantado; 0% = mais intensamente levantado.",
     "tooltipTopSpecies": "Espécies mais registradas em todos os táxons (plantas, fungos, animais). O grupo da espécie (reino/classe) não é exibido porque não foi retido durante a agregação de dados. Clique em qualquer nome para ver a taxonomia completa no GBIF.",
@@ -78,9 +78,9 @@
     "close": "Fechar painel de metodologia",
     "frontierScore": {
       "title": "Pontuação de Fronteira",
-      "intro": "Cada hexbin levantado recebe uma Pontuação de Fronteira combinando o quanto foi estudado com a quantidade de habitat adequado remanescente.",
-      "weightsNote": "Os pesos (0,53 / 0,47) favorecem ligeiramente a lacuna de levantamento porque os dados de habitat são atualmente um placeholder. Após carregar dados reais de cobertura florestal, esses pesos devem ser reavaliados.",
-      "caveat": "Esta fórmula é derivada do modelo e não foi calibrada com taxas de descoberta em campo.",
+      "intro": "Cada hexágono amostrado recebe um Escore de Fronteira que combina o quão pouco foi estudado, quanto de habitat adequado resta e quantas espécies registradas em hexágonos vizinhos comparáveis faltam aqui.",
+      "weightsNote": "O componente de lacuna tem o maior peso por ser a única medida que se apoia inteiramente em dados observados. A fórmula acima é gerada diretamente da configuração de pontuação, então sempre reflete os pesos realmente em uso.",
+      "caveat": "Esta fórmula foi deduzida por modelo e não foi calibrada contra taxas de descoberta em campo.",
       "tableHeaders": [
         "Componente",
         "Intervalo",
@@ -90,12 +90,17 @@
         [
           "survey_effort",
           "0 – 1",
-          "Intensidade com que o hexbin foi levantado em relação a todos os outros em SC. 0 = nunca levantado; 1 = mais levantado."
+          "Quão intensamente o hexágono foi amostrado em relação a todos os outros em SC. 0 = nunca amostrado; 1 = mais amostrado. O escore usa a lacuna, 1 − survey_effort."
         ],
         [
           "habitat_quality",
           "0 – 1",
-          "Fração estimada do hexbin coberta pela Mata Atlântica. Atualmente um placeholder uniforme (0,5)."
+          "Fração do hexágono coberta por remanescentes de Mata Atlântica. Excluída do escore enquanto o conjunto de dados tiver apenas o valor uniforme provisório."
+        ],
+        [
+          "taxonomic_incompleteness",
+          "0 – 1",
+          "Proporção de espécies registradas em vizinhos ecologicamente semelhantes que nunca foram registradas aqui. Excluída do escore a menos que seja calculável para todos os hexágonos ranqueados."
         ]
       ],
       "renormalisationNote": "Quando um componente não pode ser calculado para um hexágono, ele é descartado e os pesos restantes são reescalonados para somar 1 — em vez de tratar o valor ausente como zero, o que penalizaria justamente os hexágonos pouco estudados que esta ferramenta existe para revelar.",
