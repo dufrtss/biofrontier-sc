@@ -79,6 +79,32 @@ export const FRONTIER_WEIGHTS: FrontierWeights = {
  * neighbourhood is known to hold species this hexbin has no record of — either
  * they are genuinely absent, or nobody has looked. Combined with a high survey
  * gap, the second explanation becomes the likely one.
+ *
+ * ## Tuning: measured, don't guess
+ *
+ * A sweep over the production dataset (68,911 occurrences, 2,451 ranked
+ * hexbins, GBIF + iNaturalist, 2026-08-23) found a strict monotonic trade-off
+ * between coverage and discriminating power. Every relaxation that buys
+ * coverage flattens the distribution:
+ *
+ *   radius  minSp  prevalence | coverage | median  IQR
+ *   ------------------------------------------------------
+ *      3      5       0.3     |    4.9%  |  0.842  0.500
+ *      2      5       0.3     |    9.5%  |  0.875  0.400   ← current
+ *      2      3       0.3     |   15.9%  |  0.878  0.368
+ *      2      5       0.2     |   31.7%  |  0.968  0.200
+ *      2      3       0.2     |   43.9%  |  1.000  0.167
+ *
+ * No setting reaches the full coverage `resolveActiveComponents` requires
+ * before the component may enter the ranking, and the settings that come
+ * closest are precisely the ones whose median saturates at 1.0 — i.e. that
+ * measure nothing. The binding constraint is occurrence density in SC, not
+ * parameter choice, so tuning cannot rescue this. Denser data or a genuinely
+ * effort-corrected estimator (Chao1-style) are the real paths forward.
+ *
+ * The current values are the best discrimination available at non-trivial
+ * coverage. Note that `minNeighboursWithData` at 2 vs 3 changes nothing:
+ * `minExpectedSpecies` binds first.
  */
 export const INCOMPLETENESS_CONFIG = {
   /**
