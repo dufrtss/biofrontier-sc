@@ -22,7 +22,7 @@ export default function AppShell() {
   const {
     hexbins, rankedHexIds, selectedHexId, loading, error,
     lastUpdated, speciesCount, speciesDataIsPartial, habitatIsPlaceholder, sources,
-    selectHex,
+    activeComponents, selectHex,
   } = useBiofrontierData(taxonFilter)
 
   const [rankingOpen, setRankingOpen]               = useState(false)
@@ -115,6 +115,9 @@ export default function AppShell() {
             hexbins={hexbins}
             taxonFilter={taxonFilter}
             visibleCount={RANKING_LIMIT}
+            activeComponents={activeComponents}
+            generatedAt={lastUpdated}
+            sources={sources.map(s => s.id)}
           />
         </aside>
 

@@ -56,11 +56,14 @@ export const EFFORT_WEIGHTS: EffortWeights = {
 /**
  * Full three-component formula from the design spec.
  *
- * When a hexbin has no computable incompleteness value (too few ecologically
- * similar neighbours with data), `computeFrontierScore` renormalises `gap` and
- * `habitat` to sum to 1 rather than silently treating incompleteness as zero —
- * which would penalise data-poor hexbins for being data-poor, the exact
- * opposite of what this tool is meant to surface.
+ * Not every component is necessarily in play. `resolveActiveComponents` decides
+ * — once per dataset, never per hexbin — which of `habitat` and
+ * `incompleteness` are usable, and `computeFrontierScore` renormalises the
+ * active weights to sum to 1. A component absent from the data therefore
+ * neither contributes a constant offset nor drags scores toward zero.
+ *
+ * The per-dataset scope is essential: deciding per hexbin would rank hexbins
+ * scored by different formulas against each other. See `scoring.ts`.
  */
 export const FRONTIER_WEIGHTS: FrontierWeights = {
   gap:            0.40,
@@ -124,6 +127,12 @@ export const INCOMPLETENESS_CONFIG = {
    * neighbours before expecting it here is also the better biological question:
    * "what is consistently found around here but never recorded in this cell?"
    * rather than "what has ever been seen anywhere nearby?".
+   *
+   * It reduces saturation rather than curing it — see the "not yet a solved
+   * problem" note in `incompleteness.ts`. Raising this value tightens the
+   * filter but shrinks coverage further; both matter, because
+   * `resolveActiveComponents` requires full coverage of the ranked set before
+   * the component may enter the score at all.
    */
   minNeighbourPrevalence: 0.3,
 } as const

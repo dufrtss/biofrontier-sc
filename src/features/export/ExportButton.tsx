@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { ScoredHexbin, TaxonFilter } from '@/lib/types'
+import type { ActiveComponents } from '@/lib/scoring'
 import { buildFrontierCsv, frontierCsvFilename } from '@/lib/csv'
 import { downloadTextFile } from './download'
 
@@ -12,6 +13,12 @@ interface Props {
   taxonFilter: TaxonFilter
   /** How many hexbins the ranking panel is currently showing. */
   visibleCount: number
+  /** Which components entered the score — recorded in the export header. */
+  activeComponents: ActiveComponents
+  /** Dataset timestamp, recorded in the export header. */
+  generatedAt: string | null
+  /** Source ids behind the dataset, recorded in the export header. */
+  sources: string[]
 }
 
 type Scope = 'visible' | 'all'
@@ -24,7 +31,10 @@ type Scope = 'visible' | 'all'
  * dataset you load into R or QGIS. Both honour the active taxon filter, so the
  * export always matches what is on screen.
  */
-export default function ExportButton({ rankedHexIds, hexbins, taxonFilter, visibleCount }: Props) {
+export default function ExportButton({
+  rankedHexIds, hexbins, taxonFilter, visibleCount,
+  activeComponents, generatedAt, sources,
+}: Props) {
   const t = useTranslations('Export')
   const [open, setOpen] = useState(false)
 
@@ -34,6 +44,9 @@ export default function ExportButton({ rankedHexIds, hexbins, taxonFilter, visib
   const exportCsv = (scope: Scope) => {
     const csv = buildFrontierCsv(rankedHexIds, hexbins, {
       taxonFilter,
+      activeComponents,
+      generatedAt,
+      sources,
       limit: scope === 'visible' ? visibleCount : undefined,
     })
     downloadTextFile(frontierCsvFilename(taxonFilter), csv)

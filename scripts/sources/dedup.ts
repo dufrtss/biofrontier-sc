@@ -35,9 +35,12 @@ export interface DedupResult {
 /**
  * Removes duplicates across sources, keeping the first occurrence of each key.
  *
- * Records missing both a species name and a date are always kept: their key
- * would collapse to little more than a coordinate, so deduplicating on it would
- * discard genuinely distinct observations that happen to share a location.
+ * Records without a species name are always kept. Their key would rest on
+ * little more than a coordinate, and iNaturalist reports `species: null` for
+ * every identification coarser than species rank — so deduplicating on it would
+ * silently merge genuinely distinct genus-level observations that happen to
+ * share an 11 m cell and a date. Over-counting a handful of records is a much
+ * smaller error than deleting real observations.
  */
 export function dedupeOccurrences(records: Occurrence[]): DedupResult {
   const seen = new Set<string>()
@@ -45,7 +48,7 @@ export function dedupeOccurrences(records: Occurrence[]): DedupResult {
   const droppedBySource: Record<string, number> = {}
 
   for (const record of records) {
-    if (record.species === null && record.date === null) {
+    if (record.species === null) {
       kept.push(record)
       continue
     }

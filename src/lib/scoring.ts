@@ -41,51 +41,92 @@ export function computeEffortScores(
 export interface FrontierInputs {
   /** Always available — normalised across all hexbins. */
   effortScore: number
+  /** Atlantic Forest remnant coverage. Ignored unless `habitat` is active. */
+  habitatQuality: number
   /**
-   * Atlantic Forest remnant coverage, or `null` when the dataset carries only
-   * the uniform placeholder produced by `data:habitat-fallback`. A constant
-   * cannot discriminate between hexbins, so scoring on it would inflate every
-   * score by a fixed amount while contributing nothing to the ranking.
-   */
-  habitatQuality: number | null
-  /**
-   * Fraction of the expected neighbourhood species pool never recorded here.
-   * `null` when the hexbin has too few ecologically similar neighbours with
-   * data to compute a trustworthy value — see `computeIncompleteness`.
+   * Fraction of the expected neighbourhood species pool never recorded here,
+   * or `null` where not computable. Ignored unless `incompleteness` is active.
    */
   taxonomicIncompleteness: number | null
+}
+
+/**
+ * Which optional components participate in scoring.
+ *
+ * **This is a dataset-wide decision, never a per-hexbin one.** See
+ * `resolveActiveComponents` for why that distinction is load-bearing.
+ */
+export interface ActiveComponents {
+  habitat: boolean
+  incompleteness: boolean
+}
+
+export interface ComponentAvailability {
+  /** False when every hexbin carries the same habitat value (the placeholder). */
+  habitatVaries: boolean
+  /** Ranked hexbins with a computable incompleteness value. */
+  incompletenessComputable: number
+  /** Total ranked hexbins. */
+  rankedCount: number
+}
+
+/**
+ * Decides which optional components may enter the composite score, for the
+ * dataset as a whole.
+ *
+ * A component is admitted only when it is available for *every* ranked hexbin.
+ *
+ * This rule exists because of a subtle scoring bug. An earlier version dropped
+ * unavailable components per hexbin and renormalised the remainder — which is
+ * defensible for one hexbin in isolation, but invalid once the results are
+ * merged into a single ranking: hexbins end up scored by different formulas and
+ * placed on one list. Measured on real data, only 18 of 369 ranked hexbins had
+ * a computable incompleteness value, and because that value saturates near 1.0
+ * those 18 took ranks 1–5 — displacing hexbins that would otherwise sit at #19,
+ * #37, #93, #179 and #223. The ranking was being driven by which hexbins
+ * happened to clear the neighbour threshold, not by biology.
+ *
+ * All-or-nothing keeps every hexbin on one comparable scale. It is deliberately
+ * strict: a component that cannot be computed everywhere is reported in the
+ * detail panel as a diagnostic, but kept out of the number used to rank.
+ */
+export function resolveActiveComponents(
+  { habitatVaries, incompletenessComputable, rankedCount }: ComponentAvailability,
+): ActiveComponents {
+  return {
+    habitat: habitatVaries,
+    incompleteness: rankedCount > 0 && incompletenessComputable === rankedCount,
+  }
 }
 
 /**
  * Composite frontier score in [0, 1]. Higher = more promising as a discovery
  * frontier.
  *
- * Components that are unavailable for a given hexbin are dropped, and the
- * weights of the remaining components are renormalised to sum to 1.
+ * `active` must be identical for every hexbin in a ranking — pass the single
+ * result of `resolveActiveComponents`, never a per-hexbin decision.
  *
- * The alternative — treating a missing component as zero — would systematically
- * push data-poor hexbins down the ranking. But data-poor hexbins are precisely
- * what this tool exists to surface, so that failure mode would invert the
- * tool's purpose. Renormalising instead says "score this hexbin on what we
- * actually know about it", which is both the honest reading and the useful one.
- *
- * The survey gap is never optional: it is derived from the occurrence data that
+ * The survey gap is never optional: it derives from the occurrence data that
  * must exist for the hexbin to be scored at all.
  */
 export function computeFrontierScore(
   { effortScore, habitatQuality, taxonomicIncompleteness }: FrontierInputs,
+  active: ActiveComponents,
   weights: FrontierWeights = FRONTIER_WEIGHTS,
 ): number {
-  let weightedSum   = (1 - effortScore) * weights.gap
-  let activeWeight  = weights.gap
+  let weightedSum  = (1 - effortScore) * weights.gap
+  let activeWeight = weights.gap
 
-  if (habitatQuality !== null) {
+  if (active.habitat) {
     weightedSum  += habitatQuality * weights.habitat
     activeWeight += weights.habitat
   }
 
-  if (taxonomicIncompleteness !== null) {
-    weightedSum  += taxonomicIncompleteness * weights.incompleteness
+  if (active.incompleteness) {
+    // Guaranteed non-null by resolveActiveComponents, which only activates the
+    // component when every ranked hexbin has a value. Coerced defensively so an
+    // unranked hexbin cannot produce NaN and poison the ordering.
+    weightedSum  += (taxonomicIncompleteness ?? 0) * weights.incompleteness
     activeWeight += weights.incompleteness
   }
 

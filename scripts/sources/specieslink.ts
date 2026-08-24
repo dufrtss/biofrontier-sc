@@ -58,6 +58,14 @@ function toNumber(value: string | number | undefined): number | null {
  * speciesLink records often carry split date parts rather than an `eventdate`.
  * Reassembling them recovers a temporal span for specimens that would otherwise
  * look undated — and the temporal span feeds the survey effort score.
+ *
+ * The reassembled date is round-tripped through `Date` before being accepted.
+ * A day/month pair valid in isolation can still be impossible together
+ * (`2020-02-31`), and JavaScript silently rolls such a date forward rather than
+ * rejecting it. An unvalidated string would then be stored as `firstDate`,
+ * displayed verbatim in the UI and CSV, and counted as a survey date distinct
+ * from the real `2020-03-01` — inflating `uniqueDateCount`, which carries 30%
+ * of the effort weight.
  */
 function extractDate(r: RawRecord): string | null {
   const direct = toIsoDate(r.eventdate)
@@ -70,10 +78,14 @@ function extractDate(r: RawRecord): string | null {
   if (month < 1 || month > 12 || day < 1 || day > 31) return null
 
   const pad = (n: number) => String(n).padStart(2, '0')
-  return `${year}-${pad(month)}-${pad(day)}`
+  const candidate = `${year}-${pad(month)}-${pad(day)}`
+
+  const parsed = new Date(`${candidate}T00:00:00Z`)
+  if (Number.isNaN(parsed.getTime())) return null
+  return parsed.toISOString().slice(0, 10) === candidate ? candidate : null
 }
 
-/** Prefers an explicit binomial; falls back to genus + epithet. */
+/** Prefers an explicit genus + epithet pair; falls back to parsing scientificname. */
 function extractSpecies(r: RawRecord): string | null {
   if (r.genus && r.specificepithet) return `${r.genus} ${r.specificepithet}`
   if (!r.scientificname) return null

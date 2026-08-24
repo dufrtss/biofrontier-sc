@@ -26,8 +26,26 @@
  *
  * Instead a species must be recorded in at least `minNeighbourPrevalence` of
  * the qualifying neighbours before it is expected here. That asks the more
- * useful question — "what is consistently found around here but absent from
- * this cell?" — and produces a distribution that actually separates hexbins.
+ * useful question: "what is consistently found around here but absent from
+ * this cell?"
+ *
+ * ## This is not yet a solved problem
+ *
+ * The prevalence threshold reduces saturation but does not eliminate it at
+ * current data density: on the datasets measured so far the median remains at
+ * or near 1.0, and the metric is computable for only a small minority of ranked
+ * hexbins. Two structural reasons:
+ *
+ * - `requiredNeighbours` bottoms out at 2, so with the minimum of three
+ *   qualifying neighbours the filter is only "2 of 3" — barely a filter.
+ * - Occurrence data for SC is sparse enough that most neighbourhoods cannot
+ *   clear the thresholds at all.
+ *
+ * This is why `resolveActiveComponents` admits the component into the composite
+ * score only when it is computable for every ranked hexbin — which, today, it
+ * is not. Until then it is displayed as a per-hexbin diagnostic and kept out of
+ * the ranking. Denser data, or a genuinely effort-corrected estimator
+ * (Chao1-style) rather than a raw ratio, are the paths to making it usable.
  *
  * ## Known limitations
  *
@@ -97,13 +115,22 @@ export function computeIncompleteness(
   for (const hex of hexes) {
     const neighbourIds = hexNeighbours(hex.hexId, config.neighbourRadius)
 
-    // A neighbour qualifies if it is inside our grid, has records to contribute,
-    // and is ecologically comparable on the one axis we can measure.
+    // A neighbour qualifies if it is inside our grid, contributes at least one
+    // species-level identification, and is ecologically comparable on the one
+    // axis we can measure.
+    //
+    // The species requirement is stricter than `hasData` on purpose. A hexbin
+    // can hold occurrence records while identifying none of them to species —
+    // common for iNaturalist, where anything coarser than species rank is
+    // recorded with no species name. Such a neighbour contributes nothing to
+    // the expected pool, but counting it would still raise the prevalence
+    // denominator and make real species harder to qualify.
     const qualifying = neighbourIds
       .map(id => byId.get(id))
       .filter((n): n is IncompletenessInput =>
         n !== undefined &&
         n.hasData &&
+        n.speciesIds.length > 0 &&
         Math.abs(n.habitatQuality - hex.habitatQuality) <= config.habitatSimilarityTolerance,
       )
 

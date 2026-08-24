@@ -8,7 +8,7 @@ import type {
   AppState,
   TaxonFilter,
 } from '@/lib/types'
-import { computeEffortScores, computeFrontierScore } from '@/lib/scoring'
+import { computeEffortScores, computeFrontierScore, resolveActiveComponents } from '@/lib/scoring'
 import { computeIncompleteness } from '@/lib/incompleteness'
 import { normalizeHexbinsFile } from '@/lib/hexbins-file'
 import { H3_RES6_AREA_KM2 } from '@/lib/h3-utils'
@@ -36,8 +36,12 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     return () => controller.abort()
   }, [])
 
-  const { hexbins, rankedHexIds } = useMemo(() => {
-    if (!raw) return { hexbins: {} as Record<string, ScoredHexbin>, rankedHexIds: [] }
+  const { hexbins, rankedHexIds, activeComponents } = useMemo(() => {
+    if (!raw) return {
+      hexbins: {} as Record<string, ScoredHexbin>,
+      rankedHexIds: [] as string[],
+      activeComponents: { habitat: false, incompleteness: false },
+    }
 
     const taxonDataFor = (hex: (typeof raw.hexbins)[number]) =>
       taxonFilter === 'vertebrates' ? hex.vertebrates : hex.all
@@ -77,6 +81,23 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
         }),
       )
 
+    // Which hexbins are eligible for the ranking. Zero-record hexbins all score
+    // identically, so including them would make the ranking meaningless.
+    const isRanked = (hex: (typeof raw.hexbins)[number]) =>
+      taxonDataFor(hex).occurrenceCount > 0
+
+    // Component availability is resolved once, over the ranked set, and applied
+    // uniformly. Deciding per hexbin would place hexbins scored by different
+    // formulas on a single list — see resolveActiveComponents.
+    const rankedHexbins = raw.hexbins.filter(isRanked)
+    const active = resolveActiveComponents({
+      habitatVaries: !raw.habitatIsPlaceholder,
+      incompletenessComputable: rankedHexbins.filter(
+        h => incompleteness.get(h.hexId)?.score != null,
+      ).length,
+      rankedCount: rankedHexbins.length,
+    })
+
     const scored: ScoredHexbin[] = raw.hexbins.map((hex, i) => {
       const inc = incompleteness.get(hex.hexId)
       return {
@@ -87,26 +108,22 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
         missingSpeciesCount:     inc?.missingSpeciesCount ?? 0,
         frontierScore:           computeFrontierScore({
           effortScore:             effortScores[i],
-          // A uniform placeholder cannot discriminate between hexbins, so it is
-          // dropped from the score rather than added as a constant offset.
-          habitatQuality:          raw.habitatIsPlaceholder ? null : hex.habitatQuality,
+          habitatQuality:          hex.habitatQuality,
           taxonomicIncompleteness: inc?.score ?? null,
-        }),
+        }, active),
         rank: 0,  // assigned below
       }
     })
 
-    // Only rank hexbins that have actual occurrence data for the active filter.
-    // Zero-record hexbins all score identically with fallback habitat data, making
-    // the ranking meaningless if they're included.
     const surveyed = scored
-      .filter(h => (taxonFilter === 'vertebrates' ? h.vertebrates : h.all).occurrenceCount > 0)
+      .filter(isRanked)
       .sort((a, b) => b.frontierScore - a.frontierScore)
     surveyed.forEach((h, idx) => { h.rank = idx + 1 })
 
     return {
       hexbins:      Object.fromEntries(scored.map(h => [h.hexId, h])),
       rankedHexIds: surveyed.map(h => h.hexId),
+      activeComponents: active,
     }
   }, [raw, taxonFilter])
 
@@ -126,6 +143,7 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     sources: raw?.sources ?? [],
     speciesDataIsPartial: raw?.speciesDataIsPartial ?? false,
     habitatIsPlaceholder: raw?.habitatIsPlaceholder ?? false,
+    activeComponents,
     selectHex: setSelected,
   }
 }

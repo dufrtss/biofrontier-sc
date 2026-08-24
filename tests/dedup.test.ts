@@ -88,9 +88,18 @@ describe('dedupeOccurrences', () => {
     expect(droppedBySource).toEqual({})
   })
 
-  it('keeps records that have neither species nor date rather than collapsing them', () => {
-    // Their key would be little more than a coordinate, so deduplicating on it
-    // would discard distinct observations that merely share a location.
+  it('keeps records with no species name rather than collapsing them', () => {
+    // iNaturalist reports species: null for every identification coarser than
+    // species rank. Two distinct genus-level observations sharing an 11 m cell
+    // and a date are not duplicates, and merging them would delete real data.
+    const { records } = dedupeOccurrences([
+      occ({ species: null }),
+      occ({ species: null }),
+    ])
+    expect(records).toHaveLength(2)
+  })
+
+  it('keeps records that have neither species nor date', () => {
     const { records } = dedupeOccurrences([
       occ({ species: null, date: null }),
       occ({ species: null, date: null }),
@@ -98,7 +107,7 @@ describe('dedupeOccurrences', () => {
     expect(records).toHaveLength(2)
   })
 
-  it('still deduplicates when only the date is missing', () => {
+  it('still deduplicates a named species when only the date is missing', () => {
     const { records } = dedupeOccurrences([
       occ({ date: null, source: 'gbif' }),
       occ({ date: null, source: 'inaturalist' }),

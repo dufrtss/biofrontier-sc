@@ -45,6 +45,9 @@ function renderButton(props: Partial<Parameters<typeof ExportButton>[0]> = {}) {
         hexbins={hexbins}
         taxonFilter="all"
         visibleCount={20}
+        activeComponents={{ habitat: true, incompleteness: true }}
+        generatedAt="2026-08-23T00:00:00.000Z"
+        sources={['gbif', 'inaturalist']}
         {...props}
       />
     </NextIntlClientProvider>,
@@ -120,6 +123,7 @@ describe('ExportButton', () => {
     expect(createdBlobs).toHaveLength(1)
     const text = await createdBlobs[0].text()
     const lines = text.replace(/^\uFEFF/, '').trimEnd().split('\n')
+      .filter(l => !l.startsWith('#'))
     expect(lines[0]).toContain('frontier_score')
     expect(lines).toHaveLength(3)
   })
@@ -153,7 +157,8 @@ describe('ExportButton', () => {
     await user.click(screen.getByRole('menuitem', { name: /top 1 shown/i }))
 
     const text = (await createdBlobs[0].text()).replace(/^\uFEFF/, '')
-    expect(text.trimEnd().split('\n')).toHaveLength(2)  // header + 1
+    const rows = text.trimEnd().split('\n').filter(l => !l.startsWith('#'))
+    expect(rows).toHaveLength(2)  // header + 1
   })
 
   it('closes the menu after exporting', async () => {

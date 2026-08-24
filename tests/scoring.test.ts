@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { normalizeValues, computeEffortScores, computeFrontierScore } from '@/lib/scoring'
+import {
+  normalizeValues,
+  computeEffortScores,
+  computeFrontierScore,
+  resolveActiveComponents,
+} from '@/lib/scoring'
 import { EFFORT_WEIGHTS, FRONTIER_WEIGHTS } from '@/lib/scoring-config'
 import { scoreToColor, scoreToOpacity } from '@/lib/color'
 
@@ -55,11 +60,18 @@ describe('scoring weight configuration', () => {
 })
 
 describe('computeFrontierScore', () => {
+  const ALL_ACTIVE = { habitat: true, incompleteness: true }
+  const GAP_ONLY   = { habitat: false, incompleteness: false }
+  const NO_HABITAT = { habitat: false, incompleteness: true }
+
   const score = (
     effortScore: number,
-    habitatQuality: number | null,
+    habitatQuality: number,
     taxonomicIncompleteness: number | null = null,
-  ) => computeFrontierScore({ effortScore, habitatQuality, taxonomicIncompleteness })
+    active = ALL_ACTIVE,
+  ) => computeFrontierScore(
+    { effortScore, habitatQuality, taxonomicIncompleteness }, active,
+  )
 
   it('scores 1.0 for an unsurveyed hexbin with full habitat and full incompleteness', () => {
     expect(score(0, 1, 1)).toBeCloseTo(1.0, 5)
@@ -88,52 +100,37 @@ describe('computeFrontierScore', () => {
     expect(score(0.5, 0.5, 0.5)).toBeGreaterThan(score(0.5, 0.5, 0))
   })
 
-  describe('when incompleteness is unavailable', () => {
-    it('renormalises the remaining components to still span [0, 1]', () => {
-      expect(score(0, 1, null)).toBeCloseTo(1.0, 6)
-      expect(score(1, 0, null)).toBeCloseTo(0.0, 6)
+  describe('with only the survey gap active', () => {
+    it('spans [0, 1] on the gap alone', () => {
+      expect(score(0, 0.5, 0.9, GAP_ONLY)).toBeCloseTo(1.0, 6)
+      expect(score(1, 0.5, 0.9, GAP_ONLY)).toBeCloseTo(0.0, 6)
+      expect(score(0.3, 0.5, 0.9, GAP_ONLY)).toBeCloseTo(0.7, 6)
     })
 
-    it('does not penalise the hexbin the way treating it as zero would', () => {
-      // The failure mode this guards against: data-poor hexbins are exactly what
-      // the tool exists to surface, so a missing third component must not push
-      // them down the ranking.
-      const renormalised = score(0.2, 0.8, null)
-      const asIfZero =
-        (1 - 0.2) * FRONTIER_WEIGHTS.gap + 0.8 * FRONTIER_WEIGHTS.habitat
-      expect(renormalised).toBeGreaterThan(asIfZero)
-    })
-
-    it('preserves the gap:habitat ratio after renormalising', () => {
-      const ratio = FRONTIER_WEIGHTS.gap / FRONTIER_WEIGHTS.habitat
-      expect(score(0, 0, null) / score(1, 1, null)).toBeCloseTo(ratio, 6)
+    it('ignores the values of inactive components entirely', () => {
+      // A uniform habitat placeholder must not shift the score at all.
+      expect(score(0.4, 0.0, null, GAP_ONLY))
+        .toBeCloseTo(score(0.4, 1.0, 1, GAP_ONLY), 6)
     })
   })
 
-  describe('when habitat data is a uniform placeholder', () => {
-    it('still spans [0, 1] using the remaining components', () => {
-      expect(score(0, null, 1)).toBeCloseTo(1.0, 6)
-      expect(score(1, null, 0)).toBeCloseTo(0.0, 6)
+  describe('with habitat inactive but incompleteness active', () => {
+    it('still spans [0, 1] across the two active components', () => {
+      expect(score(0, 0.5, 1, NO_HABITAT)).toBeCloseTo(1.0, 6)
+      expect(score(1, 0.5, 0, NO_HABITAT)).toBeCloseTo(0.0, 6)
     })
 
-    it('scores purely on the survey gap when both optional components are absent', () => {
-      expect(score(0, null, null)).toBeCloseTo(1.0, 6)
-      expect(score(1, null, null)).toBeCloseTo(0.0, 6)
-      expect(score(0.3, null, null)).toBeCloseTo(0.7, 6)
+    it('preserves the gap:incompleteness ratio after renormalising', () => {
+      const ratio = FRONTIER_WEIGHTS.gap / FRONTIER_WEIGHTS.incompleteness
+      expect(score(0, 0, 0, NO_HABITAT) / score(1, 0, 1, NO_HABITAT))
+        .toBeCloseTo(ratio, 6)
     })
+  })
 
-    it('does not add a constant offset the way a fixed 0.5 habitat value would', () => {
-      // The bug this guards against: with every hexbin at habitat 0.5, including
-      // the component adds the same 0.175 to all of them — inflating scores and
-      // compressing the visible range while changing no ordering.
-      const dropped = score(0.5, null, 0.5)
-      const withConstant = score(0.5, 0.5, 0.5)
-      expect(dropped).toBeCloseTo(0.5, 6)
-      expect(withConstant).toBeCloseTo(0.5, 6)
-      // Equal at the midpoint, but the placeholder compresses the extremes:
-      expect(score(0, null, 1)).toBeGreaterThan(score(0, 0.5, 1))
-      expect(score(1, null, 0)).toBeLessThan(score(1, 0.5, 0))
-    })
+  it('treats a null incompleteness as 0 rather than producing NaN', () => {
+    // resolveActiveComponents prevents this combination for ranked hexbins, but
+    // an unranked one must not poison the ordering with NaN.
+    expect(Number.isNaN(score(0.5, 0.5, null, ALL_ACTIVE))).toBe(false)
   })
 
   it('accepts injected weights for calibration experiments', () => {
@@ -141,9 +138,46 @@ describe('computeFrontierScore', () => {
     expect(
       computeFrontierScore(
         { effortScore: 0.25, habitatQuality: 1, taxonomicIncompleteness: 1 },
+        ALL_ACTIVE,
         gapOnly,
       ),
     ).toBeCloseTo(0.75, 6)
+  })
+})
+
+describe('resolveActiveComponents', () => {
+  it('activates habitat only when it varies between hexbins', () => {
+    expect(resolveActiveComponents({
+      habitatVaries: true, incompletenessComputable: 0, rankedCount: 10,
+    }).habitat).toBe(true)
+
+    expect(resolveActiveComponents({
+      habitatVaries: false, incompletenessComputable: 0, rankedCount: 10,
+    }).habitat).toBe(false)
+  })
+
+  it('activates incompleteness only with full coverage of the ranked set', () => {
+    expect(resolveActiveComponents({
+      habitatVaries: false, incompletenessComputable: 10, rankedCount: 10,
+    }).incompleteness).toBe(true)
+  })
+
+  it('refuses partial coverage, which would mix incompatible scales', () => {
+    // The regression this guards: with 18 of 369 ranked hexbins scored on a
+    // renormalised three-component formula and the rest on the gap alone, those
+    // 18 took ranks 1–5 purely because their value was computable and saturated,
+    // displacing hexbins that belonged at #19, #37, #93, #179 and #223.
+    for (const computable of [0, 1, 18, 368]) {
+      expect(resolveActiveComponents({
+        habitatVaries: false, incompletenessComputable: computable, rankedCount: 369,
+      }).incompleteness).toBe(false)
+    }
+  })
+
+  it('does not activate incompleteness when nothing is ranked', () => {
+    expect(resolveActiveComponents({
+      habitatVaries: false, incompletenessComputable: 0, rankedCount: 0,
+    }).incompleteness).toBe(false)
   })
 })
 

@@ -1,3 +1,5 @@
+import type { ActiveComponents } from './scoring'
+
 export type TaxonFilter = 'all' | 'vertebrates'
 
 /** Occurrence data sources the pipeline can draw from. */
@@ -100,4 +102,6 @@ export interface AppState {
   sources: SourceMeta[]
   speciesDataIsPartial: boolean
   habitatIsPlaceholder: boolean
+  /** Which optional components entered the composite score for this dataset. */
+  activeComponents: ActiveComponents
 }
