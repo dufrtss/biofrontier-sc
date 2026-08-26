@@ -28,10 +28,23 @@
     "recordsCount": "{count} registros"
   },
   "TaxonSelector": {
-    "allTaxa": "Todos los Taxa",
-    "vertebrates": "Vertebrados",
-    "tooltipAll": "Todos los organismos registrados en GBIF para SC — plantas, hongos, animales (vertebrados e invertebrados), bacterias, protozoos y más. Una planta en la lista de especies es comportamiento esperado.",
-    "tooltipVertebrates": "Solo animales con columna vertebral: Mamíferos, Aves, Reptiles, Anfibios y Peces (Actinopterygii). Invertebrados y todos los reinos no animales excluidos."
+    "groupLabel": "Filtro de taxones",
+    "labels": {
+      "all": "Todos los Taxa",
+      "vertebrates": "Vertebrados",
+      "birds": "Aves",
+      "mammals": "Mamíferos",
+      "herpetofauna": "Herpetofauna",
+      "invertebrates": "Invertebrados"
+    },
+    "tooltips": {
+      "all": "Todos los organismos registrados para SC en todas las fuentes — plantas, hongos, animales (vertebrados e invertebrados), bacterias, protozoos y más. Una planta en la lista de especies es comportamiento esperado.",
+      "vertebrates": "Animales con columna vertebral: Mammalia, Aves, Reptilia, Amphibia y las clases de peces. Invertebrados y todos los reinos no animales excluidos.",
+      "birds": "Solo la clase Aves. El grupo mejor registrado en SC por amplio margen, por lo que sus vacíos de muestreo son los más confiables — y los más difíciles de atribuir a datos faltantes.",
+      "mammals": "Solo la clase Mammalia. Escasamente registrado y sesgado hacia atropellos, cámaras trampa y avistamientos urbanos, así que los vacíos reflejan esfuerzo de muestreo más que ausencia.",
+      "herpetofauna": "Reptiles y anfibios juntos (Reptilia + Amphibia) — el agrupamiento convencional en herpetología de campo, y el grupo donde el Bosque Atlántico aún produce especies nuevas con más frecuencia.",
+      "invertebrates": "Animales sin columna vertebral: insectos, arácnidos, moluscos, crustáceos, gusanos y demás. Enormemente subregistrados frente a su diversidad real, así que los puntajes altos hablan del esfuerzo de muestreo."
+    }
   },
   "HexDetail": {
     "unsurveyed": "No relevado",
@@ -171,7 +184,6 @@
     "taxaCoverage": {
       "title": "Cobertura de Taxa",
       "allIntro": "Todos los Taxa incluye todos los organismos con registro en GBIF para SC — no solo animales. Esto incluye plantas registradas por botánicos y naturalistas ciudadanos, por lo que las especies vegetales pueden aparecer en la lista.",
-      "vertebratesIntro": "Vertebrados filtra solo animales con columna vertebral, usando estas cinco clases taxonómicas de GBIF:",
       "taxaTableHeaders": [
         "Reino",
         "Ejemplos"
@@ -202,39 +214,42 @@
           "Algas, mohos acuáticos, diatomeas"
         ]
       ],
-      "classTableHeaders": [
-        "Clase",
-        "Clave GBIF",
+      "groupsIntro": "Los demás filtros son vistas sobre esos mismos registros, agrupados por la clase taxonómica a la que cada ocurrencia fue identificada:",
+      "groupTableHeaders": [
+        "Filtro",
+        "Clases incluidas",
         "Ejemplos"
       ],
-      "classTableRows": [
+      "groupTableRows": [
         [
-          "Mammalia",
-          "359",
-          "Murciélagos, pumas, tapires, pequeños roedores"
+          "Vertebrados",
+          "Mammalia, Aves, Reptilia, Amphibia, Actinopterygii, Chondrichthyes y otras clases de peces",
+          "Todo lo que tiene columna vertebral"
         ],
         [
           "Aves",
-          "212",
+          "Aves",
           "Todas las aves"
         ],
         [
-          "Reptilia",
-          "358",
-          "Serpientes, lagartos, tortugas, caimanes"
+          "Mamíferos",
+          "Mammalia",
+          "Murciélagos, pumas, tapires, pequeños roedores"
         ],
         [
-          "Amphibia",
-          "131",
-          "Ranas, salamandras, cecilias"
+          "Herpetofauna",
+          "Reptilia, Amphibia",
+          "Serpientes, lagartos, tortugas, caimanes, ranas, cecilias"
         ],
         [
-          "Actinopterygii",
-          "204",
-          "Peces de aletas radiadas"
+          "Invertebrados",
+          "Insecta, Arachnida, Malacostraca, Gastropoda, Bivalvia y otras clases de invertebrados",
+          "Insectos, arañas, cangrejos, caracoles, gusanos"
         ]
       ],
-      "groupsNote": "Las etiquetas de grupo de especies (ej.: \"(Aves)\") no se muestran junto a los nombres porque la información de reino/clase no se retuvo durante la agregación de datos actual. Volver a ejecutar el pipeline con campos extendidos lo habilitaría."
+      "overlapNote": "Los filtros se superponen en lugar de particionar los datos: un tucán cuenta a la vez para Aves, Vertebrados y Todos los Taxa. Cada filtro se puntúa de forma independiente, así que el ranking se recalcula desde cero al cambiar — un hexágono bien muestreado para aves puede seguir siendo frontera para herpetofauna.",
+      "unclassifiedNote": "Los registros identificados solo por encima del nivel de clase, y toda planta, hongo y microorganismo, cuentan para Todos los Taxa y para ningún filtro de grupo. Son ocurrencias reales y aportan esfuerzo de muestreo genuino, por eso nunca se descartan — solo quedan sin agrupar en lugar de adivinarse.",
+      "availabilityNote": "Solo se ofrecen los filtros para los que el conjunto de datos cargado tiene registros. Un conjunto generado antes de que existieran los filtros por grupo muestra únicamente Todos los Taxa y Vertebrados; volver a ejecutar el pipeline restaura el conjunto completo."
     },
     "geographicScope": {
       "title": "Alcance Geográfico y Cuadrícula",

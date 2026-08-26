@@ -24,12 +24,6 @@ import type { FetchContext, Occurrence, OccurrenceSource } from './types'
 const BASE = 'https://specieslink.net/ws/1.0/search'
 const PAGE_SIZE = 500
 
-/** Vertebrate class names as they appear in speciesLink's Darwin Core `class` field. */
-const VERTEBRATE_CLASSES = new Set([
-  'mammalia', 'aves', 'reptilia', 'amphibia', 'actinopterygii',
-  'chondrichthyes', 'osteichthyes',
-])
-
 interface RawRecord {
   decimallatitude?: string | number
   decimallongitude?: string | number
@@ -151,7 +145,7 @@ export const specieslinkSource: OccurrenceSource = {
           lat,
           lng,
           species: extractSpecies(r),
-          isVertebrate: VERTEBRATE_CLASSES.has((r.class ?? '').toLowerCase()),
+          className: r.class ?? null,
           observer: r.recordedby?.slice(0, 60) ?? null,
           date: extractDate(r),
           source: 'specieslink',

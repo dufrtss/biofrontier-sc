@@ -6,7 +6,7 @@ import {
   frontierCsvFilename,
   FRONTIER_CSV_HEADERS,
 } from '@/lib/csv'
-import type { ScoredHexbin, TaxonRecord } from '@/lib/types'
+import type { ScoredHexbin, TaxonFilter, TaxonRecord } from '@/lib/types'
 
 describe('escapeCsvField', () => {
   it('leaves plain values untouched', () => {
@@ -69,8 +69,10 @@ function taxonRecord(overrides: Partial<TaxonRecord> = {}): TaxonRecord {
 function scoredHex(overrides: Partial<ScoredHexbin> = {}): ScoredHexbin {
   return {
     hexId: '86a91b477ffffff',
-    all: taxonRecord(),
-    vertebrates: taxonRecord({ occurrenceCount: 6, uniqueSpeciesCount: 2 }),
+    taxa: {
+      all:   taxonRecord(),
+      birds: taxonRecord({ occurrenceCount: 6, uniqueSpeciesCount: 2 }),
+    },
     habitatQuality: 0.75,
     effortScore: 0.25,
     frontierScore: 0.8,
@@ -148,7 +150,7 @@ describe('buildFrontierCsv', () => {
 
   it('uses the taxon filter to pick which record block is exported', () => {
     const colOf = (name: string) => FRONTIER_CSV_HEADERS.indexOf(name as never)
-    const cellsFor = (taxonFilter: 'all' | 'vertebrates') =>
+    const cellsFor = (taxonFilter: TaxonFilter) =>
       dataLines(
         buildFrontierCsv(['86a91b477ffffff'], hexbins, {
           taxonFilter, activeComponents: ALL_ACTIVE,
@@ -156,7 +158,21 @@ describe('buildFrontierCsv', () => {
       )[1].split(',')
 
     expect(cellsFor('all')[colOf('occurrence_count')]).toBe('12')
-    expect(cellsFor('vertebrates')[colOf('occurrence_count')]).toBe('6')
+    expect(cellsFor('birds')[colOf('occurrence_count')]).toBe('6')
+  })
+
+  it('exports zeros for a filter the hexbin has no records under', () => {
+    // The fixture carries `all` and `birds` only. A filter the pipeline omitted
+    // must export an empty record rather than blowing up or reusing `all`.
+    const colOf = (name: string) => FRONTIER_CSV_HEADERS.indexOf(name as never)
+    const cells = dataLines(
+      buildFrontierCsv(['86a91b477ffffff'], hexbins, {
+        taxonFilter: 'mammals', activeComponents: ALL_ACTIVE,
+      }),
+    )[1].split(',')
+
+    expect(cells[colOf('occurrence_count')]).toBe('0')
+    expect(cells[colOf('unique_species')]).toBe('0')
   })
 
   it('honours the limit option', () => {

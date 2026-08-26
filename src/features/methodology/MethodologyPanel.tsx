@@ -212,22 +212,21 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
 
           <Section id="taxa-coverage" title={t('taxaCoverage.title')}>
             <p>
-              <strong className="text-slate-200">{tTaxon('allTaxa')}</strong>{' '}
+              <strong className="text-slate-200">{tTaxon('labels.all')}</strong>{' '}
               {t('taxaCoverage.allIntro')}
             </p>
             <Table
               headers={t.raw('taxaCoverage.taxaTableHeaders') as string[]}
               rows={t.raw('taxaCoverage.taxaTableRows') as string[][]}
             />
-            <p className="mt-2">
-              <strong className="text-slate-200">{tTaxon('vertebrates')}</strong>{' '}
-              {t('taxaCoverage.vertebratesIntro')}
-            </p>
+            <p className="mt-2">{t('taxaCoverage.groupsIntro')}</p>
             <Table
-              headers={t.raw('taxaCoverage.classTableHeaders') as string[]}
-              rows={t.raw('taxaCoverage.classTableRows') as string[][]}
+              headers={t.raw('taxaCoverage.groupTableHeaders') as string[]}
+              rows={t.raw('taxaCoverage.groupTableRows') as string[][]}
             />
-            <p className="text-slate-500 mt-2">{t('taxaCoverage.groupsNote')}</p>
+            <p className="mt-2">{t('taxaCoverage.overlapNote')}</p>
+            <p className="text-slate-500 mt-2">{t('taxaCoverage.unclassifiedNote')}</p>
+            <p className="text-slate-500 mt-2">{t('taxaCoverage.availabilityNote')}</p>
           </Section>
 
           <Section id="geographic-scope" title={t('geographicScope.title')}>

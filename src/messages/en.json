@@ -28,10 +28,23 @@
     "recordsCount": "{count} records"
   },
   "TaxonSelector": {
-    "allTaxa": "All Taxa",
-    "vertebrates": "Vertebrates",
-    "tooltipAll": "Every organism recorded in GBIF for SC — plants, fungi, animals (vertebrates & invertebrates), bacteria, protozoa, and more. A plant appearing in the species list is expected behaviour.",
-    "tooltipVertebrates": "Animals with a backbone only: Mammals, Birds, Reptiles, Amphibians, and Fish (Actinopterygii). Invertebrates and all non-animal kingdoms excluded."
+    "groupLabel": "Taxon filter",
+    "labels": {
+      "all": "All Taxa",
+      "vertebrates": "Vertebrates",
+      "birds": "Birds",
+      "mammals": "Mammals",
+      "herpetofauna": "Herpetofauna",
+      "invertebrates": "Invertebrates"
+    },
+    "tooltips": {
+      "all": "Every organism recorded for SC across all sources — plants, fungi, animals (vertebrates & invertebrates), bacteria, protozoa, and more. A plant appearing in the species list is expected behaviour.",
+      "vertebrates": "Animals with a backbone: Mammalia, Aves, Reptilia, Amphibia and the fish classes. Invertebrates and all non-animal kingdoms excluded.",
+      "birds": "Class Aves only. The best-recorded group in SC by a wide margin, so its survey gaps are the most trustworthy — and the hardest to explain away as missing data.",
+      "mammals": "Class Mammalia only. Sparsely recorded and biased toward roadkill, camera traps and urban sightings, so gaps here reflect survey effort more than absence.",
+      "herpetofauna": "Reptiles and amphibians together (Reptilia + Amphibia) — the conventional pairing in field herpetology, and the group where the Atlantic Forest still yields new species most often.",
+      "invertebrates": "Animals without a backbone: insects, arachnids, molluscs, crustaceans, worms and the rest. Vastly under-recorded relative to their true diversity, so treat high scores as a statement about effort."
+    }
   },
   "HexDetail": {
     "unsurveyed": "Unsurveyed",
@@ -171,7 +184,6 @@
     "taxaCoverage": {
       "title": "Taxa Coverage",
       "allIntro": "All Taxa includes every organism with a GBIF record in SC — not just animals. This includes plants found by botanists and citizen naturalists, which is why plant species occasionally appear in the recorded species list.",
-      "vertebratesIntro": "Vertebrates filters to animals with a backbone only, using these five GBIF taxonomic classes:",
       "taxaTableHeaders": [
         "Kingdom",
         "Examples"
@@ -202,39 +214,42 @@
           "Algae, water moulds, diatoms"
         ]
       ],
-      "classTableHeaders": [
-        "Class",
-        "GBIF key",
+      "groupsIntro": "The remaining filters are views over those same records, grouped by the taxonomic class each occurrence was identified to:",
+      "groupTableHeaders": [
+        "Filter",
+        "Classes included",
         "Examples"
       ],
-      "classTableRows": [
+      "groupTableRows": [
         [
-          "Mammalia",
-          "359",
-          "Bats, pumas, tapirs, small rodents"
+          "Vertebrates",
+          "Mammalia, Aves, Reptilia, Amphibia, Actinopterygii, Chondrichthyes and other fish classes",
+          "Anything with a backbone"
         ],
         [
+          "Birds",
           "Aves",
-          "212",
           "All birds"
         ],
         [
-          "Reptilia",
-          "358",
-          "Snakes, lizards, turtles, caimans"
+          "Mammals",
+          "Mammalia",
+          "Bats, pumas, tapirs, small rodents"
         ],
         [
-          "Amphibia",
-          "131",
-          "Frogs, salamanders, caecilians"
+          "Herpetofauna",
+          "Reptilia, Amphibia",
+          "Snakes, lizards, turtles, caimans, frogs, caecilians"
         ],
         [
-          "Actinopterygii",
-          "204",
-          "Ray-finned fish"
+          "Invertebrates",
+          "Insecta, Arachnida, Malacostraca, Gastropoda, Bivalvia and other invertebrate classes",
+          "Insects, spiders, crabs, snails, worms"
         ]
       ],
-      "groupsNote": "Species group labels (e.g. \"(Aves)\") are not shown next to species names because kingdom/class information was not retained during the current data aggregation. Re-running the pipeline with extended fields would enable this."
+      "overlapNote": "The filters overlap rather than partition the data: a toucan counts toward Birds, Vertebrates and All Taxa at once. Each filter is scored independently, so the frontier ranking is recomputed from scratch when you switch — a hexbin well surveyed for birds can still be a frontier for herpetofauna.",
+      "unclassifiedNote": "Records identified only above class level, and every plant, fungus and micro-organism, count toward All Taxa and no group filter. They are real occurrences and contribute genuine survey effort, so they are never discarded — only left ungrouped rather than guessed at.",
+      "availabilityNote": "Only filters the loaded dataset actually holds records for are offered. A dataset generated before group filters existed shows All Taxa and Vertebrates alone; re-running the data pipeline restores the full set."
     },
     "geographicScope": {
       "title": "Geographic Scope & Grid",

@@ -9,6 +9,7 @@
 import type { ScoredHexbin, TaxonFilter } from './types'
 import type { ActiveComponents } from './scoring'
 import { hexCenter } from './h3-utils'
+import { taxonDataFor } from './hexbins-file'
 
 /**
  * Characters that make Excel and LibreOffice treat a cell as a formula.
@@ -165,7 +166,7 @@ export function buildFrontierCsv(
     const hex = hexbins[hexId]
     if (!hex) continue
 
-    const td = taxonFilter === 'vertebrates' ? hex.vertebrates : hex.all
+    const td = taxonDataFor(hex, taxonFilter)
     const [lat, lng] = hexCenter(hexId)
 
     lines.push(toCsvRow([

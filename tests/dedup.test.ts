@@ -7,7 +7,7 @@ function occ(overrides: Partial<Occurrence> = {}): Occurrence {
     lat: -27.5954,
     lng: -48.5480,
     species: 'Panthera onca',
-    isVertebrate: true,
+    className: 'Mammalia',
     observer: 'someone',
     date: '2024-03-15',
     source: 'gbif',

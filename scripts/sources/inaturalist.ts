@@ -18,11 +18,6 @@ const BASE = 'https://api.inaturalist.org/v1'
 /** iNaturalist caps `per_page` at 200. */
 const PAGE_SIZE = 200
 
-/** `iconic_taxon_name` values that correspond to vertebrate classes. */
-const VERTEBRATE_ICONIC_TAXA = new Set([
-  'Mammalia', 'Aves', 'Reptilia', 'Amphibia', 'Actinopterygii',
-])
-
 interface RawObservation {
   id: number
   observed_on: string | null
@@ -108,7 +103,10 @@ export const inaturalistSource: OccurrenceSource = {
           lat: coords.lat,
           lng: coords.lng,
           species: isSpeciesLevel ? obs.taxon?.name ?? null : null,
-          isVertebrate: VERTEBRATE_ICONIC_TAXA.has(obs.taxon?.iconic_taxon_name ?? ''),
+          // `iconic_taxon_name` is iNaturalist's coarse grouping and is almost
+          // always a class name (`Aves`, `Insecta`); `Mollusca` is a phylum and
+          // `Animalia` too coarse to group, both handled in `taxonomy.ts`.
+          className: obs.taxon?.iconic_taxon_name ?? null,
           observer: obs.user?.login?.slice(0, 60) ?? null,
           date: toIsoDate(obs.observed_on),
           source: 'inaturalist',
