@@ -28,10 +28,23 @@
     "recordsCount": "{count} registros"
   },
   "TaxonSelector": {
-    "allTaxa": "Todos os Táxons",
-    "vertebrates": "Vertebrados",
-    "tooltipAll": "Todo organismo registrado no GBIF para SC — plantas, fungos, animais (vertebrados e invertebrados), bactérias, protozoários e mais. Espécies vegetais na lista é comportamento esperado.",
-    "tooltipVertebrates": "Apenas animais com coluna vertebral: Mamíferos, Aves, Répteis, Anfíbios e Peixes (Actinopterygii). Invertebrados e todos os reinos não animais excluídos."
+    "groupLabel": "Filtro de táxons",
+    "labels": {
+      "all": "Todos os Táxons",
+      "vertebrates": "Vertebrados",
+      "birds": "Aves",
+      "mammals": "Mamíferos",
+      "herpetofauna": "Herpetofauna",
+      "invertebrates": "Invertebrados"
+    },
+    "tooltips": {
+      "all": "Todo organismo registrado para SC em todas as fontes — plantas, fungos, animais (vertebrados e invertebrados), bactérias, protozoários e mais. Espécies vegetais na lista é comportamento esperado.",
+      "vertebrates": "Animais com coluna vertebral: Mammalia, Aves, Reptilia, Amphibia e as classes de peixes. Invertebrados e todos os reinos não animais excluídos.",
+      "birds": "Apenas a classe Aves. O grupo mais bem registrado em SC com larga margem, então suas lacunas de amostragem são as mais confiáveis — e as mais difíceis de atribuir a dados faltantes.",
+      "mammals": "Apenas a classe Mammalia. Pouco registrado e enviesado para atropelamentos, armadilhas fotográficas e avistamentos urbanos, então lacunas refletem esforço de amostragem mais que ausência.",
+      "herpetofauna": "Répteis e anfíbios juntos (Reptilia + Amphibia) — o agrupamento convencional na herpetologia de campo, e o grupo em que a Mata Atlântica ainda revela espécies novas com mais frequência.",
+      "invertebrates": "Animais sem coluna vertebral: insetos, aracnídeos, moluscos, crustáceos, vermes e afins. Enormemente sub-registrados frente à diversidade real, então pontuações altas falam do esforço de amostragem."
+    }
   },
   "HexDetail": {
     "unsurveyed": "Não levantado",
@@ -171,7 +184,6 @@
     "taxaCoverage": {
       "title": "Cobertura de Táxons",
       "allIntro": "Todos os Táxons inclui todos os organismos com registro no GBIF para SC — não apenas animais. Isso inclui plantas registradas por botânicos e naturalistas cidadãos, por isso espécies vegetais podem aparecer na lista.",
-      "vertebratesIntro": "Vertebrados filtra apenas animais com coluna vertebral, usando estas cinco classes taxonômicas do GBIF:",
       "taxaTableHeaders": [
         "Reino",
         "Exemplos"
@@ -202,39 +214,42 @@
           "Algas, mofos aquáticos, diatomáceas"
         ]
       ],
-      "classTableHeaders": [
-        "Classe",
-        "Chave GBIF",
+      "groupsIntro": "Os demais filtros são recortes sobre esses mesmos registros, agrupados pela classe taxonômica em que cada ocorrência foi identificada:",
+      "groupTableHeaders": [
+        "Filtro",
+        "Classes incluídas",
         "Exemplos"
       ],
-      "classTableRows": [
+      "groupTableRows": [
         [
-          "Mammalia",
-          "359",
-          "Morcegos, onças, antas, pequenos roedores"
+          "Vertebrados",
+          "Mammalia, Aves, Reptilia, Amphibia, Actinopterygii, Chondrichthyes e outras classes de peixes",
+          "Tudo que tem coluna vertebral"
         ],
         [
           "Aves",
-          "212",
+          "Aves",
           "Todas as aves"
         ],
         [
-          "Reptilia",
-          "358",
-          "Cobras, lagartos, tartarugas, jacarés"
+          "Mamíferos",
+          "Mammalia",
+          "Morcegos, pumas, antas, pequenos roedores"
         ],
         [
-          "Amphibia",
-          "131",
-          "Rãs, salamandras, cecílias"
+          "Herpetofauna",
+          "Reptilia, Amphibia",
+          "Serpentes, lagartos, tartarugas, jacarés, rãs, cecílias"
         ],
         [
-          "Actinopterygii",
-          "204",
-          "Peixes de nadadeiras radiadas"
+          "Invertebrados",
+          "Insecta, Arachnida, Malacostraca, Gastropoda, Bivalvia e outras classes de invertebrados",
+          "Insetos, aranhas, caranguejos, caracóis, vermes"
         ]
       ],
-      "groupsNote": "Rótulos de grupo de espécies (ex.: \"(Aves)\") não são exibidos ao lado dos nomes porque as informações de reino/classe não foram retidas durante a agregação de dados atual. Executar novamente o pipeline com campos estendidos permitiria isso."
+      "overlapNote": "Os filtros se sobrepõem em vez de particionar os dados: um tucano conta simultaneamente para Aves, Vertebrados e Todos os Táxons. Cada filtro é pontuado de forma independente, então o ranking é recalculado do zero ao trocar — um hexágono bem amostrado para aves ainda pode ser fronteira para herpetofauna.",
+      "unclassifiedNote": "Registros identificados apenas acima do nível de classe, e toda planta, fungo e microrganismo, contam para Todos os Táxons e para nenhum filtro de grupo. São ocorrências reais e contribuem com esforço de amostragem genuíno, por isso nunca são descartadas — apenas ficam sem agrupamento em vez de serem adivinhadas.",
+      "availabilityNote": "Só são oferecidos os filtros para os quais o conjunto de dados carregado tem registros. Um conjunto gerado antes de os filtros por grupo existirem mostra apenas Todos os Táxons e Vertebrados; reexecutar o pipeline restaura o conjunto completo."
     },
     "geographicScope": {
       "title": "Escopo Geográfico e Grade",

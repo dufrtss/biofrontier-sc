@@ -22,7 +22,7 @@ export default function AppShell() {
   const {
     hexbins, rankedHexIds, selectedHexId, loading, error,
     lastUpdated, speciesCount, speciesDataIsPartial, habitatIsPlaceholder, sources,
-    activeComponents, selectHex,
+    activeComponents, availableFilters, selectHex,
   } = useBiofrontierData(taxonFilter)
 
   const [rankingOpen, setRankingOpen]               = useState(false)
@@ -69,7 +69,12 @@ export default function AppShell() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <TaxonSelector value={taxonFilter} onChange={setTaxonFilter} onOpenMethodology={openMethodology} />
+          <TaxonSelector
+            value={taxonFilter}
+            options={availableFilters}
+            onChange={setTaxonFilter}
+            onOpenMethodology={openMethodology}
+          />
           <button
             onClick={() => openMethodology()}
             className="text-xs text-slate-500 hover:text-slate-300 transition-colors hidden md:block"
@@ -103,6 +108,7 @@ export default function AppShell() {
             <FrontierRanking
               rankedHexIds={rankedHexIds}
               hexbins={hexbins}
+              taxonFilter={taxonFilter}
               selectedHexId={selectedHexId}
               onSelect={(hexId) => { selectHex(hexId); setRankingOpen(false) }}
               onOpenMethodology={openMethodology}

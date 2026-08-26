@@ -12,7 +12,16 @@ export interface Occurrence {
   lng: number
   /** Binomial name. Null when the record is identified only to genus or above. */
   species: string | null
-  isVertebrate: boolean
+  /**
+   * Taxonomic class the record was identified to, as the provider names it
+   * (`Aves`, `Insecta`, …). Null when the identification stops above class or
+   * the provider supplies nothing usable.
+   *
+   * Adapters pass the name through rather than deciding group membership
+   * themselves; `src/lib/taxonomy.ts` owns that mapping, so adding a taxon
+   * filter is one edit there instead of one per source.
+   */
+  className: string | null
   /** Collector or observer, truncated by the adapter. Null when not supplied. */
   observer: string | null
   /** ISO date, `YYYY-MM-DD`. Null when the record carries no usable date. */

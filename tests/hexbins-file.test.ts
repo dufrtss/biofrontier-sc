@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { normalizeHexbinsFile, habitatDataIsPlaceholder, CURRENT_SCHEMA_VERSION } from '@/lib/hexbins-file'
+import {
+  normalizeHexbinsFile,
+  habitatDataIsPlaceholder,
+  resolveAvailableFilters,
+  taxonDataFor,
+  CURRENT_SCHEMA_VERSION,
+} from '@/lib/hexbins-file'
 import type { HexbinsFile, TaxonRecord } from '@/lib/types'
 
 function taxonRecord(topSpecies: string[], overrides: Partial<TaxonRecord> = {}): TaxonRecord {
@@ -61,27 +67,27 @@ describe('normalizeHexbinsFile — v1 input', () => {
     const file = normalizeHexbinsFile(v1File())
     const resolve = (ids: number[] | undefined) => (ids ?? []).map(i => file.speciesIndex[i])
 
-    expect(resolve(file.hexbins[0].all.speciesIds)).toEqual([
+    expect(resolve(taxonDataFor(file.hexbins[0], 'all').speciesIds)).toEqual([
       'Panthera onca',
       'Tapirus terrestris',
     ])
-    expect(resolve(file.hexbins[1].all.speciesIds)).toEqual([
+    expect(resolve(taxonDataFor(file.hexbins[1], 'all').speciesIds)).toEqual([
       'Tapirus terrestris',
       'Chrysocyon brachyurus',
     ])
-    expect(resolve(file.hexbins[1].vertebrates.speciesIds)).toEqual([
+    expect(resolve(taxonDataFor(file.hexbins[1], 'vertebrates').speciesIds)).toEqual([
       'Chrysocyon brachyurus',
     ])
   })
 
   it('gives the same species the same id across hexbins and taxon filters', () => {
     const file = normalizeHexbinsFile(v1File())
-    const tapirInHex0 = file.hexbins[0].all.speciesIds![1]
-    const tapirInHex1 = file.hexbins[1].all.speciesIds![0]
+    const tapirInHex0 = taxonDataFor(file.hexbins[0], 'all').speciesIds![1]
+    const tapirInHex1 = taxonDataFor(file.hexbins[1], 'all').speciesIds![0]
     expect(tapirInHex0).toBe(tapirInHex1)
 
-    const oncaAll  = file.hexbins[0].all.speciesIds![0]
-    const oncaVert = file.hexbins[0].vertebrates.speciesIds![0]
+    const oncaAll  = taxonDataFor(file.hexbins[0], 'all').speciesIds![0]
+    const oncaVert = taxonDataFor(file.hexbins[0], 'vertebrates').speciesIds![0]
     expect(oncaAll).toBe(oncaVert)
   })
 
@@ -93,14 +99,14 @@ describe('normalizeHexbinsFile — v1 input', () => {
     const file = v1File()
     file.hexbins[0].all = taxonRecord([], { occurrenceCount: 0, uniqueSpeciesCount: 0 })
     const normalized = normalizeHexbinsFile(file)
-    expect(normalized.hexbins[0].all.speciesIds).toEqual([])
+    expect(taxonDataFor(normalized.hexbins[0], 'all').speciesIds).toEqual([])
   })
 })
 
 describe('normalizeHexbinsFile — v2 input', () => {
   function v2File(): HexbinsFile {
     return {
-      schemaVersion: CURRENT_SCHEMA_VERSION,
+      schemaVersion: 2,
       generatedAt: '2026-08-23T00:00:00.000Z',
       hexbinCount: 1,
       speciesIndex: ['Panthera onca', 'Tapirus terrestris', 'Leopardus wiedii'],
@@ -127,7 +133,7 @@ describe('normalizeHexbinsFile — v2 input', () => {
   it('preserves speciesIds beyond what topSpecies would have yielded', () => {
     // The point of v2: 3 species recorded, only 1 in the top-10 list.
     const file = normalizeHexbinsFile(v2File())
-    expect(file.hexbins[0].all.speciesIds).toEqual([0, 1, 2])
+    expect(taxonDataFor(file.hexbins[0], 'all').speciesIds).toEqual([0, 1, 2])
   })
 
   it('preserves source provenance', () => {
@@ -142,11 +148,105 @@ describe('normalizeHexbinsFile — v2 input', () => {
   })
 })
 
+describe('normalizeHexbinsFile — v3 input', () => {
+  function v3File(): HexbinsFile {
+    return {
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+      generatedAt: '2026-08-26T00:00:00.000Z',
+      hexbinCount: 2,
+      speciesIndex: ['Ramphastos dicolorus', 'Boana faber', 'Leopardus wiedii'],
+      sources: [
+        { id: 'gbif', recordCount: 10, duplicatesDropped: 0, fetchedAt: '2026-08-26T00:00:00.000Z' },
+      ],
+      hexbins: [
+        {
+          hexId: '86a91b477ffffff',
+          taxa: {
+            all:         taxonRecord(['Ramphastos dicolorus'], { speciesIds: [0, 1, 2] }),
+            vertebrates: taxonRecord(['Ramphastos dicolorus'], { speciesIds: [0, 1, 2] }),
+            birds:       taxonRecord(['Ramphastos dicolorus'], { speciesIds: [0] }),
+            herpetofauna: taxonRecord(['Boana faber'], { speciesIds: [1] }),
+          },
+          habitatQuality: 0.8,
+        },
+        // Every filter omitted: the pipeline writes nothing for a hexbin with
+        // no records rather than six zeroed blocks.
+        { hexId: '86a91b47bffffff', taxa: {}, habitatQuality: 0.4 },
+      ],
+    }
+  }
+
+  it('passes a v3 taxa map through without rebuilding it', () => {
+    const file = normalizeHexbinsFile(v3File())
+    expect(file.speciesDataIsPartial).toBe(false)
+    expect(taxonDataFor(file.hexbins[0], 'birds').speciesIds).toEqual([0])
+  })
+
+  it('substitutes an empty record for a filter the hexbin omits', () => {
+    const file = normalizeHexbinsFile(v3File())
+    const mammals = taxonDataFor(file.hexbins[0], 'mammals')
+    expect(mammals.occurrenceCount).toBe(0)
+    expect(mammals.topSpecies).toEqual([])
+    expect(taxonDataFor(file.hexbins[1], 'all').occurrenceCount).toBe(0)
+  })
+
+  it('offers the shared empty record as frozen, so a stray write cannot leak', () => {
+    const file = normalizeHexbinsFile(v3File())
+    const empty = taxonDataFor(file.hexbins[1], 'all')
+    expect(() => { empty.occurrenceCount = 99 }).toThrow()
+    expect(taxonDataFor(file.hexbins[0], 'mammals').occurrenceCount).toBe(0)
+  })
+})
+
+describe('resolveAvailableFilters', () => {
+  const hex = (taxa: Record<string, TaxonRecord>) => ({
+    hexId: 'a', taxa, habitatQuality: 0.5,
+  })
+
+  it('lists filters with records, in display order', () => {
+    const filters = resolveAvailableFilters([
+      hex({ all: taxonRecord(['x']), birds: taxonRecord(['x']) }),
+      hex({ all: taxonRecord(['y']), invertebrates: taxonRecord(['y']) }),
+    ])
+    expect(filters).toEqual(['all', 'birds', 'invertebrates'])
+  })
+
+  it('hides the group filters for a pre-v3 dataset', () => {
+    // A v2 file upgrades to a two-key taxa map, so the selector must fall back
+    // to the two filters that file can actually answer for.
+    const file = normalizeHexbinsFile({
+      schemaVersion: 2,
+      generatedAt: '2026-08-23T00:00:00.000Z',
+      hexbinCount: 1,
+      speciesIndex: ['Panthera onca'],
+      hexbins: [{
+        hexId: '86a91b477ffffff',
+        all: taxonRecord(['Panthera onca'], { speciesIds: [0] }),
+        vertebrates: taxonRecord(['Panthera onca'], { speciesIds: [0] }),
+        habitatQuality: 0.8,
+      }],
+    })
+    expect(file.availableFilters).toEqual(['all', 'vertebrates'])
+  })
+
+  it('drops a filter present but empty in every hexbin', () => {
+    const filters = resolveAvailableFilters([
+      hex({ all: taxonRecord(['x']), mammals: taxonRecord([], { occurrenceCount: 0 }) }),
+    ])
+    expect(filters).toEqual(['all'])
+  })
+
+  it('always offers `all`, even for an empty dataset', () => {
+    // `all` is the default selection; a selector with no options at all reads
+    // as a broken build rather than as an empty dataset.
+    expect(resolveAvailableFilters([])).toEqual(['all'])
+  })
+})
+
 describe('habitatDataIsPlaceholder', () => {
   const hex = (hexId: string, habitatQuality: number) => ({
     hexId,
-    all: taxonRecord([]),
-    vertebrates: taxonRecord([]),
+    taxa: { all: taxonRecord([]) },
     habitatQuality,
   })
 

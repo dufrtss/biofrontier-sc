@@ -10,7 +10,7 @@ import type {
 } from '@/lib/types'
 import { computeEffortScores, computeFrontierScore, resolveActiveComponents } from '@/lib/scoring'
 import { computeIncompleteness } from '@/lib/incompleteness'
-import { normalizeHexbinsFile } from '@/lib/hexbins-file'
+import { normalizeHexbinsFile, taxonDataFor } from '@/lib/hexbins-file'
 import { H3_RES6_AREA_KM2 } from '@/lib/h3-utils'
 
 export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
@@ -36,18 +36,16 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     return () => controller.abort()
   }, [])
 
-  const { hexbins, rankedHexIds, activeComponents } = useMemo(() => {
+  const { hexbins, rankedHexIds, activeComponents, speciesCount } = useMemo(() => {
     if (!raw) return {
       hexbins: {} as Record<string, ScoredHexbin>,
       rankedHexIds: [] as string[],
       activeComponents: { habitat: false, incompleteness: false },
+      speciesCount: 0,
     }
 
-    const taxonDataFor = (hex: (typeof raw.hexbins)[number]) =>
-      taxonFilter === 'vertebrates' ? hex.vertebrates : hex.all
-
     const effortInputs = raw.hexbins.map(h => {
-      const td = taxonDataFor(h)
+      const td = taxonDataFor(h, taxonFilter)
       return {
         uniqueObserverCount: td.uniqueObserverCount,
         uniqueDateCount:     td.uniqueDateCount,
@@ -59,7 +57,7 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     const effortScores = computeEffortScores(effortInputs)
 
     // Incompleteness depends on the active taxon filter: the expected-species
-    // pool for "vertebrates" must be built from vertebrate records only.
+    // pool for "birds" must be built from bird records only.
     //
     // Skipped entirely on a partial (v1) dataset. There each hexbin knows only
     // its top 10 species while the neighbourhood pool is the union of many such
@@ -71,7 +69,7 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
       ? new Map<string, never>()
       : computeIncompleteness(
         raw.hexbins.map(h => {
-          const td = taxonDataFor(h)
+          const td = taxonDataFor(h, taxonFilter)
           return {
             hexId:          h.hexId,
             speciesIds:     td.speciesIds ?? [],
@@ -84,7 +82,7 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     // Which hexbins are eligible for the ranking. Zero-record hexbins all score
     // identically, so including them would make the ranking meaningless.
     const isRanked = (hex: (typeof raw.hexbins)[number]) =>
-      taxonDataFor(hex).occurrenceCount > 0
+      taxonDataFor(hex, taxonFilter).occurrenceCount > 0
 
     // Component availability is resolved once, over the ranked set, and applied
     // uniformly. Deciding per hexbin would place hexbins scored by different
@@ -120,16 +118,27 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
       .sort((a, b) => b.frontierScore - a.frontierScore)
     surveyed.forEach((h, idx) => { h.rank = idx + 1 })
 
+    // Counted per filter rather than taken from the global species index: with
+    // "Birds" selected, quoting the all-taxa total beside a bird ranking invites
+    // the reader to attribute one to the other. For `all` this is the same
+    // number the index carries, since every interned species came from a record
+    // that also entered `all`.
+    //
+    // With a v2+ file this is the true count; with a v1 file the species sets
+    // were rebuilt from top-10 lists, so it is a lower bound — which is what
+    // `speciesDataIsPartial` tells the UI to say.
+    const speciesSeen = new Set<number>()
+    for (const hex of raw.hexbins) {
+      for (const id of taxonDataFor(hex, taxonFilter).speciesIds ?? []) speciesSeen.add(id)
+    }
+
     return {
       hexbins:      Object.fromEntries(scored.map(h => [h.hexId, h])),
       rankedHexIds: surveyed.map(h => h.hexId),
       activeComponents: active,
+      speciesCount: speciesSeen.size,
     }
   }, [raw, taxonFilter])
-
-  // With a v2 file this is the true count; with a v1 file the species index was
-  // rebuilt from top-10 lists, so it is a lower bound.
-  const speciesCount = raw?.speciesIndex.length ?? 0
 
   return {
     hexbins,
@@ -144,6 +153,7 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     speciesDataIsPartial: raw?.speciesDataIsPartial ?? false,
     habitatIsPlaceholder: raw?.habitatIsPlaceholder ?? false,
     activeComponents,
+    availableFilters: raw?.availableFilters ?? ['all'],
     selectHex: setSelected,
   }
 }

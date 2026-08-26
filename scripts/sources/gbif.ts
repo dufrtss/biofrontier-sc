@@ -17,15 +17,25 @@ const BASE = 'https://api.gbif.org/v1'
 const PAGE_SIZE = 300
 
 /**
- * classKey values in the GBIF backbone taxonomy.
- * Mammalia=359, Aves=212, Reptilia=358, Amphibia=131, Actinopterygii=204
+ * Backstop for records that carry a backbone `classKey` but no `class` string.
+ *
+ * GBIF normally interprets both, so this rarely fires — it covers the five
+ * classes the tool has always relied on, so a missing name cannot silently
+ * drop a vertebrate out of every group filter.
  */
-const VERTEBRATE_CLASS_KEYS = new Set([359, 212, 358, 131, 204])
+const CLASS_NAME_BY_KEY: Record<number, string> = {
+  359: 'Mammalia',
+  212: 'Aves',
+  358: 'Reptilia',
+  131: 'Amphibia',
+  204: 'Actinopterygii',
+}
 
 interface RawOccurrence {
   decimalLatitude?: number
   decimalLongitude?: number
   species?: string
+  class?: string
   classKey?: number
   recordedBy?: string
   eventDate?: string
@@ -78,7 +88,7 @@ export const gbifSource: OccurrenceSource = {
           lat: r.decimalLatitude,
           lng: r.decimalLongitude,
           species: r.species ?? null,
-          isVertebrate: r.classKey != null && VERTEBRATE_CLASS_KEYS.has(r.classKey),
+          className: r.class ?? (r.classKey != null ? CLASS_NAME_BY_KEY[r.classKey] ?? null : null),
           observer: r.recordedBy?.slice(0, 60) ?? null,
           date: toIsoDate(r.eventDate),
           source: 'gbif',

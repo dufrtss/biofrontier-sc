@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import type { ScoredHexbin, TaxonFilter } from '@/lib/types'
 import { scoreToColor } from '@/lib/color'
 import { hexCenter } from '@/lib/h3-utils'
+import { taxonDataFor } from '@/lib/hexbins-file'
 import InfoTooltip from '@/components/ui/InfoTooltip'
 
 interface Props {
@@ -72,7 +73,7 @@ export default function HexDetail({ hex, taxonFilter, habitatIsPlaceholder, onCl
 
   if (!hex) return null
 
-  const td = taxonFilter === 'vertebrates' ? hex.vertebrates : hex.all
+  const td = taxonDataFor(hex, taxonFilter)
   const [lat, lng] = hexCenter(hex.hexId)
   const accentColor = scoreToColor(hex.frontierScore)
   const frontierPct = Math.round(hex.frontierScore * 100)

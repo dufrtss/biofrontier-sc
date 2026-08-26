@@ -2,8 +2,8 @@
  * Builds `public/data/hexbins.json` — the single data file the app loads.
  *
  * Fetches occurrence records from every selected source, deduplicates across
- * them, aggregates to H3 hexbins, and writes a schema v2 file with a global
- * species index.
+ * them, aggregates to H3 hexbins once per taxon filter, and writes a schema v3
+ * file with a global species index.
  *
  * Prerequisite: `public/data/habitat-by-hex.json` (`npm run data:habitat` for
  * real forest cover, or `npm run data:habitat-fallback` for the placeholder).
@@ -24,9 +24,11 @@ import type {
   HexbinsFile,
   SourceId,
   SourceMeta,
+  TaxonFilter,
   TaxonRecord,
 } from '../src/lib/types'
 import { CURRENT_SCHEMA_VERSION } from '../src/lib/hexbins-file'
+import { TAXON_FILTERS, groupsForClass } from '../src/lib/taxonomy'
 import { ALL_SOURCES, getSource, isSourceId } from './sources'
 import { dedupeOccurrences } from './sources/dedup'
 import type { Occurrence } from './sources/types'
@@ -134,30 +136,7 @@ function accumulate(acc: HexAccumulator, record: Occurrence, speciesId: number |
   }
 }
 
-/**
- * Built fresh per call rather than spread from a shared constant: a shallow
- * copy would leave all ~5,900 empty hexbins sharing one `topSpecies`,
- * `speciesIds` and `countsBySource` instance, so a single downstream push or
- * assignment would mutate every empty hexbin at once.
- */
-function emptyTaxonRecord(): TaxonRecord {
-  return {
-    occurrenceCount: 0,
-    uniqueSpeciesCount: 0,
-    uniqueObserverCount: 0,
-    uniqueDateCount: 0,
-    temporalSpanYears: 0,
-    firstDate: null,
-    lastDate: null,
-    topSpecies: [],
-    speciesIds: [],
-    countsBySource: {},
-  }
-}
-
-function toTaxonRecord(acc: HexAccumulator | undefined, speciesIndex: string[]): TaxonRecord {
-  if (!acc) return emptyTaxonRecord()
-
+function toTaxonRecord(acc: HexAccumulator, speciesIndex: string[]): TaxonRecord {
   const span = acc.firstDate && acc.lastDate
     ? Math.max(0, new Date(acc.lastDate).getFullYear() - new Date(acc.firstDate).getFullYear())
     : 0
@@ -267,27 +246,36 @@ async function main(): Promise<void> {
     return id
   }
 
-  const allAcc  = new Map<string, HexAccumulator>()
-  const vertAcc = new Map<string, HexAccumulator>()
+  // One accumulator set per filter. The filters overlap by design — a bird
+  // lands in `birds`, `vertebrates` and `all` — so a record is accumulated once
+  // per group it belongs to rather than routed to a single bucket.
+  const accByFilter = new Map<TaxonFilter, Map<string, HexAccumulator>>(
+    TAXON_FILTERS.map(filter => [filter, new Map<string, HexAccumulator>()]),
+  )
 
   for (const record of records) {
     const hexId = occurrenceToHex(record.lat, record.lng)
     const speciesId = internSpecies(record.species)
 
-    for (const [map, include] of [[allAcc, true], [vertAcc, record.isVertebrate]] as const) {
-      if (!include) continue
-      let acc = map.get(hexId)
-      if (!acc) { acc = newAccumulator(); map.set(hexId, acc) }
+    for (const filter of ['all' as const, ...groupsForClass(record.className)]) {
+      const byHex = accByFilter.get(filter)!
+      let acc = byHex.get(hexId)
+      if (!acc) { acc = newAccumulator(); byHex.set(hexId, acc) }
       accumulate(acc, record, speciesId)
     }
   }
 
-  const hexbins: HexbinRecord[] = allHexIds.map(hexId => ({
-    hexId,
-    all:            toTaxonRecord(allAcc.get(hexId), speciesIndex),
-    vertebrates:    toTaxonRecord(vertAcc.get(hexId), speciesIndex),
-    habitatQuality: habitatByHex[hexId] ?? 0,
-  }))
+  // Filters with no records in a hexbin are omitted rather than written as
+  // zeroed records: at six filters across ~6,300 hexbins the empties would
+  // dominate the file. `taxonDataFor` substitutes an empty record on read.
+  const hexbins: HexbinRecord[] = allHexIds.map(hexId => {
+    const taxa: Partial<Record<TaxonFilter, TaxonRecord>> = {}
+    for (const filter of TAXON_FILTERS) {
+      const acc = accByFilter.get(filter)!.get(hexId)
+      if (acc) taxa[filter] = toTaxonRecord(acc, speciesIndex)
+    }
+    return { hexId, taxa, habitatQuality: habitatByHex[hexId] ?? 0 }
+  })
 
   const output: HexbinsFile = {
     schemaVersion: CURRENT_SCHEMA_VERSION,
@@ -300,11 +288,21 @@ async function main(): Promise<void> {
 
   writeFileSync(OUTPUT, JSON.stringify(output))
 
-  const populated = hexbins.filter(h => h.all.occurrenceCount > 0).length
+  const populated = hexbins.filter(h => (h.taxa.all?.occurrenceCount ?? 0) > 0).length
   console.log(`\nDone → ${OUTPUT}`)
   console.log(`  ${hexbins.length} hexbins (${populated} with records)`)
   console.log(`  ${speciesIndex.length} unique species`)
   console.log(`  sources: ${sourceMeta.map(s => `${s.id} (${s.recordCount})`).join(', ')}`)
+
+  // Per-filter counts make an empty group filter visible here rather than as a
+  // missing button in the UI — the usual cause is a source that stopped
+  // supplying class names, which is otherwise silent.
+  console.log('  taxon filters:')
+  for (const filter of TAXON_FILTERS) {
+    const byHex = accByFilter.get(filter)!
+    const total = [...byHex.values()].reduce((sum, acc) => sum + acc.occurrenceCount, 0)
+    console.log(`    ${filter.padEnd(14)} ${String(total).padStart(7)} records in ${byHex.size} hexbins`)
+  }
 }
 
 main().catch(err => { console.error(err); process.exit(1) })

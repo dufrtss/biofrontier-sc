@@ -6,43 +6,52 @@ import InfoTooltip from '@/components/ui/InfoTooltip'
 
 interface Props {
   value: TaxonFilter
+  /**
+   * Filters to offer, already ordered and restricted to those the loaded
+   * dataset has records for — see `resolveAvailableFilters`. An old data file
+   * therefore shows a shorter list rather than filters that rank nothing.
+   */
+  options: TaxonFilter[]
   onChange: (v: TaxonFilter) => void
   onOpenMethodology: (sectionId: string) => void
 }
 
-export default function TaxonSelector({ value, onChange, onOpenMethodology }: Props) {
+export default function TaxonSelector({ value, options, onChange, onOpenMethodology }: Props) {
   const t = useTranslations('TaxonSelector')
-
-  const OPTIONS: { value: TaxonFilter; label: string }[] = [
-    { value: 'all',         label: t('allTaxa')      },
-    { value: 'vertebrates', label: t('vertebrates')  },
-  ]
-
-  const tooltips: Record<TaxonFilter, string> = {
-    all:         t('tooltipAll'),
-    vertebrates: t('tooltipVertebrates'),
-  }
 
   return (
     <div className="flex items-center gap-2">
-      <div className="flex gap-1 bg-slate-800 rounded-full p-1">
-        {OPTIONS.map(opt => (
+      {/*
+        Radiogroup rather than a row of buttons: exactly one filter is active at
+        a time, and without `aria-checked` which one is active is carried by
+        background colour alone — invisible to a screen reader, and marginal for
+        anyone who does not perceive the contrast.
+      */}
+      <div
+        role="radiogroup"
+        aria-label={t('groupLabel')}
+        className="flex gap-1 bg-slate-800 rounded-full p-1 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {options.map(filter => (
           <button
-            key={opt.value}
-            onClick={() => onChange(opt.value)}
+            key={filter}
+            role="radio"
+            aria-checked={value === filter}
+            onClick={() => onChange(filter)}
             className={[
-              'px-4 py-1.5 rounded-full text-sm font-medium transition-colors',
-              value === opt.value
+              'px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap',
+              value === filter
                 ? 'bg-blue-600 text-white shadow'
                 : 'text-slate-400 hover:text-slate-200',
             ].join(' ')}
           >
-            {opt.label}
+            {t(`labels.${filter}`)}
           </button>
         ))}
       </div>
       <InfoTooltip
-        content={tooltips[value]}
+        content={t(`tooltips.${value}`)}
         learnMore={{ sectionId: 'taxa-coverage' }}
         onLearnMore={onOpenMethodology}
         align="right"

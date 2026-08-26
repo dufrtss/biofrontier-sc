@@ -1,14 +1,22 @@
 'use client'
 
 import { useTranslations } from 'next-intl'
-import type { ScoredHexbin } from '@/lib/types'
+import type { ScoredHexbin, TaxonFilter } from '@/lib/types'
 import { scoreToColor } from '@/lib/color'
 import { hexCenter } from '@/lib/h3-utils'
+import { taxonDataFor } from '@/lib/hexbins-file'
 import InfoTooltip from '@/components/ui/InfoTooltip'
 
 interface Props {
   rankedHexIds: string[]
   hexbins: Record<string, ScoredHexbin>
+  /**
+   * The ranking itself is computed per filter, so the record count shown
+   * alongside each rank has to come from the same filter — quoting the
+   * all-taxa total next to a birds-only ranking invites the reader to
+   * attribute one to the other.
+   */
+  taxonFilter: TaxonFilter
   selectedHexId: string | null
   onSelect: (hexId: string) => void
   onOpenMethodology: (sectionId: string) => void
@@ -21,7 +29,7 @@ function formatCoords(hexId: string): string {
   return `${Math.abs(lat).toFixed(2)}°S, ${Math.abs(lng).toFixed(2)}°W`
 }
 
-export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, onSelect, onOpenMethodology, onClose, limit = 20 }: Props) {
+export default function FrontierRanking({ rankedHexIds, hexbins, taxonFilter, selectedHexId, onSelect, onOpenMethodology, onClose, limit = 20 }: Props) {
   const t = useTranslations('FrontierRanking')
   const topIds = rankedHexIds.slice(0, limit)
 
@@ -58,7 +66,7 @@ export default function FrontierRanking({ rankedHexIds, hexbins, selectedHexId, 
           const isSelected = hexId === selectedHexId
           const color = scoreToColor(hex.frontierScore)
           const pct = (hex.frontierScore * 100).toFixed(0)
-          const td  = hex.all
+          const td  = taxonDataFor(hex, taxonFilter)
 
           return (
             <li key={hexId}>

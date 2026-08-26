@@ -1,6 +1,8 @@
 import type { ActiveComponents } from './scoring'
+import type { TaxonFilter } from './taxonomy'
 
-export type TaxonFilter = 'all' | 'vertebrates'
+export type { TaxonFilter }
+export { TAXON_FILTERS } from './taxonomy'
 
 /** Occurrence data sources the pipeline can draw from. */
 export type SourceId = 'gbif' | 'inaturalist' | 'specieslink'
@@ -27,12 +29,26 @@ export interface TaxonRecord {
   countsBySource?: Partial<Record<SourceId, number>>
 }
 
-// Shape stored in public/data/hexbins.json
-export interface HexbinRecord {
+/**
+ * A hexbin as stored on disk. Schema v3 keys taxon records by filter; v1 and v2
+ * carried exactly two fixed fields. `normalizeHexbinsFile` folds both into
+ * `HexbinRecord`, so nothing downstream sees the difference.
+ */
+export interface RawHexbinRecord {
   hexId: string
-  all: TaxonRecord
-  vertebrates: TaxonRecord
+  /** Schema v3+. */
+  taxa?: Partial<Record<TaxonFilter, TaxonRecord>>
+  /** Schema v1/v2. */
+  all?: TaxonRecord
+  /** Schema v1/v2. */
+  vertebrates?: TaxonRecord
   habitatQuality: number  // 0–1, fraction of hexbin covered by Atlantic Forest
+}
+
+/** A hexbin after normalization: `taxa` is always populated. */
+export interface HexbinRecord extends RawHexbinRecord {
+  taxa: Partial<Record<TaxonFilter, TaxonRecord>>
+  habitatQuality: number
 }
 
 /** Per-source provenance for a generated dataset. */
@@ -50,18 +66,21 @@ export interface HexbinsFile {
   schemaVersion?: number
   generatedAt: string   // ISO 8601
   hexbinCount: number
-  hexbins: HexbinRecord[]
+  hexbins: RawHexbinRecord[]
   /** Global deduplicated species names. Schema v2+. */
   speciesIndex?: string[]
   /** Which sources produced this dataset. Schema v2+. */
   sources?: SourceMeta[]
 }
 
-/** A `HexbinsFile` after normalization, with v2 fields guaranteed present. */
-export interface NormalizedHexbinsFile extends HexbinsFile {
+/** A `HexbinsFile` after normalization, with later-schema fields guaranteed present. */
+export interface NormalizedHexbinsFile extends Omit<HexbinsFile, 'hexbins'> {
+  hexbins: HexbinRecord[]
   schemaVersion: number
   speciesIndex: string[]
   sources: SourceMeta[]
+  /** Filters with at least one record in this dataset, in display order. */
+  availableFilters: TaxonFilter[]
   /**
    * True when species sets were reconstructed from `topSpecies` because the
    * source file predates the species index. Incompleteness scoring still runs
@@ -104,4 +123,6 @@ export interface AppState {
   habitatIsPlaceholder: boolean
   /** Which optional components entered the composite score for this dataset. */
   activeComponents: ActiveComponents
+  /** Filters with at least one record in this dataset. Drives TaxonSelector. */
+  availableFilters: TaxonFilter[]
 }

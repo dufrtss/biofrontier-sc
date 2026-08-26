@@ -22,8 +22,7 @@ function taxonRecord(): TaxonRecord {
 function scoredHex(hexId: string, rank: number): ScoredHexbin {
   return {
     hexId,
-    all: taxonRecord(),
-    vertebrates: taxonRecord(),
+    taxa: { all: taxonRecord() },
     habitatQuality: 0.75,
     effortScore: 0.25,
     frontierScore: 0.8,
