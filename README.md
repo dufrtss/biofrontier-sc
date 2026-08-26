@@ -122,13 +122,33 @@ For real coverage, download an Atlantic Forest remnants GeoJSON to
 are listed in the header of `scripts/compute-habitat.ts` (MapBiomas, SOS Mata
 Atlântica, IBGE).
 
+### Taxon filters
+
+Occurrences are grouped by the taxonomic class they were identified to — the
+coarsest rank every source supplies reliably (GBIF `class`, iNaturalist
+`iconic_taxon_name`, Darwin Core `class` in speciesLink). The mapping lives in
+`src/lib/taxonomy.ts`; adapters pass the class name through rather than deciding
+membership, so adding a filter is one edit there instead of one per source.
+
+The filters overlap rather than partition the data — a toucan counts toward
+Birds, Vertebrates and All Taxa — and each is scored independently, so switching
+filter recomputes the ranking from scratch. Records identified only above class
+level, and every plant, fungus and micro-organism, count toward All Taxa alone:
+they contribute genuine survey effort, so they are never discarded, only left
+ungrouped rather than guessed at.
+
 ### Data schema
 
-`hexbins.json` is versioned. Schema 2 adds a global `speciesIndex` with per-hexbin
-`speciesIds`, plus per-source provenance. Schema 1 files still load — the app
-reconstructs a partial species index from the top-10 lists and flags the result
-as incomplete, disabling taxonomic incompleteness scoring rather than computing
-it from data too sparse to support it. See `src/lib/hexbins-file.ts`.
+`hexbins.json` is versioned. Schema 3 keys each hexbin's taxon records by filter
+under `taxa`, omitting filters with no records; schema 2 added a global
+`speciesIndex` with per-hexbin `speciesIds`, plus per-source provenance.
+
+Older files still load. Schema 2 upgrades to a two-key `taxa` map, so the
+selector offers All Taxa and Vertebrates alone rather than group filters the
+file cannot answer for. Schema 1 additionally reconstructs a partial species
+index from the top-10 lists and flags the result as incomplete, disabling
+taxonomic incompleteness scoring rather than computing it from data too sparse
+to support it. See `src/lib/hexbins-file.ts`.
 
 ---
 
