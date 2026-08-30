@@ -18,7 +18,7 @@ import type {
 } from './types'
 import { TAXON_FILTERS } from './taxonomy'
 
-export const CURRENT_SCHEMA_VERSION = 3
+export const CURRENT_SCHEMA_VERSION = 4
 
 /**
  * Stand-in for a filter a hexbin has no records under.
@@ -45,6 +45,29 @@ const EMPTY_TAXON_RECORD: TaxonRecord = Object.freeze({
   speciesIds: [],
   countsBySource: {},
 })
+
+/**
+ * Species name → GBIF usage key, for the names the backbone matched.
+ *
+ * Keys arrive as an array parallel to `speciesIndex` (schema v4+) because that
+ * is far cheaper on the wire than repeating every name; the app wants lookups
+ * by name, so the pairing happens once here. A file without them yields an
+ * empty map, and `gbifSpeciesUrl` degrades to a pre-filled GBIF search.
+ */
+function buildGbifKeyIndex(
+  speciesIndex: string[],
+  speciesKeys: Array<number | null> | undefined,
+): Map<string, number> {
+  const byName = new Map<string, number>()
+  if (!speciesKeys) return byName
+
+  const count = Math.min(speciesIndex.length, speciesKeys.length)
+  for (let i = 0; i < count; i++) {
+    const key = speciesKeys[i]
+    if (key != null) byName.set(speciesIndex[i], key)
+  }
+  return byName
+}
 
 /** The taxon record for one filter, or an empty one when the filter has no records. */
 export function taxonDataFor(hex: HexbinRecord, filter: TaxonFilter): TaxonRecord {
@@ -153,6 +176,7 @@ export function normalizeHexbinsFile(file: HexbinsFile): NormalizedHexbinsFile {
       speciesIndex: file.speciesIndex,
       sources: file.sources ?? [],
       availableFilters,
+      gbifKeyByName: buildGbifKeyIndex(file.speciesIndex, file.speciesKeys),
       speciesDataIsPartial: false,
       habitatIsPlaceholder,
     }
@@ -170,6 +194,9 @@ export function normalizeHexbinsFile(file: HexbinsFile): NormalizedHexbinsFile {
     speciesIndex,
     sources: file.sources ?? [],
     availableFilters,
+    // Rebuilt indices carry no stable positions, so any `speciesKeys` a v1 file
+    // somehow held could not be aligned to them.
+    gbifKeyByName: new Map<string, number>(),
     speciesDataIsPartial: true,
     habitatIsPlaceholder,
   }

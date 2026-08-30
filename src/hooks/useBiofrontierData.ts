@@ -13,6 +13,9 @@ import { computeIncompleteness } from '@/lib/incompleteness'
 import { normalizeHexbinsFile, taxonDataFor } from '@/lib/hexbins-file'
 import { H3_RES6_AREA_KM2 } from '@/lib/h3-utils'
 
+/** Shared so a dataset without GBIF keys still returns a stable reference. */
+const NO_GBIF_KEYS: Map<string, number> = new Map()
+
 export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
   selectHex: (hexId: string | null) => void
 } {
@@ -154,6 +157,7 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     habitatIsPlaceholder: raw?.habitatIsPlaceholder ?? false,
     activeComponents,
     availableFilters: raw?.availableFilters ?? ['all'],
+    gbifKeyByName: raw?.gbifKeyByName ?? NO_GBIF_KEYS,
     selectHex: setSelected,
   }
 }

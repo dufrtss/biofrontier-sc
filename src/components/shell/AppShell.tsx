@@ -22,7 +22,7 @@ export default function AppShell() {
   const {
     hexbins, rankedHexIds, selectedHexId, loading, error,
     lastUpdated, speciesCount, speciesDataIsPartial, habitatIsPlaceholder, sources,
-    activeComponents, availableFilters, selectHex,
+    activeComponents, availableFilters, gbifKeyByName, selectHex,
   } = useBiofrontierData(taxonFilter)
 
   const [rankingOpen, setRankingOpen]               = useState(false)
@@ -159,6 +159,7 @@ export default function AppShell() {
           <HexDetail
             hex={selectedHex}
             taxonFilter={taxonFilter}
+            gbifKeyByName={gbifKeyByName}
             habitatIsPlaceholder={habitatIsPlaceholder}
             onClose={() => selectHex(null)}
             onOpenMethodology={openMethodology}

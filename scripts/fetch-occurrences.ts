@@ -2,8 +2,9 @@
  * Builds `public/data/hexbins.json` — the single data file the app loads.
  *
  * Fetches occurrence records from every selected source, deduplicates across
- * them, aggregates to H3 hexbins once per taxon filter, and writes a schema v3
- * file with a global species index.
+ * them, aggregates to H3 hexbins once per taxon filter, resolves the species
+ * index against the GBIF backbone, and writes a schema v4 file with a global
+ * species index and its usage keys.
  *
  * Prerequisite: `public/data/habitat-by-hex.json` (`npm run data:habitat` for
  * real forest cover, or `npm run data:habitat-fallback` for the placeholder).
@@ -31,6 +32,7 @@ import { CURRENT_SCHEMA_VERSION } from '../src/lib/hexbins-file'
 import { TAXON_FILTERS, groupsForClass } from '../src/lib/taxonomy'
 import { ALL_SOURCES, getSource, isSourceId } from './sources'
 import { dedupeOccurrences } from './sources/dedup'
+import { resolveGbifKeys } from './gbif-keys'
 import type { Occurrence } from './sources/types'
 
 const OUTPUT  = resolve('public/data/hexbins.json')
@@ -277,11 +279,26 @@ async function main(): Promise<void> {
     return { hexId, taxa, habitatQuality: habitatByHex[hexId] ?? 0 }
   })
 
+  // ── Resolve GBIF taxon links ──
+  // Last, and non-fatal: the keys only decide whether the app links a species
+  // to its GBIF page or to a GBIF search. Losing a whole fetch run to a flaky
+  // lookup service would be absurdly out of proportion. `npm run data:gbif-keys`
+  // fills them in afterwards.
+  console.log(`\nResolving ${speciesIndex.length} species names against the GBIF backbone...`)
+  let speciesKeys: Array<number | null> | undefined
+  try {
+    speciesKeys = await resolveGbifKeys(speciesIndex, m => console.log(`  ${m}`))
+  } catch (err) {
+    console.warn(`  key resolution failed (${err}); writing file without GBIF links`)
+    console.warn('  run npm run data:gbif-keys to add them')
+  }
+
   const output: HexbinsFile = {
     schemaVersion: CURRENT_SCHEMA_VERSION,
     generatedAt: new Date().toISOString(),
     hexbinCount: hexbins.length,
     speciesIndex,
+    speciesKeys,
     sources: sourceMeta,
     hexbins,
   }

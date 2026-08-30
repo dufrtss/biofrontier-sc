@@ -151,7 +151,7 @@ describe('normalizeHexbinsFile — v2 input', () => {
 describe('normalizeHexbinsFile — v3 input', () => {
   function v3File(): HexbinsFile {
     return {
-      schemaVersion: CURRENT_SCHEMA_VERSION,
+      schemaVersion: 3,
       generatedAt: '2026-08-26T00:00:00.000Z',
       hexbinCount: 2,
       speciesIndex: ['Ramphastos dicolorus', 'Boana faber', 'Leopardus wiedii'],
@@ -195,6 +195,49 @@ describe('normalizeHexbinsFile — v3 input', () => {
     const empty = taxonDataFor(file.hexbins[1], 'all')
     expect(() => { empty.occurrenceCount = 99 }).toThrow()
     expect(taxonDataFor(file.hexbins[0], 'mammals').occurrenceCount).toBe(0)
+  })
+})
+
+describe('normalizeHexbinsFile — GBIF usage keys', () => {
+  function v4File(speciesKeys?: Array<number | null>): HexbinsFile {
+    return {
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+      generatedAt: '2026-08-30T00:00:00.000Z',
+      hexbinCount: 1,
+      speciesIndex: ['Rothschildia speculifer', 'Boana faber', 'Leopardus wiedii'],
+      speciesKeys,
+      hexbins: [
+        {
+          hexId: '86a91b477ffffff',
+          taxa: { all: taxonRecord(['Rothschildia speculifer'], { speciesIds: [0, 1, 2] }) },
+          habitatQuality: 0.8,
+        },
+      ],
+    }
+  }
+
+  it('pairs each key with its species name', () => {
+    const { gbifKeyByName } = normalizeHexbinsFile(v4File([5124607, 2426857, 2434970]))
+    expect(gbifKeyByName.get('Rothschildia speculifer')).toBe(5124607)
+    expect(gbifKeyByName.get('Leopardus wiedii')).toBe(2434970)
+  })
+
+  it('omits names the backbone could not match', () => {
+    const { gbifKeyByName } = normalizeHexbinsFile(v4File([5124607, null, 2434970]))
+    expect(gbifKeyByName.has('Boana faber')).toBe(false)
+    expect(gbifKeyByName.size).toBe(2)
+  })
+
+  it('yields an empty map for a file without keys', () => {
+    expect(normalizeHexbinsFile(v4File()).gbifKeyByName.size).toBe(0)
+    expect(normalizeHexbinsFile(v1File()).gbifKeyByName.size).toBe(0)
+  })
+
+  it('ignores keys past the end of the species index', () => {
+    // A truncated or over-long array must not pair a key with the wrong name.
+    const { gbifKeyByName } = normalizeHexbinsFile(v4File([5124607]))
+    expect(gbifKeyByName.size).toBe(1)
+    expect(gbifKeyByName.get('Rothschildia speculifer')).toBe(5124607)
   })
 })
 

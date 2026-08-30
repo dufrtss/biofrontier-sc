@@ -69,6 +69,12 @@ export interface HexbinsFile {
   hexbins: RawHexbinRecord[]
   /** Global deduplicated species names. Schema v2+. */
   speciesIndex?: string[]
+  /**
+   * GBIF backbone usage keys, parallel to `speciesIndex` — null for a name the
+   * backbone could not match. Schema v4+; absent in earlier files, which then
+   * fall back to search links. Written by `npm run data:gbif-keys`.
+   */
+  speciesKeys?: Array<number | null>
   /** Which sources produced this dataset. Schema v2+. */
   sources?: SourceMeta[]
 }
@@ -81,6 +87,11 @@ export interface NormalizedHexbinsFile extends Omit<HexbinsFile, 'hexbins'> {
   sources: SourceMeta[]
   /** Filters with at least one record in this dataset, in display order. */
   availableFilters: TaxonFilter[]
+  /**
+   * Species name → GBIF usage key, for the names that have one. Empty on files
+   * without `speciesKeys`, which links then treat as "unresolved".
+   */
+  gbifKeyByName: Map<string, number>
   /**
    * True when species sets were reconstructed from `topSpecies` because the
    * source file predates the species index. Incompleteness scoring still runs
@@ -125,4 +136,6 @@ export interface AppState {
   activeComponents: ActiveComponents
   /** Filters with at least one record in this dataset. Drives TaxonSelector. */
   availableFilters: TaxonFilter[]
+  /** Species name → GBIF usage key, for linking a species to its GBIF page. */
+  gbifKeyByName: Map<string, number>
 }

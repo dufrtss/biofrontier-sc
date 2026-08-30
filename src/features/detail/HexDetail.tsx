@@ -6,11 +6,14 @@ import type { ScoredHexbin, TaxonFilter } from '@/lib/types'
 import { scoreToColor } from '@/lib/color'
 import { hexCenter } from '@/lib/h3-utils'
 import { taxonDataFor } from '@/lib/hexbins-file'
+import { gbifSpeciesUrl } from '@/lib/gbif'
 import InfoTooltip from '@/components/ui/InfoTooltip'
 
 interface Props {
   hex: ScoredHexbin | null
   taxonFilter: TaxonFilter
+  /** Species name → GBIF usage key; a name missing here links to a GBIF search. */
+  gbifKeyByName: Map<string, number>
   /** When true the habitat figure is a uniform placeholder, not a measurement. */
   habitatIsPlaceholder: boolean
   onClose: () => void
@@ -59,7 +62,7 @@ function AnimatedBar({ label, labelExtra, value, color, animate }: AnimatedBarPr
   )
 }
 
-export default function HexDetail({ hex, taxonFilter, habitatIsPlaceholder, onClose, onOpenMethodology }: Props) {
+export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPlaceholder, onClose, onOpenMethodology }: Props) {
   const t = useTranslations('HexDetail')
   const prevHexIdRef = useRef<string | null>(null)
   const [shouldAnimate, setShouldAnimate] = useState(false)
@@ -336,7 +339,7 @@ export default function HexDetail({ hex, taxonFilter, habitatIsPlaceholder, onCl
                 {td.topSpecies.map(({ name, count }) => (
                   <li key={name} className="flex items-center justify-between gap-2 group">
                     <a
-                      href={`https://www.gbif.org/species/search?q=${encodeURIComponent(name)}`}
+                      href={gbifSpeciesUrl(name, gbifKeyByName.get(name))}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-[12px] italic truncate text-blue-400/80 hover:text-blue-300 transition-colors flex-1 min-w-0"
