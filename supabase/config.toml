@@ -1,0 +1,64 @@
+# Supabase project configuration, pushed with `supabase config push`.
+#
+# Only the settings this project actually depends on are declared. Secrets are
+# read from the environment via env(...) so nothing sensitive is committed —
+# see .env.example for the variables involved.
+
+project_id = "ntgupaqcyjfnqpwshaqu"
+
+[auth]
+# Magic links are the only way into this app, so the redirect allow-list is
+# load-bearing rather than incidental: `useAuth` passes the current page as
+# emailRedirectTo, and a URL missing from this list silently sends the user to
+# site_url instead of back to the hexbin they were looking at.
+site_url = "https://omega-eduardo-freitas-projects.vercel.app"
+additional_redirect_urls = [
+  "https://omega-eduardo-freitas-projects.vercel.app/**",
+  "http://localhost:3000/**",
+]
+
+enable_signup = true
+# Sessions outlive a field trip; a biologist should not be signed out between
+# recording an observation and confirming someone else's.
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+
+[auth.email]
+enable_signup = true
+# No password is ever collected, so there is no confirmation step to skip:
+# clicking the emailed link is itself the proof of address.
+enable_confirmations = true
+secure_password_change = false
+# Supabase's own defaults, restated deliberately. Omitting a field here does not
+# leave the remote value alone — `config push` overwrites it with the CLI's
+# default, so anything not written down is silently reset. `max_frequency` in
+# particular is the throttle that stops the sign-in form being used to bomb a
+# third party's inbox.
+max_frequency = "1m0s"
+otp_length = 8
+otp_expiry = 3600
+
+[auth.email.smtp]
+enabled = true
+host = "smtp.resend.com"
+port = 465
+user = "resend"
+pass = "env(RESEND_API_KEY)"
+admin_email = "onboarding@resend.dev"
+sender_name = "BioFrontier SC"
+
+[auth.mfa]
+max_enrolled_factors = 10
+
+[auth.mfa.totp]
+# Restated for the same reason: the CLI defaults these to false, while the
+# project had them enabled. A blank section here is a downgrade, not a no-op.
+enroll_enabled = true
+verify_enabled = true
+
+[auth.rate_limit]
+# The built-in Supabase sender allows a handful of messages per hour, which is
+# unusable for a class. Custom SMTP lifts that, but a limit still belongs here:
+# this is the ceiling on how fast someone could use the sign-in form to send
+# mail to third parties.
+email_sent = 30
