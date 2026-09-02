@@ -83,7 +83,9 @@
     "wellSurveyed": "Bem levantado",
     "highFrontier": "Alto potencial de fronteira",
     "unsurveyed": "Não levantado",
-    "tooltipCoverage": "Cada célula é uma unidade hexagonal H3 (~36 km²). Os limites são algorítmicos, não administrativos — não coincidem com municípios ou áreas protegidas."
+    "tooltipCoverage": "Cada célula é uma unidade hexagonal H3 (~36 km²). Os limites são algorítmicos, não administrativos — não coincidem com municípios ou áreas protegidas.",
+    "communityRecord": "Registro da comunidade",
+    "communityConfirmations": "{n} confirmações da comunidade"
   },
   "MethodologyPanel": {
     "title": "Como Funciona",
@@ -338,5 +340,28 @@
     "scopeVisibleHint": "Corresponde ao ranking na tela",
     "scopeAll": "Todos os {count} hexágonos ranqueados",
     "scopeAllHint": "Conjunto completo para análise em R, QGIS ou planilha"
+  },
+  "Community": {
+    "title": "Observações da comunidade",
+    "highFrontierPrompt": "Esta área é pouco amostrada. Um registro daqui vale mais do que um de um hexágono bem estudado.",
+    "reviewExplainer": "As submissões são revisadas por outros colaboradores. {n} confirmações independentes marcam um registro como aprovado pela comunidade; de todo modo, ele não entra no índice de fronteira.",
+    "emailPlaceholder": "seu@email.com",
+    "sendMagicLink": "Enviar link de acesso",
+    "magicLinkSent": "Verifique seu e-mail para o link de acesso.",
+    "signOut": "Sair",
+    "addObservation": "+ Adicionar observação",
+    "speciesPlaceholder": "Nome científico, ex. Leopardus guttulus",
+    "notesPlaceholder": "Notas (habitat, evidência, como foi identificado)",
+    "coordinateNote": "Registrado no centro do hexágono ({lat}, {lng}).",
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "submitted": "Enviado. Aparecerá no mapa assim que for confirmado por outros.",
+    "awaitingReview": "Aguardando revisão",
+    "confirmations": "{n}/{of} confirmado",
+    "disputed": "{n} contestaram esta identificação",
+    "yourRecord": "Seu registro",
+    "withdraw": "Retirar",
+    "confirm": "Confirmar",
+    "dispute": "Contestar"
   }
 }

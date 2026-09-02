@@ -8,6 +8,7 @@ import { hexCenter } from '@/lib/h3-utils'
 import { taxonDataFor } from '@/lib/hexbins-file'
 import { gbifSpeciesUrl } from '@/lib/gbif'
 import InfoTooltip from '@/components/ui/InfoTooltip'
+import CommunityPanel from '@/features/community/CommunityPanel'
 
 interface Props {
   hex: ScoredHexbin | null
@@ -18,6 +19,8 @@ interface Props {
   habitatIsPlaceholder: boolean
   onClose: () => void
   onOpenMethodology: (sectionId: string) => void
+  /** Called after a community submission or review vote, to refresh the map layer. */
+  onCommunityChange: () => void
 }
 
 interface AnimatedBarProps {
@@ -62,7 +65,7 @@ function AnimatedBar({ label, labelExtra, value, color, animate }: AnimatedBarPr
   )
 }
 
-export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPlaceholder, onClose, onOpenMethodology }: Props) {
+export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPlaceholder, onClose, onOpenMethodology, onCommunityChange }: Props) {
   const t = useTranslations('HexDetail')
   const prevHexIdRef = useRef<string | null>(null)
   const [shouldAnimate, setShouldAnimate] = useState(false)
@@ -359,6 +362,20 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
             </div>
           </>
         )}
+
+        {/* Community contributions. Renders nothing when Supabase is not
+            configured, so a fork without a backend keeps the full analysis. */}
+        <div className="mx-4 border-t border-slate-800" />
+        <CommunityPanel
+          /* Remount per hexbin: a different cell is a different question, and
+             carrying a half-typed form across would risk filing an observation
+             against the wrong one. */
+          key={hex.hexId}
+          hexId={hex.hexId}
+          center={[lat, lng]}
+          frontierScore={hex.frontierScore}
+          onSubmitted={onCommunityChange}
+        />
 
         <div className="h-2" />
       </div>

@@ -83,7 +83,9 @@
     "wellSurveyed": "Well surveyed",
     "highFrontier": "High frontier potential",
     "unsurveyed": "Unsurveyed",
-    "tooltipCoverage": "Each cell is an H3 hexagonal grid unit (~36 km²). Boundaries are algorithmic, not administrative — they don't align with municipalities or protected areas."
+    "tooltipCoverage": "Each cell is an H3 hexagonal grid unit (~36 km²). Boundaries are algorithmic, not administrative — they don't align with municipalities or protected areas.",
+    "communityRecord": "Community record",
+    "communityConfirmations": "{n} community confirmations"
   },
   "MethodologyPanel": {
     "title": "How It Works",
@@ -338,5 +340,28 @@
     "scopeVisibleHint": "Matches the ranking on screen",
     "scopeAll": "All {count} ranked hexbins",
     "scopeAllHint": "Full dataset for analysis in R, QGIS or a spreadsheet"
+  },
+  "Community": {
+    "title": "Community observations",
+    "highFrontierPrompt": "This area is under-surveyed. A record from here is worth more than one from a well-studied hexbin.",
+    "reviewExplainer": "Submissions are reviewed by other contributors. {n} independent confirmations mark a record as community-approved; it stays out of the frontier score either way.",
+    "emailPlaceholder": "your@email.com",
+    "sendMagicLink": "Send sign-in link",
+    "magicLinkSent": "Check your email for a sign-in link.",
+    "signOut": "Sign out",
+    "addObservation": "+ Add an observation",
+    "speciesPlaceholder": "Scientific name, e.g. Leopardus guttulus",
+    "notesPlaceholder": "Notes (habitat, evidence, how it was identified)",
+    "coordinateNote": "Recorded at the hexbin centre ({lat}, {lng}).",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "submitted": "Submitted. It will appear on the map once confirmed by others.",
+    "awaitingReview": "Awaiting review",
+    "confirmations": "{n}/{of} confirmed",
+    "disputed": "{n} disputed this identification",
+    "yourRecord": "Your record",
+    "withdraw": "Withdraw",
+    "confirm": "Confirm",
+    "dispute": "Dispute"
   }
 }

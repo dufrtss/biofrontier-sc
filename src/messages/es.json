@@ -83,7 +83,9 @@
     "wellSurveyed": "Bien relevado",
     "highFrontier": "Alto potencial de frontera",
     "unsurveyed": "No relevado",
-    "tooltipCoverage": "Cada celda es una unidad hexagonal H3 (~36 km²). Los límites son algorítmicos, no administrativos — no coinciden con municipios ni áreas protegidas."
+    "tooltipCoverage": "Cada celda es una unidad hexagonal H3 (~36 km²). Los límites son algorítmicos, no administrativos — no coinciden con municipios ni áreas protegidas.",
+    "communityRecord": "Registro de la comunidad",
+    "communityConfirmations": "{n} confirmaciones de la comunidad"
   },
   "MethodologyPanel": {
     "title": "Cómo Funciona",
@@ -338,5 +340,28 @@
     "scopeVisibleHint": "Coincide con el ranking en pantalla",
     "scopeAll": "Los {count} hexágonos clasificados",
     "scopeAllHint": "Conjunto completo para análisis en R, QGIS u hoja de cálculo"
+  },
+  "Community": {
+    "title": "Observaciones de la comunidad",
+    "highFrontierPrompt": "Esta área está poco muestreada. Un registro de aquí vale más que uno de un hexágono bien estudiado.",
+    "reviewExplainer": "Las contribuciones son revisadas por otros colaboradores. {n} confirmaciones independientes marcan un registro como aprobado por la comunidad; en todo caso, no entra en el índice de frontera.",
+    "emailPlaceholder": "tu@email.com",
+    "sendMagicLink": "Enviar enlace de acceso",
+    "magicLinkSent": "Revisa tu correo para el enlace de acceso.",
+    "signOut": "Cerrar sesión",
+    "addObservation": "+ Añadir observación",
+    "speciesPlaceholder": "Nombre científico, p. ej. Leopardus guttulus",
+    "notesPlaceholder": "Notas (hábitat, evidencia, cómo se identificó)",
+    "coordinateNote": "Registrado en el centro del hexágono ({lat}, {lng}).",
+    "submit": "Enviar",
+    "cancel": "Cancelar",
+    "submitted": "Enviado. Aparecerá en el mapa cuando otros lo confirmen.",
+    "awaitingReview": "Pendiente de revisión",
+    "confirmations": "{n}/{of} confirmado",
+    "disputed": "{n} han cuestionado esta identificación",
+    "yourRecord": "Tu registro",
+    "withdraw": "Retirar",
+    "confirm": "Confirmar",
+    "dispute": "Cuestionar"
   }
 }
