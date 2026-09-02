@@ -12,6 +12,7 @@
     "test:coverage": "vitest run --coverage",
     "data:habitat-fallback": "tsx scripts/compute-habitat-fallback.ts",
     "data:habitat": "tsx scripts/compute-habitat.ts",
+    "data:habitat-merge": "tsx scripts/merge-habitat.ts",
     "data:fetch": "tsx scripts/fetch-occurrences.ts",
     "data:gbif-keys": "tsx scripts/gbif-keys.ts"
   },
