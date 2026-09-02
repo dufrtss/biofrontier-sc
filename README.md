@@ -80,8 +80,8 @@ Open [http://localhost:3000](http://localhost:3000). Stop with `docker compose d
 Pre-computed data is bundled in `public/data/`. To regenerate:
 
 ```bash
-npm run data:habitat-fallback  # habitat placeholder (no download needed) — run first
-npm run data:habitat           # real habitat scores (needs a GeoJSON, see below)
+npm run data:habitat           # native forest cover from MapBiomas — run first
+npm run data:habitat-fallback  # uniform placeholder, for working offline
 npm run data:fetch             # fetch occurrences → public/data/hexbins.json
 npm run data:gbif-keys         # backfill GBIF taxon links into an existing file
 ```
@@ -117,14 +117,29 @@ registering it in `scripts/sources/index.ts` — the orchestrator needs no chang
 
 ### Habitat data
 
-`data:habitat-fallback` writes a uniform `0.5` for every hexbin. The app detects
-a uniform value, **drops the habitat component from the frontier score**, and
-says so in the UI rather than presenting a placeholder as a measurement.
+`npm run data:habitat` computes native forest cover per hexbin from
+[MapBiomas](https://mapbiomas.org/) Collection 11 (30 m, annual, 2025 by
+default — `-- --year=2024` for an earlier one). Nothing needs downloading by
+hand: the annual mosaics are cloud-optimised GeoTIFFs in a public bucket, so the
+script reads only the tiles covering SC over HTTP. A full run takes about a
+minute.
 
-For real coverage, download an Atlantic Forest remnants GeoJSON to
-`public/data/sc-atlantic-forest.geojson` and run `npm run data:habitat`. Sources
-are listed in the header of `scripts/compute-habitat.ts` (MapBiomas, SOS Mata
-Atlântica, IBGE).
+Habitat counts MapBiomas' native forest classes — Forest Formation, Savanna,
+Mangrove, Floodable Forest and Wooded Sandbank Vegetation. Forest plantation
+(class 9) is deliberately excluded: SC's planalto carries large pine and
+eucalyptus stands, and a generic tree-cover product would score those the same
+as old-growth Atlantic Forest. Natural non-forest vegetation is excluded too, so
+the highland grasslands around São Joaquim score low — a real limitation of
+defining this component as *forest* cover, not a data error.
+
+Coverage is measured against land: a coastal hexbin is scored on the part of it
+MapBiomas maps, and one with no land at all is omitted from the file rather than
+recorded as 0% forest.
+
+`data:habitat-fallback` remains as an offline stand-in — it writes a uniform
+`0.5` for every hexbin. The app detects a uniform value, **drops the habitat
+component from the frontier score**, and says so in the UI rather than
+presenting a placeholder as a measurement.
 
 ### Taxon filters
 
@@ -194,6 +209,7 @@ src/
 
 scripts/
 ├── fetch-occurrences.ts # Orchestrator: fetch → dedupe → aggregate → write
+├── compute-habitat.ts   # Native forest cover per hexbin, read from MapBiomas
 ├── gbif-keys.ts         # Species names → GBIF usage keys, for taxon page links
 └── sources/             # One adapter per provider behind a shared interface
 ```

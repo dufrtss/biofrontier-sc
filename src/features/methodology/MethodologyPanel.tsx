@@ -7,6 +7,18 @@ import {
   FRONTIER_WEIGHTS,
   INCOMPLETENESS_CONFIG,
 } from '@/lib/scoring-config'
+import { HABITAT_SOURCE } from '@/lib/habitat-source'
+
+/**
+ * Same reasoning as the formulas: the habitat section names the MapBiomas
+ * release the bundled data was built from, read from the constant the pipeline
+ * downloads with rather than retyped into three locale files.
+ */
+const habitatSource = {
+  collection: HABITAT_SOURCE.collectionLabel,
+  year: HABITAT_SOURCE.year,
+  resolution: HABITAT_SOURCE.resolutionM,
+}
 
 /**
  * The formulas below are rendered from `scoring-config` rather than hardcoded,
@@ -186,12 +198,19 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
           </Section>
 
           <Section id="habitat-quality" title={t('habitatQuality.title')}>
-            <p>{t('habitatQuality.intro')}</p>
+            <p>{t('habitatQuality.intro', habitatSource)}</p>
             <p className="text-amber-400/80 font-medium">{t('habitatQuality.warning')}</p>
-            <p className="text-slate-500">{t('habitatQuality.sourcesLabel')}</p>
-            <ul className="list-disc pl-4 space-y-1 text-slate-500">
-              {(t.raw('habitatQuality.sources') as string[]).map(s => <li key={s}>{s}</li>)}
-            </ul>
+            <p className="text-slate-500">
+              {t('habitatQuality.sourcesLabel')}{' '}
+              <a
+                href="https://mapbiomas.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400/80 hover:text-blue-300 transition-colors"
+              >
+                {t('habitatQuality.source', habitatSource)}
+              </a>
+            </p>
           </Section>
 
           <Section id="data-source" title={t('dataSource.title')}>

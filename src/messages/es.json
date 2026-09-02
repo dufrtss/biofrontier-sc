@@ -68,7 +68,7 @@
     "tooltipRecords": "Una ocurrencia de GBIF — una observación documentada de una especie en esta ubicación, por un investigador, institución o científico ciudadano (ej.: iNaturalist).",
     "tooltipScoreBreakdown": "El Puntaje de Frontera es una combinación ponderada de brecha de muestreo, calidad del hábitat e incompletitud taxonómica. Cada componente se normaliza entre todos los hexágonos de SC, y cualquier componente no disponible en este conjunto de datos se excluye en lugar de estimarse. Consulte la metodología para los pesos en uso.",
     "tooltipFrontierPotential": "Puntaje combinado: cuán poco se ha muestreado esta área, cuánto hábitat de Bosque Atlántico queda y cuántas especies encontradas en áreas vecinas comparables nunca se han registrado aquí.",
-    "tooltipHabitatQuality": "Fracción estimada del hexbin cubierta por Mata Atlántica. Actualmente un placeholder uniforme (0,5) — los valores reales requieren descargar datos de cobertura forestal.",
+    "tooltipHabitatQuality": "Fracción de la superficie terrestre mapeada del hexágono cubierta por bosque nativo, según la cobertura del suelo MapBiomas de 30 m. Las plantaciones de pino y eucalipto quedan excluidas, al igual que la vegetación nativa no boscosa.",
     "tooltipSurveyGap": "Cuánto se ha relevado este hexbin en relación a todos los demás en SC. 100% = nunca relevado; 0% = más intensamente relevado.",
     "tooltipTopSpecies": "Especies más registradas en todos los taxa (plantas, hongos, animales). El grupo de especie (reino/clase) no se muestra porque no se retuvo durante la agregación de datos. Haga clic en cualquier nombre para ver la taxonomía completa en GBIF.",
     "taxonomicIncompleteness": "Incompletitud taxonómica",
@@ -108,7 +108,7 @@
         [
           "habitat_quality",
           "0 – 1",
-          "Fracción del hexágono cubierta por remanentes de Bosque Atlántico. Excluida del puntaje mientras el conjunto de datos solo tenga el valor uniforme provisional."
+          "Fracción de la superficie terrestre mapeada del hexágono cubierta por Bosque Atlántico nativo, medida a partir de la cobertura del suelo MapBiomas de 30 m."
         ],
         [
           "taxonomic_incompleteness",
@@ -153,14 +153,10 @@
     },
     "habitatQuality": {
       "title": "Calidad del Hábitat",
-      "intro": "Destinado a representar la fracción de cada hexbin cubierta por Mata Atlántica — el bioma con mayor riqueza de especies endémicas en Santa Catarina.",
-      "warning": "⚠ Estado actual: valor placeholder de 0,5 asignado a cada hexbin. La calidad del hábitat no diferencia actualmente las localidades de frontera.",
-      "sourcesLabel": "Fuentes de datos para GeoJSON de cobertura forestal:",
-      "sources": [
-        "SOS Mata Atlântica — sosma.org.br",
-        "MapBiomas Collection (cuenta gratuita) — mapbiomas.org",
-        "IBGE Biomas — ibge.gov.br"
-      ]
+      "intro": "La fracción de cada hexbin cubierta por Bosque Atlántico nativo — el bioma con mayor riqueza de especies endémicas en Santa Catarina. Medida a partir de la cobertura del suelo de MapBiomas {collection} ({resolution} m, {year}): Formación Forestal, Formación Sabánica, Manglar, Bosque Inundable y Restinga Arbórea. La silvicultura se excluye deliberadamente, para que las plantaciones de pino y eucalipto del planalto no se lean como bosque íntegro.",
+      "warning": "⚠ Solo cobertura forestal. El hábitat nativo no boscoso — sobre todo los campos de altitud de la región de São Joaquim — cuenta como cero aquí, por lo que esas áreas puntúan bajo en un componente que no las describe bien. La cobertura se mide sobre la superficie terrestre mapeada, de modo que un hexágono costero se evalúa por su tierra, no por su mar.",
+      "sourcesLabel": "Fuente de datos:",
+      "source": "MapBiomas {collection} — cobertura del suelo anual de Brasil a {resolution} m"
     },
     "dataSource": {
       "title": "Fuente de Datos",
@@ -293,7 +289,7 @@
         ],
         [
           "Valores de calidad del hábitat",
-          "Placeholder (0,5 uniforme). No se cargaron datos reales de cobertura forestal."
+          "Cobertura del suelo MapBiomas a 30 m. Solo bosque nativo — plantaciones y campos naturales excluidos."
         ],
         [
           "Riqueza de especies por hexbin",
