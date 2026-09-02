@@ -68,7 +68,7 @@
     "tooltipRecords": "Uma ocorrência GBIF — uma observação documentada de uma espécie neste local, por pesquisador, instituição ou cientista cidadão (ex.: iNaturalist).",
     "tooltipScoreBreakdown": "O Escore de Fronteira é uma combinação ponderada de lacuna amostral, qualidade do habitat e incompletude taxonômica. Cada componente é normalizado entre todos os hexágonos de SC, e qualquer componente indisponível neste conjunto de dados é excluído em vez de estimado. Veja a metodologia para os pesos em uso.",
     "tooltipFrontierPotential": "Escore combinado: o quão pouco esta área foi amostrada, quanto de habitat de Mata Atlântica resta e quantas espécies encontradas em áreas vizinhas comparáveis nunca foram registradas aqui.",
-    "tooltipHabitatQuality": "Fração estimada do hexbin coberta pela Mata Atlântica. Atualmente um placeholder uniforme (0,5) — valores reais exigem download de dados de cobertura florestal.",
+    "tooltipHabitatQuality": "Fração da área terrestre mapeada do hexágono coberta por floresta nativa, segundo a cobertura do solo MapBiomas de 30 m. Silvicultura de pínus e eucalipto fica de fora, assim como a vegetação nativa não florestal.",
     "tooltipSurveyGap": "O quanto este hexbin foi levantado em relação a todos os outros em SC. 100% = nunca levantado; 0% = mais intensamente levantado.",
     "tooltipTopSpecies": "Espécies mais registradas em todos os táxons (plantas, fungos, animais). O grupo da espécie (reino/classe) não é exibido porque não foi retido durante a agregação de dados. Clique em qualquer nome para ver a taxonomia completa no GBIF.",
     "taxonomicIncompleteness": "Incompletude taxonômica",
@@ -108,7 +108,7 @@
         [
           "habitat_quality",
           "0 – 1",
-          "Fração do hexágono coberta por remanescentes de Mata Atlântica. Excluída do escore enquanto o conjunto de dados tiver apenas o valor uniforme provisório."
+          "Fração da área terrestre mapeada do hexágono coberta por Mata Atlântica nativa, medida a partir da cobertura do solo MapBiomas de 30 m."
         ],
         [
           "taxonomic_incompleteness",
@@ -153,14 +153,10 @@
     },
     "habitatQuality": {
       "title": "Qualidade do Habitat",
-      "intro": "Destinado a representar a fração de cada hexbin coberta pela Mata Atlântica — o bioma com maior riqueza de espécies endêmicas em Santa Catarina.",
-      "warning": "⚠ Status atual: valor placeholder de 0,5 atribuído a cada hexbin. A qualidade do habitat não diferencia as localidades de fronteira no momento.",
-      "sourcesLabel": "Fontes de dados para GeoJSON de cobertura florestal:",
-      "sources": [
-        "SOS Mata Atlântica — sosma.org.br",
-        "MapBiomas Collection (conta gratuita) — mapbiomas.org",
-        "IBGE Biomas — ibge.gov.br"
-      ]
+      "intro": "A fração de cada hexbin coberta por Mata Atlântica nativa — o bioma com maior riqueza de espécies endêmicas em Santa Catarina. Medida a partir da cobertura do solo do MapBiomas {collection} ({resolution} m, {year}): Formação Florestal, Formação Savânica, Mangue, Floresta Alagável e Restinga Arbórea. A silvicultura é deliberadamente excluída, para que os plantios de pínus e eucalipto do planalto não sejam lidos como floresta íntegra.",
+      "warning": "⚠ Apenas cobertura florestal. O habitat nativo não florestal — sobretudo os campos de altitude da região de São Joaquim — conta como zero aqui, então essas áreas pontuam baixo em um componente que não as descreve bem. A cobertura é medida sobre a área terrestre mapeada, de modo que um hexágono costeiro é avaliado por sua terra, não por seu mar.",
+      "sourcesLabel": "Fonte de dados:",
+      "source": "MapBiomas {collection} — cobertura do solo anual do Brasil a {resolution} m"
     },
     "dataSource": {
       "title": "Fonte de Dados",
@@ -293,7 +289,7 @@
         ],
         [
           "Valores de qualidade do habitat",
-          "Placeholder (0,5 uniforme). Nenhum dado real de cobertura florestal carregado."
+          "Cobertura do solo MapBiomas a 30 m. Apenas floresta nativa — silvicultura e campos naturais excluídos."
         ],
         [
           "Riqueza de espécies por hexbin",
