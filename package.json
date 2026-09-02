@@ -17,6 +17,7 @@
     "data:gbif-keys": "tsx scripts/gbif-keys.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.114.0",
     "@types/leaflet": "^1.9.21",
     "h3-js": "^4.4.0",
     "leaflet": "^1.9.4",

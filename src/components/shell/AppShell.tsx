@@ -12,6 +12,7 @@ import DataSummaryBar from '@/features/controls/DataSummaryBar'
 import MethodologyPanel from '@/features/methodology/MethodologyPanel'
 import LocaleSwitcher from '@/features/controls/LocaleSwitcher'
 import ExportButton from '@/features/export/ExportButton'
+import { useCommunitySubmissions } from '@/hooks/useCommunitySubmissions'
 
 /** Hexbins shown in the ranking sidebar, and the default CSV export scope. */
 const RANKING_LIMIT = 20
@@ -24,6 +25,10 @@ export default function AppShell() {
     lastUpdated, speciesCount, speciesDataIsPartial, habitatIsPlaceholder, sources,
     activeComponents, availableFilters, gbifKeyByName, selectHex,
   } = useBiofrontierData(taxonFilter)
+
+  // Approved community records. Held here rather than inside GapMap so that a
+  // submission or vote made in HexDetail can refresh the map layer.
+  const { submissions: communitySubmissions, refresh: refreshCommunity } = useCommunitySubmissions()
 
   const [rankingOpen, setRankingOpen]               = useState(false)
   const [methodologyOpen, setMethodologyOpen]       = useState(false)
@@ -133,6 +138,7 @@ export default function AppShell() {
             selectedHexId={selectedHexId}
             onHexSelect={selectHex}
             onOpenMethodology={openMethodology}
+            communitySubmissions={communitySubmissions}
           />
           <button
             onClick={() => setRankingOpen(o => !o)}
@@ -163,6 +169,7 @@ export default function AppShell() {
             habitatIsPlaceholder={habitatIsPlaceholder}
             onClose={() => selectHex(null)}
             onOpenMethodology={openMethodology}
+            onCommunityChange={refreshCommunity}
           />
         </aside>
       </div>

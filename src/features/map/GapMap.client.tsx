@@ -10,11 +10,23 @@ import { scoreToColor, scoreToOpacity } from '@/lib/color'
 import type { GapMapProps } from './GapMap'
 import InfoTooltip from '@/components/ui/InfoTooltip'
 
-export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOpenMethodology }: GapMapProps) {
+/**
+ * Escapes text interpolated into a Leaflet popup. Species names, dates and
+ * display names in the community layer are written by contributors, and
+ * `bindPopup` takes raw HTML — so this is the boundary where untrusted text
+ * stops being markup.
+ */
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
+}
+
+export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOpenMethodology, communitySubmissions }: GapMapProps) {
   const t = useTranslations('GapMap')
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<L.Map | null>(null)
   const polygonsRef  = useRef<Map<string, L.Polygon>>(new Map())
+  const communityRef = useRef<L.LayerGroup | null>(null)
 
   // Stable ref so polygon effects can read current translations without re-running
   const tRef = useRef(t)
@@ -108,6 +120,43 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
     })
   }, [selectedHexId, hexbins])
 
+  // Community marker layer.
+  //
+  // Deliberately a separate Leaflet layer rather than a change to the hexbin
+  // polygons: an approved community record does not alter a hexbin's frontier
+  // score in Phase 1, and drawing it as if it did would misrepresent the data.
+  // A reader must be able to see at a glance which marks came from GBIF and
+  // iNaturalist and which came from the community.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    communityRef.current?.remove()
+    if (communitySubmissions.length === 0) { communityRef.current = null; return }
+
+    const group = L.layerGroup(
+      communitySubmissions.map(s =>
+        L.circleMarker([s.latitude, s.longitude], {
+          radius: 5,
+          color: '#34d399',
+          weight: 2,
+          fillColor: '#065f46',
+          fillOpacity: 0.9,
+        }).bindPopup(
+          `<div style="font-size:12px;line-height:1.5">
+             <em>${escapeHtml(s.scientific_name)}</em><br/>
+             <span style="color:#64748b">${escapeHtml(s.observed_on)}</span><br/>
+             <span style="color:#64748b">${tRef.current('communityConfirmations', { n: s.confirmation_count })}</span>
+             ${s.observer_display_name ? `<br/><span style="color:#64748b">${escapeHtml(s.observer_display_name)}</span>` : ''}
+           </div>`,
+        ),
+      ),
+    ).addTo(map)
+
+    communityRef.current = group
+    return () => { group.remove() }
+  }, [communitySubmissions])
+
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full h-full" />
@@ -130,9 +179,16 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
           <span className="w-3 h-3 rounded-sm inline-block" style={{ background: 'rgb(239,68,68)' }} />
           {t('highFrontier')}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-1">
           <span className="w-3 h-3 rounded-sm inline-block bg-slate-600 opacity-50" />
           {t('unsurveyed')}
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className="w-3 h-3 rounded-full inline-block"
+            style={{ background: '#065f46', border: '2px solid #34d399' }}
+          />
+          {t('communityRecord')}
         </div>
       </div>
     </div>
