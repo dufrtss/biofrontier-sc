@@ -14,12 +14,15 @@ project_id = "ntgupaqcyjfnqpwshaqu"
 # The team-scoped `<project>-<team>.vercel.app` hostname used to live here, and
 # it is protected by Vercel SSO: every magic link landed on a Vercel login wall
 # instead of the app. Only publicly reachable hostnames belong in these fields.
-site_url = "https://biofrontier-sc.vercel.app"
+site_url = "https://biofrontier.sc.eduardofrafre.com"
 additional_redirect_urls = [
-  "https://biofrontier-sc.vercel.app/**",
-  # Custom domain. Attached to the Vercel project and listed here in advance so
-  # it works the moment the Cloudflare A record exists — see docs/dns-and-email.md.
   "https://biofrontier.sc.eduardofrafre.com/**",
+  "https://biofrontier-sc.vercel.app/**",
+  # The team-scoped hostname. It is not a hostname anyone should be sent to,
+  # but Vercel's Supabase integration rewrites `site_url` to it on every
+  # deployment, so it is allow-listed to keep a link usable in the window
+  # between that rewrite and the next `supabase config push`.
+  "https://biofrontier-sc-eduardo-freitas-projects.vercel.app/**",
   # Legacy alias from when the Vercel project was still called `omega`. Still
   # serving, so links already in someone's inbox keep working.
   "https://omega-six-tau.vercel.app/**",
