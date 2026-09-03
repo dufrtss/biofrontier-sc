@@ -11,9 +11,18 @@ project_id = "ntgupaqcyjfnqpwshaqu"
 # load-bearing rather than incidental: `useAuth` passes the current page as
 # emailRedirectTo, and a URL missing from this list silently sends the user to
 # site_url instead of back to the hexbin they were looking at.
-site_url = "https://omega-eduardo-freitas-projects.vercel.app"
+# The team-scoped `<project>-<team>.vercel.app` hostname used to live here, and
+# it is protected by Vercel SSO: every magic link landed on a Vercel login wall
+# instead of the app. Only publicly reachable hostnames belong in these fields.
+site_url = "https://biofrontier-sc.vercel.app"
 additional_redirect_urls = [
-  "https://omega-eduardo-freitas-projects.vercel.app/**",
+  "https://biofrontier-sc.vercel.app/**",
+  # Custom domain. Attached to the Vercel project and listed here in advance so
+  # it works the moment the Cloudflare A record exists — see docs/dns-and-email.md.
+  "https://biofrontier.sc.eduardofrafre.com/**",
+  # Legacy alias from when the Vercel project was still called `omega`. Still
+  # serving, so links already in someone's inbox keep working.
+  "https://omega-six-tau.vercel.app/**",
   "http://localhost:3000/**",
 ]
 
@@ -44,7 +53,11 @@ host = "smtp.resend.com"
 port = 465
 user = "resend"
 pass = "env(RESEND_API_KEY)"
-admin_email = "onboarding@resend.dev"
+# `onboarding@resend.dev` is Resend's shared sandbox sender, which only delivers
+# to the account owner's own address — useless for a class. `mail.` rather than
+# the apex on purpose: this app mails people who do not own the domain, and a
+# sender reputation problem should not reach personal mail at eduardofrafre.com.
+admin_email = "no-reply@mail.eduardofrafre.com"
 sender_name = "BioFrontier SC"
 
 [auth.mfa]
