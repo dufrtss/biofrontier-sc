@@ -50,6 +50,22 @@ max_frequency = "1m0s"
 otp_length = 8
 otp_expiry = 3600
 
+# Both events deliver the same thing here — a one-time link that signs you in —
+# so they share a body and differ only in subject. GoTrue picks `confirmation`
+# when the address has no account yet and `magic_link` when it does, which is an
+# implementation detail no contributor should have to know about.
+#
+# The defaults were the problem worth fixing: a first-time user received
+# "Confirm your email address", which in an app where the link is the *only* way
+# in reads as unrelated boilerplate. A real sign-in attempt was lost to it.
+[auth.email.template.confirmation]
+subject = "Seu link de acesso ao BioFrontier SC"
+content_path = "./supabase/templates/sign-in.html"
+
+[auth.email.template.magic_link]
+subject = "Seu link de acesso ao BioFrontier SC"
+content_path = "./supabase/templates/sign-in.html"
+
 [auth.email.smtp]
 enabled = true
 host = "smtp.resend.com"
