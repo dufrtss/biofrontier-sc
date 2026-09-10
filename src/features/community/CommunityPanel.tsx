@@ -34,7 +34,7 @@ const inputClass =
 
 export default function CommunityPanel({ hexId, center, frontierScore, onSubmitted }: Props) {
   const t = useTranslations('Community')
-  const { user, loading: authLoading, signIn, signOut } = useAuth()
+  const { user, loading: authLoading, linkError, signIn, signOut } = useAuth()
 
   const [pending, setPending]   = useState<PendingSubmission[]>([])
   const [busy, setBusy]         = useState(false)
@@ -255,6 +255,7 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
 
       {notice && <p className="text-[10px] text-emerald-400">{notice}</p>}
       {error  && <p className="text-[10px] text-red-400">{error}</p>}
+      {linkError && <p className="text-[10px] text-red-400">{linkError}</p>}
     </div>
   )
 }
