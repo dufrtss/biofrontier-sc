@@ -6,7 +6,8 @@
     "loadingData": "Loading biodiversity data",
     "errorLoading": "Error loading data",
     "tagline": "Frontier intelligence · Santa Catarina · Atlantic Forest",
-    "howItWorks": "How it works →"
+    "howItWorks": "How it works →",
+    "donate": "♥ Support"
   },
   "DataSummaryBar": {
     "speciesRecorded": "≥ {count} species recorded",
@@ -363,5 +364,15 @@
     "withdraw": "Withdraw",
     "confirm": "Confirm",
     "dispute": "Dispute"
+  },
+  "Donate": {
+    "title": "Thank you",
+    "usingIt": "BioFrontier SC exists to show where Santa Catarina's Atlantic Forest still hasn't been looked at. That you're here, hunting for those gaps, is already part of the work.",
+    "contributing": "If you've submitted an observation or confirmed someone else's, thank you twice over: those records are what turn an index into field knowledge.",
+    "supporting": "And if you want to support the project financially, thank you for considering it. Contributions go to what keeps it running — hosting, data access, and the time to process it.",
+    "freeEitherWay": "Either way the map stays free and open source. Nothing here sits behind a payment.",
+    "continue": "Continue to PayPal",
+    "later": "Maybe later",
+    "close": "Close"
   }
 }
