@@ -6,7 +6,8 @@
     "loadingData": "Cargando datos de biodiversidad",
     "errorLoading": "Error al cargar datos",
     "tagline": "Inteligencia de fronteras · Santa Catarina · Mata Atlántica",
-    "howItWorks": "Cómo funciona →"
+    "howItWorks": "Cómo funciona →",
+    "donate": "♥ Apoyar"
   },
   "DataSummaryBar": {
     "speciesRecorded": "≥ {count} especies registradas",
@@ -363,5 +364,15 @@
     "withdraw": "Retirar",
     "confirm": "Confirmar",
     "dispute": "Cuestionar"
+  },
+  "Donate": {
+    "title": "Gracias",
+    "usingIt": "BioFrontier SC existe para mostrar dónde el Bosque Atlántico de Santa Catarina aún no ha sido observado. Que estés aquí, buscando esos vacíos, ya forma parte del trabajo.",
+    "contributing": "Si has enviado una observación o confirmado la de otra persona, gracias por partida doble: esos registros son los que convierten un índice en conocimiento de campo.",
+    "supporting": "Y si quieres apoyar económicamente, gracias por considerarlo. La contribución va a lo que mantiene el proyecto en pie: alojamiento, acceso a los datos y el tiempo de procesarlos.",
+    "freeEitherWay": "En cualquier caso, el mapa seguirá siendo gratuito y de código abierto. Aquí no hay nada detrás de un pago.",
+    "continue": "Continuar a PayPal",
+    "later": "Quizás después",
+    "close": "Cerrar"
   }
 }

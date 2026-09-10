@@ -6,7 +6,8 @@
     "loadingData": "Carregando dados de biodiversidade",
     "errorLoading": "Erro ao carregar dados",
     "tagline": "Inteligência de fronteiras · Santa Catarina · Mata Atlântica",
-    "howItWorks": "Como funciona →"
+    "howItWorks": "Como funciona →",
+    "donate": "♥ Apoiar"
   },
   "DataSummaryBar": {
     "speciesRecorded": "≥ {count} espécies registradas",
@@ -363,5 +364,15 @@
     "withdraw": "Retirar",
     "confirm": "Confirmar",
     "dispute": "Contestar"
+  },
+  "Donate": {
+    "title": "Obrigado",
+    "usingIt": "O BioFrontier SC existe para mostrar onde a Mata Atlântica catarinense ainda não foi olhada. Que você esteja aqui, procurando esses vazios no mapa, já faz parte do trabalho.",
+    "contributing": "Se você já enviou uma observação ou confirmou a de outra pessoa, obrigado duas vezes: são esses registros que transformam um índice em conhecimento de campo.",
+    "supporting": "E se você quer apoiar financeiramente, obrigado por considerar. A contribuição vai para o que mantém o projeto no ar — hospedagem, acesso aos dados e o tempo de processá-los.",
+    "freeEitherWay": "De todo modo, o mapa continua gratuito e de código aberto. Não há nada aqui atrás de um pagamento.",
+    "continue": "Continuar para o PayPal",
+    "later": "Talvez depois",
+    "close": "Fechar"
   }
 }

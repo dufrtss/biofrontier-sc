@@ -12,6 +12,7 @@ import DataSummaryBar from '@/features/controls/DataSummaryBar'
 import MethodologyPanel from '@/features/methodology/MethodologyPanel'
 import LocaleSwitcher from '@/features/controls/LocaleSwitcher'
 import ExportButton from '@/features/export/ExportButton'
+import DonateModal from '@/features/donate/DonateModal'
 import { useCommunitySubmissions } from '@/hooks/useCommunitySubmissions'
 
 /** Hexbins shown in the ranking sidebar, and the default CSV export scope. */
@@ -33,6 +34,7 @@ export default function AppShell() {
   const [rankingOpen, setRankingOpen]               = useState(false)
   const [methodologyOpen, setMethodologyOpen]       = useState(false)
   const [methodologySection, setMethodologySection] = useState<string | undefined>()
+  const [donateOpen, setDonateOpen]                 = useState(false)
 
   const openMethodology = useCallback((sectionId?: string) => {
     setMethodologySection(sectionId)
@@ -177,15 +179,15 @@ export default function AppShell() {
       {/* Footer — locale switcher + donate */}
       <footer className="shrink-0 flex items-center justify-between px-4 py-2 bg-slate-900 border-t border-slate-700/60">
         <LocaleSwitcher />
-        <a
-          href="https://www.paypal.com/donate/?cmd=_donations&business=eduardofragadefreitas@gmail.com&item_name=BioFrontier%20SC&currency_code=BRL"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={() => setDonateOpen(true)}
           className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
         >
-          ♥ Donate
-        </a>
+          {t('donate')}
+        </button>
       </footer>
+
+      <DonateModal open={donateOpen} onClose={() => setDonateOpen(false)} />
 
       {/* Methodology panel */}
       <MethodologyPanel
