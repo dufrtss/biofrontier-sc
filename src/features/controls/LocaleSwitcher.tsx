@@ -21,28 +21,25 @@ export default function LocaleSwitcher() {
   }
 
   return (
-    // Same segmented part as the taxon filter: one outline, shared hairlines,
-    // no separator glyphs. The interpuncts were doing the job a shared border
-    // does better, and the underline on the current locale was the last
-    // rounded-era decoration left in the footer.
-    <div className="flex border border-edge">
-      {routing.locales.map(locale => (
-        <button
-          key={locale}
-          onClick={() => switchLocale(locale)}
-          // The active locale is otherwise announced by nothing at all — it was
-          // colour and an underline, both purely visual.
-          aria-current={locale === currentLocale ? 'true' : undefined}
-          className={[
-            'hud-label px-2 py-1 transition-colors border-l border-edge first:border-l-0',
-            locale === currentLocale
-              ? 'emit relative z-10 bg-raised text-highlight'
-              : 'text-muted hover:text-system',
-          ].join(' ')}
-          type="button"
-        >
-          {LABELS[locale]}
-        </button>
+    <div className="flex items-center gap-0.5">
+      {routing.locales.map((locale, i) => (
+        <span key={locale} className="flex items-center">
+          <button
+            onClick={() => switchLocale(locale)}
+            className={[
+              'text-[11px] font-semibold tracking-wider px-1.5 py-0.5 rounded transition-colors',
+              locale === currentLocale
+                ? 'text-blue-400 underline underline-offset-2'
+                : 'text-slate-500 hover:text-slate-400',
+            ].join(' ')}
+            type="button"
+          >
+            {LABELS[locale]}
+          </button>
+          {i < routing.locales.length - 1 && (
+            <span className="text-slate-600 text-[10px] select-none">·</span>
+          )}
+        </span>
       ))}
     </div>
   )

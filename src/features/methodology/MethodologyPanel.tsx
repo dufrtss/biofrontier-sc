@@ -60,22 +60,17 @@ interface SectionProps {
 function Section({ id, title, children }: SectionProps) {
   return (
     <section id={`methodology-${id}`} className="scroll-mt-4">
-      {/* A lit tick before the title is the section marker: it gives the
-          reader a repeating anchor down a long scroll without spending a
-          heading weight on it. The prose below stays prose. */}
-      <h3 className="flex items-center gap-2 mb-3 pb-2 border-b border-edge
-                     font-mono text-[11px] uppercase tracking-[0.14em] text-primary">
-        <span aria-hidden className="h-3 w-px bg-system shrink-0" />
+      <h3 className="text-sm font-semibold text-slate-200 uppercase tracking-wider mb-3 pb-2 border-b border-slate-700/60">
         {title}
       </h3>
-      <div className="text-xs text-secondary leading-relaxed space-y-2">{children}</div>
+      <div className="text-xs text-slate-400 leading-relaxed space-y-2">{children}</div>
     </section>
   )
 }
 
 function Code({ children }: { children: string }) {
   return (
-    <pre className="bg-background border border-edge px-3 py-2 font-mono text-system text-[11px] overflow-x-auto whitespace-pre-wrap">
+    <pre className="bg-slate-800 border border-slate-700 rounded px-3 py-2 font-mono text-emerald-400 text-[11px] overflow-x-auto whitespace-pre-wrap">
       {children}
     </pre>
   )
@@ -88,7 +83,7 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
         <thead>
           <tr>
             {headers.map(h => (
-              <th key={h} className="hud-label text-left px-2 py-1.5 border-b border-edge">
+              <th key={h} className="text-left text-slate-500 font-medium px-2 py-1.5 border-b border-slate-700">
                 {h}
               </th>
             ))}
@@ -96,9 +91,9 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
         </thead>
         <tbody>
           {rows.map((row, i) => (
-            <tr key={i} className="border-b border-line">
+            <tr key={i} className="border-b border-slate-800">
               {row.map((cell, j) => (
-                <td key={j} className="px-2 py-1.5 text-secondary align-top">{cell}</td>
+                <td key={j} className="px-2 py-1.5 text-slate-400 align-top">{cell}</td>
               ))}
             </tr>
           ))}
@@ -125,29 +120,26 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
   return (
     <>
       {open && (
-        <div className="fixed inset-0 bg-background/90 z-[1999]" onClick={onClose} aria-hidden />
+        <div className="fixed inset-0 bg-black/50 z-[1999]" onClick={onClose} aria-hidden />
       )}
       <div
         className={[
-          // True black ground rather than a surface slab: the reader is a full
-          // panel, and a large near-black grey is the thing this palette is
-          // getting away from. The lit left edge separates it from the map.
-          'fixed right-0 top-0 h-full w-full md:w-[480px] bg-background border-l border-edge emit-soft z-[2000] flex flex-col transition-transform duration-200',
+          'fixed right-0 top-0 h-full w-full md:w-[480px] bg-slate-900 border-l border-slate-700 z-[2000] flex flex-col transition-transform duration-200',
           open ? 'translate-x-0' : 'translate-x-full',
         ].join(' ')}
         aria-hidden={!open}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-edge shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-700/60 shrink-0">
           <div>
-            <h2 className="text-sm font-semibold text-primary uppercase tracking-[0.14em]">
+            <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider font-condensed">
               {t('title')}
             </h2>
-            <p className="text-xs text-muted mt-0.5">{t('subtitle')}</p>
+            <p className="text-xs text-slate-500 mt-0.5">{t('subtitle')}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-muted hover:text-system text-lg leading-none transition-colors"
+            className="text-slate-500 hover:text-slate-300 text-lg leading-none"
             aria-label={t('close')}
           >
             ✕
@@ -166,8 +158,8 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
             />
             <p>{t('frontierScore.weightsNote')}</p>
             <p>{t('frontierScore.renormalisationNote')}</p>
-            <p className="text-warning font-medium">{t('frontierScore.calibrationStatus')}</p>
-            <p className="text-muted italic">{t('frontierScore.caveat')}</p>
+            <p className="text-amber-400/80 font-medium">{t('frontierScore.calibrationStatus')}</p>
+            <p className="text-slate-500 italic">{t('frontierScore.caveat')}</p>
           </Section>
 
           <Section id="taxonomic-incompleteness" title={t('taxonomicIncompleteness.title')}>
@@ -189,8 +181,8 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
             />
             <p>{t('taxonomicIncompleteness.prevalenceNote')}</p>
             <p>{t('taxonomicIncompleteness.ambiguity')}</p>
-            <p className="text-muted">{t('taxonomicIncompleteness.limitationsLabel')}</p>
-            <ul className="list-disc pl-4 space-y-1 text-muted">
+            <p className="text-slate-500">{t('taxonomicIncompleteness.limitationsLabel')}</p>
+            <ul className="list-disc pl-4 space-y-1 text-slate-500">
               {(t.raw('taxonomicIncompleteness.limitations') as string[]).map(s => <li key={s}>{s}</li>)}
             </ul>
           </Section>
@@ -207,14 +199,14 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
 
           <Section id="habitat-quality" title={t('habitatQuality.title')}>
             <p>{t('habitatQuality.intro', habitatSource)}</p>
-            <p className="text-warning font-medium">{t('habitatQuality.warning')}</p>
-            <p className="text-muted">
+            <p className="text-amber-400/80 font-medium">{t('habitatQuality.warning')}</p>
+            <p className="text-slate-500">
               {t('habitatQuality.sourcesLabel')}{' '}
               <a
                 href="https://mapbiomas.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-brand hover:text-highlight transition-colors"
+                className="text-blue-400/80 hover:text-blue-300 transition-colors"
               >
                 {t('habitatQuality.source', habitatSource)}
               </a>
@@ -224,22 +216,22 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
           <Section id="data-source" title={t('dataSource.title')}>
             <p>
               {t('dataSource.introPre')}{' '}
-              <strong className="text-primary">GBIF</strong>{' '}
+              <strong className="text-slate-200">GBIF</strong>{' '}
               {t('dataSource.introPost')}
             </p>
-            <p className="text-muted">{t('dataSource.contributingLabel')}</p>
-            <ul className="list-disc pl-4 space-y-1 text-muted">
+            <p className="text-slate-500">{t('dataSource.contributingLabel')}</p>
+            <ul className="list-disc pl-4 space-y-1 text-slate-500">
               {(t.raw('dataSource.contributing') as string[]).map(s => <li key={s}>{s}</li>)}
             </ul>
-            <p className="text-muted mt-2">{t('dataSource.excludedLabel')}</p>
-            <ul className="list-disc pl-4 space-y-1 text-muted">
+            <p className="text-slate-500 mt-2">{t('dataSource.excludedLabel')}</p>
+            <ul className="list-disc pl-4 space-y-1 text-slate-500">
               {(t.raw('dataSource.excluded') as string[]).map(s => <li key={s}>{s}</li>)}
             </ul>
           </Section>
 
           <Section id="taxa-coverage" title={t('taxaCoverage.title')}>
             <p>
-              <strong className="text-primary">{tTaxon('labels.all')}</strong>{' '}
+              <strong className="text-slate-200">{tTaxon('labels.all')}</strong>{' '}
               {t('taxaCoverage.allIntro')}
             </p>
             <Table
@@ -252,8 +244,8 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
               rows={t.raw('taxaCoverage.groupTableRows') as string[][]}
             />
             <p className="mt-2">{t('taxaCoverage.overlapNote')}</p>
-            <p className="text-muted mt-2">{t('taxaCoverage.unclassifiedNote')}</p>
-            <p className="text-muted mt-2">{t('taxaCoverage.availabilityNote')}</p>
+            <p className="text-slate-500 mt-2">{t('taxaCoverage.unclassifiedNote')}</p>
+            <p className="text-slate-500 mt-2">{t('taxaCoverage.availabilityNote')}</p>
           </Section>
 
           <Section id="geographic-scope" title={t('geographicScope.title')}>

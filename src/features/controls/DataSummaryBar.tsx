@@ -42,16 +42,12 @@ export default function DataSummaryBar({
     : 'GBIF'
 
   return (
-    /* A telemetry strip, not a sentence: everything is mono and tracked, the
-       measured figures sit at full brightness and the words around them stay
-       down in the label register. The strip is true black against the map
-       below it, so the only thing separating the two is a hairline. */
     <div
-      className="flex items-center gap-x-4 px-5 py-1.5 bg-background border-b border-edge text-xs shrink-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+      className="flex items-center gap-x-4 px-5 py-1.5 bg-slate-950 border-b border-slate-700/60 text-xs text-slate-500 tabular-nums shrink-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
       style={{ scrollbarWidth: 'none' }}
     >
       <span className="flex items-center shrink-0">
-        <span className="technical text-primary">
+        <span className="text-slate-300 font-medium">
           {speciesDataIsPartial
             ? t('speciesRecordedPartial', { count: speciesCount.toLocaleString() })
             : t('speciesRecorded', { count: speciesCount.toLocaleString() })}
@@ -63,25 +59,23 @@ export default function DataSummaryBar({
         />
       </span>
 
-      {/* A rule rather than a middot: the separators are structure, and a
-          punctuation mark in a row of readings reads as another reading. */}
-      <span aria-hidden="true" className="h-3 w-px bg-line shrink-0" />
+      <span className="text-slate-600 shrink-0">·</span>
 
       <span className="flex items-center shrink-0">
-        <span className="hud-label">{sources.length > 1 ? t('sources') : t('source')}</span>
-        <span className="technical text-primary ml-1.5">{sourceLabel}</span>
+        {sources.length > 1 ? t('sources') : t('source')}&nbsp;
+        <span className="text-slate-300 font-medium">{sourceLabel}</span>
         <InfoTooltip
           content={t('tooltipSource')}
           learnMore={{ sectionId: 'data-source' }}
           onLearnMore={onOpenMethodology}
         />
-        {date && <span className="hud-label ml-1.5 hidden sm:inline">{t('fetched', { date })}</span>}
+        {date && <span className="ml-1 hidden sm:inline">{t('fetched', { date })}</span>}
       </span>
 
-      <span aria-hidden="true" className="h-3 w-px bg-line shrink-0" />
+      <span className="text-slate-600 shrink-0">·</span>
 
       <span className="flex items-center shrink-0">
-        <span className="technical text-primary">
+        <span className="text-slate-300 font-medium">
           {t('frontierLocationsRanked', { count: frontierCount.toLocaleString() })}
         </span>
         <InfoTooltip

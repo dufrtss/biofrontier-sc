@@ -34,23 +34,20 @@ export default function FrontierRanking({ rankedHexIds, hexbins, taxonFilter, se
   const topIds = rankedHexIds.slice(0, limit)
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-background">
-      <div className="px-4 py-3 border-b border-edge">
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="px-4 py-3 border-b border-slate-700/60">
         <div className="flex items-center">
           {onClose && (
             <button
               onClick={onClose}
-              className="sm:hidden mr-3 text-secondary hover:text-system transition-colors text-base leading-none"
+              className="sm:hidden mr-3 text-slate-400 hover:text-slate-200 transition-colors text-base leading-none"
               aria-label="Close ranking panel"
               type="button"
             >
               ←
             </button>
           )}
-          {/* Panel title in the label register rather than at heading size: on a
-              readout the hierarchy is carried by brightness, not by point size,
-              so the title is the bright line and the subtitle the dim one. */}
-          <h2 className="hud-label text-primary">
+          <h2 className="text-sm font-semibold text-slate-200 uppercase tracking-wider">
             {t('title', { limit })}
           </h2>
           <InfoTooltip
@@ -59,10 +56,10 @@ export default function FrontierRanking({ rankedHexIds, hexbins, taxonFilter, se
             onLearnMore={onOpenMethodology}
           />
         </div>
-        <p className="text-[11px] text-muted mt-1">{t('subtitle')}</p>
+        <p className="text-xs text-slate-500 mt-0.5">{t('subtitle')}</p>
       </div>
 
-      <ul className="flex-1 overflow-y-auto divide-y divide-line [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
+      <ul className="flex-1 overflow-y-auto divide-y divide-slate-700/40 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
         {topIds.map(hexId => {
           const hex = hexbins[hexId]
           if (!hex) return null
@@ -73,37 +70,23 @@ export default function FrontierRanking({ rankedHexIds, hexbins, taxonFilter, se
 
           return (
             <li key={hexId}>
-              {/* Selection is a lit cyan edge with a bloom, not a lighter fill.
-                  On a true-black ground a filled row reads as a grey slab; an
-                  emitting edge reads as the row being switched on. The edge is
-                  always present and merely transparent when unselected, so
-                  selecting a row never shifts its text sideways. */}
               <button
                 onClick={() => onSelect(hexId)}
                 className={[
-                  'group w-full text-left px-4 py-3 border-l-2 transition-colors',
-                  isSelected
-                    ? 'border-system emit-soft'
-                    : 'border-transparent hover:border-edge',
+                  'w-full text-left px-4 py-3 transition-colors hover:bg-slate-700/50',
+                  isSelected ? 'bg-slate-700/80 border-l-2 border-blue-400' : '',
                 ].join(' ')}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <span className="technical text-2xl font-bold leading-none" style={{ color }}>
+                  <span className="text-2xl font-bold leading-none" style={{ color }}>
                     {hex.rank}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <div className={[
-                      'technical text-xs truncate transition-colors',
-                      isSelected ? 'text-system' : 'text-secondary group-hover:text-system',
-                    ].join(' ')}>
-                      {formatCoords(hexId)}
+                    <div className="text-xs text-slate-400 truncate">{formatCoords(hexId)}</div>
+                    <div className="mt-1.5 h-1.5 rounded-full bg-slate-700 overflow-hidden">
+                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
                     </div>
-                    {/* Square ends, hairline track: a capsule-shaped meter is
-                        consumer chrome and this is a gauge. */}
-                    <div className="mt-1.5 h-1.5 bg-background border border-line overflow-hidden">
-                      <div className="h-full transition-all" style={{ width: `${pct}%`, background: color }} />
-                    </div>
-                    <div className="technical flex justify-between mt-1 text-xs text-muted">
+                    <div className="flex justify-between mt-1 text-xs text-slate-500">
                       <span>{t('frontierPct', { pct })}</span>
                       <span>{t('recordsCount', { count: td.occurrenceCount })}</span>
                     </div>

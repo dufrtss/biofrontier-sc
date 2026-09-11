@@ -45,12 +45,9 @@ export default function AppShell() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 bg-background">
-        {/* Genuinely a circle, so `rounded-full` stays. The leading arc was a
-            raw emerald that belongs to no family here; the live-state cyan is
-            what the rest of the app uses to say "working". */}
-        <div className="w-6 h-6 rounded-full border-2 border-line border-t-system animate-spin" />
-        <p className="hud-label">
+      <div className="flex flex-col items-center justify-center h-full gap-3 bg-slate-950">
+        <div className="w-6 h-6 rounded-full border-2 border-slate-700 border-t-emerald-500 animate-spin" />
+        <p className="text-slate-500 text-sm tracking-widest uppercase font-condensed">
           {t('loadingData')}
         </p>
       </div>
@@ -59,9 +56,9 @@ export default function AppShell() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-2 bg-background">
-        <p className="hud-label text-danger">{t('errorLoading')}</p>
-        <p className="text-muted text-xs">{error}</p>
+      <div className="flex flex-col items-center justify-center h-full gap-2 bg-slate-950">
+        <p className="text-red-400 text-sm font-condensed tracking-wide uppercase">{t('errorLoading')}</p>
+        <p className="text-slate-500 text-xs">{error}</p>
       </div>
     )
   }
@@ -69,18 +66,12 @@ export default function AppShell() {
   return (
     <div className="flex flex-col h-full">
       {/* Top bar */}
-      {/* Chrome is drawn with lines, not with slabs: on an OLED panel a
-          near-black grey bar across the top is a visible grey bar, while true
-          black plus one hairline is an edge between lit and unlit. */}
-      <header className="relative flex items-center justify-between px-3 py-2 sm:px-5 sm:py-3 bg-background border-b border-edge shrink-0 z-10">
+      <header className="relative flex items-center justify-between px-3 py-2 sm:px-5 sm:py-3 bg-slate-900 border-b border-slate-700/60 shrink-0 z-10">
         <div>
-          {/* The identity reads as a designation rather than a brand: tight
-              tracking, and the suffix carried in the cyan the app speaks in. */}
-          <h1 className="text-base font-bold text-primary tracking-[-0.02em] uppercase leading-none">
-            BioFrontier{' '}
-            <span className="text-brand">SC</span>
+          <h1 className="text-base font-bold text-white tracking-tight font-condensed uppercase leading-none">
+            BioFrontier SC
           </h1>
-          <p className="text-xs text-muted mt-0.5 hidden sm:block">
+          <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">
             {t('tagline')}
           </p>
         </div>
@@ -93,7 +84,7 @@ export default function AppShell() {
           />
           <button
             onClick={() => openMethodology()}
-            className="hud-label hover:text-system transition-colors hidden md:block"
+            className="text-xs text-slate-500 hover:text-slate-300 transition-colors hidden md:block"
           >
             {t('howItWorks')}
           </button>
@@ -114,7 +105,7 @@ export default function AppShell() {
       <div className="flex flex-1 overflow-hidden">
         <aside
           className={[
-            'bg-background border-r border-edge overflow-hidden',
+            'bg-slate-900 border-r border-slate-700/60 overflow-hidden',
             rankingOpen
               ? 'fixed inset-0 z-[1500] flex flex-col sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
               : 'hidden sm:flex sm:flex-col sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
@@ -151,13 +142,9 @@ export default function AppShell() {
             onOpenMethodology={openMethodology}
             communitySubmissions={communitySubmissions}
           />
-          {/* A machined tab, not a button: no fill to speak of, a hairline that
-              brightens under the cursor, and the arrow carrying the cyan. Taller
-              and narrower than before so it reads as a latch on the panel edge
-              rather than a control floating over the map. */}
           <button
             onClick={() => setRankingOpen(o => !o)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-[1000] h-12 w-4 flex items-center justify-center bg-background/90 border border-edge hover:border-line-loud text-muted hover:text-system transition-colors"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-[1000] h-10 w-5 flex items-center justify-center bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded text-slate-400 hover:text-slate-200 transition-colors"
             aria-label={rankingOpen ? 'Hide ranking panel' : 'Show ranking panel'}
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -171,7 +158,7 @@ export default function AppShell() {
 
         <aside
           className={[
-            'bg-background border-l border-edge overflow-hidden',
+            'bg-slate-900 border-l border-slate-700 overflow-hidden',
             selectedHex
               ? 'fixed inset-0 z-[1500] sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
               : 'hidden sm:block sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
@@ -190,11 +177,11 @@ export default function AppShell() {
       </div>
 
       {/* Footer — locale switcher + donate */}
-      <footer className="shrink-0 flex items-center justify-between px-4 py-2 bg-background border-t border-edge">
+      <footer className="shrink-0 flex items-center justify-between px-4 py-2 bg-slate-900 border-t border-slate-700/60">
         <LocaleSwitcher />
         <button
           onClick={() => setDonateOpen(true)}
-          className="hud-label hover:text-system transition-colors"
+          className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
         >
           {t('donate')}
         </button>
