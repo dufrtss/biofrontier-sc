@@ -43,11 +43,11 @@ export default function DataSummaryBar({
 
   return (
     <div
-      className="flex items-center gap-x-4 px-5 py-1.5 bg-slate-950 border-b border-slate-700/60 text-xs text-slate-500 tabular-nums shrink-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+      className="flex items-center gap-x-4 px-5 py-1.5 bg-background border-b border-line/60 text-xs text-muted tabular-nums shrink-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
       style={{ scrollbarWidth: 'none' }}
     >
       <span className="flex items-center shrink-0">
-        <span className="text-slate-300 font-medium">
+        <span className="text-secondary font-medium">
           {speciesDataIsPartial
             ? t('speciesRecordedPartial', { count: speciesCount.toLocaleString() })
             : t('speciesRecorded', { count: speciesCount.toLocaleString() })}
@@ -59,11 +59,11 @@ export default function DataSummaryBar({
         />
       </span>
 
-      <span className="text-slate-600 shrink-0">·</span>
+      <span className="text-muted shrink-0">·</span>
 
       <span className="flex items-center shrink-0">
         {sources.length > 1 ? t('sources') : t('source')}&nbsp;
-        <span className="text-slate-300 font-medium">{sourceLabel}</span>
+        <span className="text-secondary font-medium">{sourceLabel}</span>
         <InfoTooltip
           content={t('tooltipSource')}
           learnMore={{ sectionId: 'data-source' }}
@@ -72,10 +72,10 @@ export default function DataSummaryBar({
         {date && <span className="ml-1 hidden sm:inline">{t('fetched', { date })}</span>}
       </span>
 
-      <span className="text-slate-600 shrink-0">·</span>
+      <span className="text-muted shrink-0">·</span>
 
       <span className="flex items-center shrink-0">
-        <span className="text-slate-300 font-medium">
+        <span className="text-secondary font-medium">
           {t('frontierLocationsRanked', { count: frontierCount.toLocaleString() })}
         </span>
         <InfoTooltip

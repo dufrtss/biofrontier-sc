@@ -6,7 +6,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { ScoredHexbin } from '@/lib/types'
 import { hexBoundary } from '@/lib/h3-utils'
-import { scoreToColor, scoreToOpacity } from '@/lib/color'
+import { scoreToColor, scoreToOpacity, frontierRamp } from '@/lib/color'
 import type { GapMapProps } from './GapMap'
 import InfoTooltip from '@/components/ui/InfoTooltip'
 
@@ -20,6 +20,15 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
 }
+
+// Leaflet paints SVG attributes directly, so these cannot be utility classes.
+// One block, each entry named for the Cold Signal token it mirrors — if a token
+// in globals.css moves, this is the only other place that has to move with it.
+const MAP = {
+  noData:      '#11181C',  // --color-raised
+  hoverStroke: '#B7F0FF',  // --color-highlight
+  community:   '#87DEFF',  // --color-system
+} as const
 
 export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOpenMethodology, communitySubmissions }: GapMapProps) {
   const t = useTranslations('GapMap')
@@ -42,9 +51,40 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
 
     const map = L.map(containerRef.current, { zoomControl: true }).setView([-27.5, -51.0], 7)
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 18,
+    // Basemap in two halves, with the data sandwiched between them.
+    //
+    // Standard OSM tiles are a light, saturated street map — beige roads, green
+    // parks, white labels — and they fought both the dark UI and the hexbin
+    // fills for attention. Esri's Dark Gray Canvas is a desaturated cartography
+    // that reads as ground rather than as content. Free, keyless, attribution
+    // required.
+    //
+    // CARTO's Dark Matter was the first choice and is the better-looking map,
+    // but it now stamps "API KEY REQUIRED" across every tile. It still answers
+    // 200 with a plausible tile size, so this was invisible until the map was
+    // actually rendered and looked at — a tile endpoint returning 200 is not
+    // evidence that the tile is usable.
+    //
+    // Splitting labels off puts place names in a pane ABOVE the hexbins, so a
+    // town stays readable through a 0.8-opacity fill instead of being buried by
+    // the data drawn over it.
+    const ESRI = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas'
+
+    L.tileLayer(`${ESRI}/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://www.esri.com/">Esri</a>',
+      maxZoom: 16,
+      className: 'basemap-ground',
+    }).addTo(map)
+
+    map.createPane('labels')
+    map.getPane('labels')!.style.zIndex = '650'
+    map.getPane('labels')!.style.pointerEvents = 'none'
+
+    L.tileLayer(`${ESRI}/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, {
+      maxZoom: 16,
+      pane: 'labels',
+      className: 'basemap-labels',
     }).addTo(map)
 
     mapRef.current = map
@@ -76,7 +116,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
         weight:      0.8,
       } : {
         color:       'transparent',
-        fillColor:   '#475569',
+        fillColor:   MAP.noData,
         fillOpacity: 0.10,
         weight:      0,
       })
@@ -100,7 +140,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
   useEffect(() => {
     polygonsRef.current.forEach((polygon, hexId) => {
       if (hexId === selectedHexId) {
-        polygon.setStyle({ color: '#ffffff', weight: 2, fillOpacity: 0.9 })
+        polygon.setStyle({ color: MAP.hoverStroke, weight: 2, fillOpacity: 0.9 })
         polygon.bringToFront()
       } else {
         const hex = hexbins[hexId]
@@ -138,16 +178,16 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
       communitySubmissions.map(s =>
         L.circleMarker([s.latitude, s.longitude], {
           radius: 5,
-          color: '#34d399',
+          color: MAP.community,
           weight: 2,
-          fillColor: '#065f46',
+          fillColor: MAP.noData,
           fillOpacity: 0.9,
         }).bindPopup(
           `<div style="font-size:12px;line-height:1.5">
              <em>${escapeHtml(s.scientific_name)}</em><br/>
-             <span style="color:#64748b">${escapeHtml(s.observed_on)}</span><br/>
-             <span style="color:#64748b">${tRef.current('communityConfirmations', { n: s.confirmation_count })}</span>
-             ${s.observer_display_name ? `<br/><span style="color:#64748b">${escapeHtml(s.observer_display_name)}</span>` : ''}
+             <span style="color:var(--color-muted)">${escapeHtml(s.observed_on)}</span><br/>
+             <span style="color:var(--color-muted)">${tRef.current('communityConfirmations', { n: s.confirmation_count })}</span>
+             ${s.observer_display_name ? `<br/><span style="color:var(--color-muted)">${escapeHtml(s.observer_display_name)}</span>` : ''}
            </div>`,
         ),
       ),
@@ -162,31 +202,35 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
       <div ref={containerRef} className="w-full h-full" />
 
       {/* Legend */}
-      <div className="absolute bottom-8 left-4 z-[1000] bg-slate-900/90 backdrop-blur rounded-lg px-3 py-2 text-xs text-slate-300 border border-slate-700">
+      <div className="absolute bottom-8 left-4 z-[1000] bg-surface/90 backdrop-blur rounded-lg px-3 py-2 text-xs text-secondary border border-line">
         <div className="flex items-center mb-2">
-          <p className="text-slate-400 uppercase tracking-widest text-[10px] font-semibold">{t('surveyCoverage')}</p>
+          <p className="text-secondary uppercase tracking-widest text-[10px] font-semibold">{t('surveyCoverage')}</p>
           <InfoTooltip
             content={t('tooltipCoverage')}
             learnMore={{ sectionId: 'geographic-scope' }}
             onLearnMore={onOpenMethodology}
           />
         </div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="w-3 h-3 rounded-sm inline-block" style={{ background: 'rgb(59,130,246)' }} />
-          {t('wellSurveyed')}
+        {/* A sequential scale deserves a continuous legend. Two swatches implied
+            two categories; the ramp is one quantity getting brighter. */}
+        <div className="mb-1.5">
+          <div
+            className="h-2 rounded-sm"
+            style={{ background: `linear-gradient(to right, ${frontierRamp.join(', ')})` }}
+          />
+          <div className="flex justify-between gap-3 mt-1 text-[10px] text-muted leading-tight">
+            <span>{t('wellSurveyed')}</span>
+            <span className="text-right">{t('highFrontier')}</span>
+          </div>
         </div>
         <div className="flex items-center gap-2 mb-1">
-          <span className="w-3 h-3 rounded-sm inline-block" style={{ background: 'rgb(239,68,68)' }} />
-          {t('highFrontier')}
-        </div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="w-3 h-3 rounded-sm inline-block bg-slate-600 opacity-50" />
+          <span className="w-3 h-3 rounded-sm inline-block bg-line-loud opacity-50" />
           {t('unsurveyed')}
         </div>
         <div className="flex items-center gap-2">
           <span
             className="w-3 h-3 rounded-full inline-block"
-            style={{ background: '#065f46', border: '2px solid #34d399' }}
+            style={{ background: MAP.noData, border: `2px solid ${MAP.community}` }}
           />
           {t('communityRecord')}
         </div>

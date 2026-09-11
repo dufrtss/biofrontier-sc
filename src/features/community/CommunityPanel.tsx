@@ -29,8 +29,8 @@ interface Props {
 const HIGH_FRONTIER = 0.6
 
 const inputClass =
-  'w-full rounded bg-slate-950 border border-slate-700 px-2 py-1.5 text-xs text-slate-200 ' +
-  'placeholder:text-slate-600 focus:outline-none focus:border-emerald-600'
+  'w-full rounded bg-background border border-line px-2 py-1.5 text-xs text-primary ' +
+  'placeholder:text-muted focus:outline-none focus:border-brand'
 
 export default function CommunityPanel({ hexId, center, frontierScore, onSubmitted }: Props) {
   const t = useTranslations('Community')
@@ -116,23 +116,23 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
   return (
     <div className="px-4 py-4 space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">
+        <h3 className="text-[10px] font-bold text-muted uppercase tracking-[0.18em]">
           {t('title')}
         </h3>
         {user && (
-          <button onClick={signOut} className="text-[10px] text-slate-600 hover:text-slate-400 underline">
+          <button onClick={signOut} className="text-[10px] text-muted hover:text-secondary underline">
             {t('signOut')}
           </button>
         )}
       </div>
 
       {isHighFrontier && (
-        <p className="text-[11px] leading-relaxed text-emerald-400/90">{t('highFrontierPrompt')}</p>
+        <p className="text-[11px] leading-relaxed text-system/90">{t('highFrontierPrompt')}</p>
       )}
 
       {/* The score is a hypothesis about where records are missing, not a
           claim that nothing lives here — say so before asking for data. */}
-      <p className="text-[10px] leading-relaxed text-slate-600">{t('reviewExplainer', { n: CONSENSUS_THRESHOLD })}</p>
+      <p className="text-[10px] leading-relaxed text-muted">{t('reviewExplainer', { n: CONSENSUS_THRESHOLD })}</p>
 
       {authLoading ? null : !user ? (
         <div className="space-y-2">
@@ -142,8 +142,8 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
           />
           <button
             onClick={handleSignIn} disabled={busy || !email.trim()}
-            className="w-full rounded bg-emerald-700 hover:bg-emerald-600 disabled:bg-slate-800
-                       disabled:text-slate-600 px-3 py-1.5 text-xs font-medium text-white transition-colors"
+            className="w-full rounded bg-brand hover:bg-brand disabled:bg-raised
+                       disabled:text-muted px-3 py-1.5 text-xs font-medium text-white transition-colors"
           >
             {t('sendMagicLink')}
           </button>
@@ -151,8 +151,8 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
       ) : !formOpen ? (
         <button
           onClick={() => setFormOpen(true)}
-          className="w-full rounded border border-emerald-800 bg-emerald-950/40 hover:bg-emerald-900/40
-                     px-3 py-1.5 text-xs font-medium text-emerald-300 transition-colors"
+          className="w-full rounded border border-brand bg-surface/40 hover:bg-raised/40
+                     px-3 py-1.5 text-xs font-medium text-system transition-colors"
         >
           {t('addObservation')}
         </button>
@@ -168,20 +168,20 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
             value={notes} onChange={e => setNotes(e.target.value)} rows={2}
             placeholder={t('notesPlaceholder')} className={inputClass}
           />
-          <p className="text-[10px] text-slate-600">
+          <p className="text-[10px] text-muted">
             {t('coordinateNote', { lat: center[0].toFixed(4), lng: center[1].toFixed(4) })}
           </p>
           <div className="flex gap-2">
             <button
               onClick={handleSubmit} disabled={busy || !name.trim()}
-              className="flex-1 rounded bg-emerald-700 hover:bg-emerald-600 disabled:bg-slate-800
-                         disabled:text-slate-600 px-3 py-1.5 text-xs font-medium text-white transition-colors"
+              className="flex-1 rounded bg-brand hover:bg-brand disabled:bg-raised
+                         disabled:text-muted px-3 py-1.5 text-xs font-medium text-white transition-colors"
             >
               {t('submit')}
             </button>
             <button
               onClick={() => setFormOpen(false)}
-              className="rounded border border-slate-700 px-3 py-1.5 text-xs text-slate-400 hover:text-slate-200"
+              className="rounded border border-line px-3 py-1.5 text-xs text-secondary hover:text-primary"
             >
               {t('cancel')}
             </button>
@@ -191,7 +191,7 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
 
       {user && pending.length > 0 && (
         <div className="space-y-2 pt-1">
-          <h4 className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.15em]">
+          <h4 className="text-[10px] font-bold text-muted uppercase tracking-[0.15em]">
             {t('awaitingReview')}
           </h4>
           {pending.map(s => {
@@ -200,25 +200,25 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
             const mine     = s.observer_id === user.id
             const myVote   = s.identifications.find(i => i.user_id === user.id)
             return (
-              <div key={s.id} className="rounded border border-slate-800 bg-slate-950/60 px-2.5 py-2 space-y-1.5">
+              <div key={s.id} className="rounded border border-line bg-background/60 px-2.5 py-2 space-y-1.5">
                 <div className="flex items-baseline justify-between gap-2">
-                  <span className="text-xs italic text-slate-300 truncate">{s.scientific_name}</span>
-                  <span className="text-[10px] font-mono text-slate-500 shrink-0">
+                  <span className="text-xs italic text-secondary truncate">{s.scientific_name}</span>
+                  <span className="text-[10px] font-mono text-muted shrink-0">
                     {t('confirmations', { n: agrees, of: CONSENSUS_THRESHOLD })}
                   </span>
                 </div>
-                <div className="text-[10px] text-slate-600">{s.observed_on}</div>
+                <div className="text-[10px] text-muted">{s.observed_on}</div>
                 {disagree > 0 && (
-                  <div className="text-[10px] text-amber-500/80">{t('disputed', { n: disagree })}</div>
+                  <div className="text-[10px] text-warning/80">{t('disputed', { n: disagree })}</div>
                 )}
-                {s.notes && <p className="text-[10px] text-slate-500 leading-relaxed">{s.notes}</p>}
+                {s.notes && <p className="text-[10px] text-muted leading-relaxed">{s.notes}</p>}
 
                 {mine ? (
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-slate-600">{t('yourRecord')}</span>
+                    <span className="text-[10px] text-muted">{t('yourRecord')}</span>
                     <button
                       onClick={() => handleWithdraw(s.id)} disabled={busy}
-                      className="text-[10px] text-slate-600 hover:text-red-400 underline"
+                      className="text-[10px] text-muted hover:text-danger underline"
                     >
                       {t('withdraw')}
                     </button>
@@ -229,8 +229,8 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
                       onClick={() => handleVote(s.id, 'agree')} disabled={busy}
                       className={`flex-1 rounded px-2 py-1 text-[10px] font-medium transition-colors ${
                         myVote?.verdict === 'agree'
-                          ? 'bg-emerald-800 text-white'
-                          : 'border border-slate-700 text-slate-400 hover:text-emerald-300 hover:border-emerald-800'
+                          ? 'bg-raised text-white'
+                          : 'border border-line text-secondary hover:text-system hover:border-brand'
                       }`}
                     >
                       {t('confirm')}
@@ -239,8 +239,8 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
                       onClick={() => handleVote(s.id, 'disagree')} disabled={busy}
                       className={`flex-1 rounded px-2 py-1 text-[10px] font-medium transition-colors ${
                         myVote?.verdict === 'disagree'
-                          ? 'bg-amber-800 text-white'
-                          : 'border border-slate-700 text-slate-400 hover:text-amber-300 hover:border-amber-800'
+                          ? 'bg-raised text-white'
+                          : 'border border-line text-secondary hover:text-warning hover:border-warning'
                       }`}
                     >
                       {t('dispute')}
@@ -253,9 +253,9 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
         </div>
       )}
 
-      {notice && <p className="text-[10px] text-emerald-400">{notice}</p>}
-      {error  && <p className="text-[10px] text-red-400">{error}</p>}
-      {linkError && <p className="text-[10px] text-red-400">{linkError}</p>}
+      {notice && <p className="text-[10px] text-system">{notice}</p>}
+      {error  && <p className="text-[10px] text-danger">{error}</p>}
+      {linkError && <p className="text-[10px] text-danger">{linkError}</p>}
     </div>
   )
 }

@@ -1,28 +1,124 @@
 @import "tailwindcss";
 
-@theme inline {
-  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
-  --font-condensed: var(--font-barlow-condensed), ui-sans-serif, system-ui, sans-serif;
+/* ══════════════════════════════════════════════════════════════════
+   COLD SIGNAL
+   The identity layer. Every colour and face the app uses is declared
+   here and nowhere else — components spend tokens, never hexes, so
+   this file is the whole theme and can be lifted into another project
+   unchanged.
+   ══════════════════════════════════════════════════════════════════ */
+
+@theme {
+  --font-sans: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, monospace;
+
+  /* ── Surfaces, darkest to lightest ─────────────────────────────── */
+  --color-background: #000000;
+  --color-surface:    #0B1012;
+  --color-raised:     #11181C;
+
+  /* ── Ink ───────────────────────────────────────────────────────── */
+  --color-primary:    #E2E8E9;  /* 15.45:1 on surface */
+  --color-secondary:  #9BA8AC;  /*  7.83:1 — AAA */
+  --color-muted:      #767D80;  /*  4.57:1 — AA at body size.
+                                   The palette's #686F72 measured 3.74:1, which
+                                   is large-text only, and this app sets almost
+                                   every count and label small. Lifted two steps
+                                   rather than shipping 60-odd unreadable labels. */
+
+  /* ── Lines ─────────────────────────────────────────────────────── */
+  --color-line:       #202D33;  /* decorative dividers — deliberately quiet */
+  --color-line-loud:  #4E646C;  /* 3.07:1 — inputs, focus rings, anything
+                                   the eye has to find to operate */
+
+  /* ── Identity ──────────────────────────────────────────────────── */
+  --color-brand:      #617BB9;  /* 4.60:1 on surface */
+  --color-system:     #87DEFF;  /* 12.69:1 — live/system state */
+  --color-highlight:  #B7F0FF;  /* 15.42:1 — the brightest thing on screen */
+
+  /* ── Frontier ramp ─────────────────────────────────────────────
+     Sequential data, so: one hue, monotone lightness, dim → bright.
+     Validated (monotone L, ΔL ≥ 0.06 per step, low end 2.49:1 over
+     the basemap, hue spread 29°). Generated in OKLCH — do not
+     hand-edit a step without re-running the ordinal validator. */
+  --color-frontier-1: #29596b;
+  --color-frontier-2: #267488;
+  --color-frontier-3: #1e8fa3;
+  --color-frontier-4: #28abba;
+  --color-frontier-5: #4ac5ce;
+  --color-frontier-6: #7cdde1;
+  --color-frontier-7: #b6f2f2;
+
+  /* ── Score components ──────────────────────────────────────────
+     Three bars in the detail panel, so this is categorical: identity,
+     not magnitude. Validated all-pairs on the raised surface (worst
+     deuteranopia ΔE 11.9, normal-vision 23.5, all ≥ 3:1). Each bar also
+     carries its own text label, so identity never rests on colour alone. */
+  --color-component-habitat:        #15ab83;
+  --color-component-gap:            #b95e17;
+  --color-component-incompleteness: #9470cd;
+
+  /* ── Status. Reserved meaning; never reused as a series colour. ── */
+  --color-danger:     #FF8A8A;
+  --color-warning:    #F0C674;
 }
 
-/* ── App colour tokens ───────────────────────────────────────── */
-:root {
-  --surface-raised:  #1e293b;
-  --border:          #334155;
-  --text-primary:    #f1f5f9;
-  --accent:          #34d399;
-  --text-muted:      #64748b;
-  --text-secondary:  #94a3b8;
-  --border-bright:   #475569;
+/* ── Technical text ──────────────────────────────────────────────
+   Coordinates, hex ids, scores, counts. Tabular figures so a column
+   of numbers lines up, and slightly tightened because Space Mono runs
+   wide at default tracking. */
+.technical {
+  font-family: var(--font-mono-face), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
-/* ── Leaflet tooltip override ────────────────────────────────── */
+/* ── Leaflet, dragged into the theme ─────────────────────────────── */
 .biofrontier-tooltip {
-  background: var(--surface-raised) !important;
-  border: 1px solid var(--border) !important;
-  color: var(--text-primary) !important;
+  background: var(--color-raised) !important;
+  border: 1px solid var(--color-line) !important;
+  color: var(--color-primary) !important;
   border-radius: 6px !important;
   font-size: 12px !important;
   padding: 4px 8px !important;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.6) !important;
 }
 .biofrontier-tooltip::before { display: none !important; }
+
+.leaflet-container { background: var(--color-background) !important; }
+
+/* Leaflet's own chrome ships light; repaint it rather than hide it. */
+.leaflet-control-attribution {
+  background: rgb(11 16 18 / 0.82) !important;
+  color: var(--color-muted) !important;
+  font-size: 10px !important;
+}
+.leaflet-control-attribution a { color: var(--color-secondary) !important; }
+
+.leaflet-bar a {
+  background: var(--color-raised) !important;
+  color: var(--color-primary) !important;
+  border-bottom: 1px solid var(--color-line) !important;
+}
+.leaflet-bar a:hover { background: var(--color-line) !important; }
+
+/* ── Basemap tone ───────────────────────────────────────────────
+   Esri's Dark Gray Canvas is a neutral mid-grey — clean, but lighter and
+   warmer than Cold Signal. Darkening and cooling it in CSS keeps the map
+   as ground beneath the data rather than a grey slab competing with it,
+   and avoids hosting a restyled tile set just to change its tone. */
+.basemap-ground {
+  filter: brightness(0.42) contrast(1.15) saturate(0.5) hue-rotate(175deg);
+}
+/* Labels are the one part of the basemap that must stay readable, so they
+   are lifted rather than dimmed with the ground. */
+.basemap-labels {
+  filter: brightness(0.95) contrast(1.05) saturate(0.3) hue-rotate(175deg);
+  opacity: 0.55;
+}
+
+/* ── Focus. One visible ring everywhere, on the loud line colour. ── */
+:focus-visible {
+  outline: 2px solid var(--color-system);
+  outline-offset: 2px;
+}

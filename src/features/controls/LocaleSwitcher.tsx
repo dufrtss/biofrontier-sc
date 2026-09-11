@@ -29,15 +29,15 @@ export default function LocaleSwitcher() {
             className={[
               'text-[11px] font-semibold tracking-wider px-1.5 py-0.5 rounded transition-colors',
               locale === currentLocale
-                ? 'text-blue-400 underline underline-offset-2'
-                : 'text-slate-500 hover:text-slate-400',
+                ? 'text-brand underline underline-offset-2'
+                : 'text-muted hover:text-secondary',
             ].join(' ')}
             type="button"
           >
             {LABELS[locale]}
           </button>
           {i < routing.locales.length - 1 && (
-            <span className="text-slate-600 text-[10px] select-none">·</span>
+            <span className="text-muted text-[10px] select-none">·</span>
           )}
         </span>
       ))}

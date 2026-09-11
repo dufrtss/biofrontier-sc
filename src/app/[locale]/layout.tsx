@@ -1,19 +1,22 @@
 import type { Metadata } from 'next'
-import { Barlow, Barlow_Condensed } from 'next/font/google'
+import { Space_Grotesk, Space_Mono } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import '../globals.css'
 
-const barlow = Barlow({
+// Cold Signal. Space Grotesk carries display and UI; Space Mono is reserved for
+// technical text — coordinates, hex ids, scores, record counts — so a number that
+// can be compared down a column is always set in a face where it lines up.
+const spaceGrotesk = Space_Grotesk({
   weight: ['400', '500', '600', '700'],
   subsets: ['latin'],
-  variable: '--font-barlow',
+  variable: '--font-display',
 })
 
-const barlowCondensed = Barlow_Condensed({
-  weight: ['600', '700', '800'],
+const spaceMono = Space_Mono({
+  weight: ['400', '700'],
   subsets: ['latin'],
-  variable: '--font-barlow-condensed',
+  variable: '--font-mono-face',
 })
 
 export const metadata: Metadata = {
@@ -38,9 +41,9 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${barlow.variable} ${barlowCondensed.variable} h-full`}
+      className={`${spaceGrotesk.variable} ${spaceMono.variable} h-full`}
     >
-      <body className="bg-slate-950 text-slate-100 h-full overflow-hidden font-sans antialiased">
+      <body className="bg-background text-primary h-full overflow-hidden font-sans antialiased">
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>
