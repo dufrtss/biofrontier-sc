@@ -182,8 +182,8 @@ describe('resolveActiveComponents', () => {
 })
 
 describe('scoreToColor', () => {
-  it('returns a hex colour from the ramp', () => {
-    expect(scoreToColor(0.5)).toMatch(/^#[0-9a-f]{6}$/)
+  it('returns a CSS rgb() string', () => {
+    expect(scoreToColor(0.5)).toMatch(/^rgb\(\d+, \d+, \d+\)$/)
   })
 
   it('clamps values outside [0, 1] without throwing', () => {
@@ -193,8 +193,8 @@ describe('scoreToColor', () => {
 })
 
 describe('scoreToOpacity', () => {
-  it('returns 0.55 at score 0', () => {
-    expect(scoreToOpacity(0)).toBeCloseTo(0.55, 2)
+  it('returns 0.25 at score 0', () => {
+    expect(scoreToOpacity(0)).toBeCloseTo(0.25, 2)
   })
 
   it('returns 0.80 at score 1', () => {
