@@ -6,7 +6,6 @@ import {
   resolveActiveComponents,
 } from '@/lib/scoring'
 import { EFFORT_WEIGHTS, FRONTIER_WEIGHTS } from '@/lib/scoring-config'
-import { scoreToColor, scoreToOpacity } from '@/lib/color'
 
 describe('normalizeValues', () => {
   it('maps [0, 5, 10] to [0, 0.5, 1]', () => {
@@ -181,23 +180,7 @@ describe('resolveActiveComponents', () => {
   })
 })
 
-describe('scoreToColor', () => {
-  it('returns a CSS rgb() string', () => {
-    expect(scoreToColor(0.5)).toMatch(/^rgb\(\d+, \d+, \d+\)$/)
-  })
-
-  it('clamps values outside [0, 1] without throwing', () => {
-    expect(() => scoreToColor(-0.5)).not.toThrow()
-    expect(() => scoreToColor(1.5)).not.toThrow()
-  })
-})
-
-describe('scoreToOpacity', () => {
-  it('returns 0.25 at score 0', () => {
-    expect(scoreToOpacity(0)).toBeCloseTo(0.25, 2)
-  })
-
-  it('returns 0.80 at score 1', () => {
-    expect(scoreToOpacity(1)).toBeCloseTo(0.80, 2)
-  })
-})
+// scoreToColor and scoreToOpacity are exercised in tests/color.test.ts, where
+// the assertions are about the ramp's ordinal properties rather than about the
+// shape of the string it returns. Pinning the format here meant a change of
+// colour space failed a scoring test, which is the wrong file to hear about it.

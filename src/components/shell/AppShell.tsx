@@ -45,8 +45,8 @@ export default function AppShell() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 bg-slate-950">
-        <div className="w-6 h-6 rounded-full border-2 border-slate-700 border-t-emerald-500 animate-spin" />
+      <div className="flex flex-col items-center justify-center h-full gap-3 bg-slate-100">
+        <div className="w-6 h-6 rounded-full border-2 border-slate-200 border-t-brand animate-spin" />
         <p className="text-slate-500 text-sm tracking-widest uppercase font-condensed">
           {t('loadingData')}
         </p>
@@ -56,8 +56,8 @@ export default function AppShell() {
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-2 bg-slate-950">
-        <p className="text-red-400 text-sm font-condensed tracking-wide uppercase">{t('errorLoading')}</p>
+      <div className="flex flex-col items-center justify-center h-full gap-2 bg-slate-100">
+        <p className="text-danger text-sm font-condensed tracking-wide uppercase">{t('errorLoading')}</p>
         <p className="text-slate-500 text-xs">{error}</p>
       </div>
     )
@@ -66,9 +66,9 @@ export default function AppShell() {
   return (
     <div className="flex flex-col h-full">
       {/* Top bar */}
-      <header className="relative flex items-center justify-between px-3 py-2 sm:px-5 sm:py-3 bg-slate-900 border-b border-slate-700/60 shrink-0 z-10">
+      <header className="relative flex items-center justify-between px-3 py-2 sm:px-5 sm:py-3 bg-white border-b border-slate-200 shrink-0 z-10">
         <div>
-          <h1 className="text-base font-bold text-white tracking-tight font-condensed uppercase leading-none">
+          <h1 className="text-base font-bold text-slate-900 tracking-tight font-condensed uppercase leading-none">
             BioFrontier SC
           </h1>
           <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">
@@ -84,7 +84,7 @@ export default function AppShell() {
           />
           <button
             onClick={() => openMethodology()}
-            className="text-xs text-slate-500 hover:text-slate-300 transition-colors hidden md:block"
+            className="text-xs text-slate-500 hover:text-slate-900 transition-colors hidden md:block"
           >
             {t('howItWorks')}
           </button>
@@ -105,7 +105,7 @@ export default function AppShell() {
       <div className="flex flex-1 overflow-hidden">
         <aside
           className={[
-            'bg-slate-900 border-r border-slate-700/60 overflow-hidden',
+            'bg-white border-r border-slate-200 overflow-hidden',
             rankingOpen
               ? 'fixed inset-0 z-[1500] flex flex-col sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
               : 'hidden sm:flex sm:flex-col sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
@@ -144,7 +144,7 @@ export default function AppShell() {
           />
           <button
             onClick={() => setRankingOpen(o => !o)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-[1000] h-10 w-5 flex items-center justify-center bg-slate-800/90 hover:bg-slate-700 border border-slate-700 rounded text-slate-400 hover:text-slate-200 transition-colors"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-[1000] h-10 w-5 flex items-center justify-center bg-white/95 hover:bg-slate-100 border border-slate-200 rounded text-slate-500 hover:text-slate-800 transition-colors"
             aria-label={rankingOpen ? 'Hide ranking panel' : 'Show ranking panel'}
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -158,7 +158,7 @@ export default function AppShell() {
 
         <aside
           className={[
-            'bg-slate-900 border-l border-slate-700 overflow-hidden',
+            'bg-white border-l border-slate-200 overflow-hidden',
             selectedHex
               ? 'fixed inset-0 z-[1500] sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
               : 'hidden sm:block sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
@@ -177,11 +177,11 @@ export default function AppShell() {
       </div>
 
       {/* Footer — locale switcher + donate */}
-      <footer className="shrink-0 flex items-center justify-between px-4 py-2 bg-slate-900 border-t border-slate-700/60">
+      <footer className="shrink-0 flex items-center justify-between px-4 py-2 bg-white border-t border-slate-200">
         <LocaleSwitcher />
         <button
           onClick={() => setDonateOpen(true)}
-          className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+          className="text-xs text-slate-500 hover:text-slate-900 transition-colors"
         >
           {t('donate')}
         </button>

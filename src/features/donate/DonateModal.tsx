@@ -58,36 +58,36 @@ export default function DonateModal({ open, onClose }: DonateModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="donate-title"
-        className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-lg shadow-xl"
+        className="w-full max-w-md bg-white border border-slate-200 rounded-lg shadow-xl"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-slate-700/60">
+        <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-slate-200">
           <h2
             id="donate-title"
-            className="text-sm font-semibold text-slate-200 uppercase tracking-wider font-condensed"
+            className="text-sm font-semibold text-slate-800 uppercase tracking-wider font-condensed"
           >
             {t('title')}
           </h2>
           <button
             onClick={onClose}
-            className="text-slate-500 hover:text-slate-300 text-lg leading-none"
+            className="text-slate-500 hover:text-slate-900 text-lg leading-none"
             aria-label={t('close')}
           >
             ✕
           </button>
         </div>
 
-        <div className="px-5 py-4 space-y-3 text-xs text-slate-400 leading-relaxed">
+        <div className="px-5 py-4 space-y-3 text-xs text-slate-500 leading-relaxed">
           <p>{t('usingIt')}</p>
           <p>{t('contributing')}</p>
           <p>{t('supporting')}</p>
-          <p className="text-emerald-400/90">{t('freeEitherWay')}</p>
+          <p className="text-brand-ink">{t('freeEitherWay')}</p>
         </div>
 
         <div className="flex items-center justify-end gap-3 px-5 pb-4 pt-1">
           <button
             onClick={onClose}
-            className="text-xs text-slate-500 hover:text-slate-300 transition-colors"
+            className="text-xs text-slate-600 hover:text-slate-900 transition-colors"
           >
             {t('later')}
           </button>
@@ -98,7 +98,7 @@ export default function DonateModal({ open, onClose }: DonateModalProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}
-            className="text-xs px-3 py-1.5 rounded border border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+            className="text-xs font-medium px-3 py-1.5 rounded bg-brand-ink text-white hover:bg-brand-ink/90 transition-colors"
           >
             {t('continue')}
           </a>

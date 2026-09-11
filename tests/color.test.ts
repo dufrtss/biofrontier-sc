@@ -1,30 +1,108 @@
 import { describe, it, expect } from 'vitest'
-import { scoreToColor, scoreToOpacity } from '@/lib/color'
+import { scoreToColor, scoreToOpacity, scoreToInk, frontierRamp, frontierInk } from '@/lib/color'
 
+// The ramp is sequential, so the properties worth pinning are the ones that
+// make it readable as a magnitude — not the individual hexes, which are
+// generated in OKLCH and expected to be re-tuned.
 describe('scoreToColor', () => {
-  it('returns blue for score 0 (well-surveyed)', () => {
-    expect(scoreToColor(0)).toBe('rgb(59, 130, 246)')
+  it('anchors the ends of the ramp', () => {
+    expect(scoreToColor(0)).toBe(frontierRamp[0])
+    expect(scoreToColor(1)).toBe(frontierRamp[frontierRamp.length - 1])
   })
-  it('returns orange-red for score 1 (frontier)', () => {
-    expect(scoreToColor(1)).toBe('rgb(239, 68, 68)')
+
+  it('clamps outside [0, 1] to the ends', () => {
+    expect(scoreToColor(-1)).toBe(frontierRamp[0])
+    expect(scoreToColor(2)).toBe(frontierRamp[frontierRamp.length - 1])
   })
-  it('clamps below 0', () => {
-    expect(scoreToColor(-1)).toBe('rgb(59, 130, 246)')
+
+  it('only ever returns a step from the documented ramp', () => {
+    for (let s = 0; s <= 1.0001; s += 0.01) {
+      expect(frontierRamp).toContain(scoreToColor(s))
+    }
   })
-  it('clamps above 1', () => {
-    expect(scoreToColor(2)).toBe('rgb(239, 68, 68)')
+
+  it('never steps backwards as the score rises', () => {
+    let prev = -1
+    for (let s = 0; s <= 1.0001; s += 0.01) {
+      const i = frontierRamp.indexOf(scoreToColor(s) as typeof frontierRamp[number])
+      expect(i).toBeGreaterThanOrEqual(prev)
+      prev = i
+    }
   })
-  it('returns a midpoint purple at score 0.5', () => {
-    // r: 59 + (239-59)*0.5 = 149, g: 130 + (68-130)*0.5 = 99, b: 246 + (68-246)*0.5 = 157
-    expect(scoreToColor(0.5)).toBe('rgb(149, 99, 157)')
+})
+
+// A sequential ramp encodes magnitude as lightness, and the direction depends
+// on the ground it is drawn over. The basemap here is light, so the ramp runs
+// DARKER as the score rises: on a pale ground the eye reads the darkest patch
+// as the most. If this were not monotone, a lighter patch could mean "more",
+// which is the failure the blue→red ramp this replaced actually had at its
+// midpoint.
+describe('the frontier ramp', () => {
+  const luminance = (hex: string) => {
+    const h = hex.replace('#', '')
+    const ch = [0, 2, 4].map(i => {
+      const c = parseInt(h.slice(i, i + 2), 16) / 255
+      return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+    })
+    return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+  }
+
+  it('falls monotonically in luminance', () => {
+    for (let i = 1; i < frontierRamp.length; i++) {
+      expect(luminance(frontierRamp[i])).toBeLessThan(luminance(frontierRamp[i - 1]))
+    }
+  })
+
+  it('keeps its palest step visible against the basemap', () => {
+    // Esri Light Gray Canvas sits around #f2f2f2. A ramp whose low end matched
+    // it would make "well surveyed" and "no data" look identical, which is the
+    // distinction the map exists to draw.
+    const basemap = luminance('#f2f2f2')
+    const palest = luminance(frontierRamp[0])
+    const contrast = (Math.max(basemap, palest) + 0.05) / (Math.min(basemap, palest) + 0.05)
+    expect(contrast).toBeGreaterThan(1.3)
+  })
+})
+
+// The fill ramp and the ink ramp are the same quantity in two media, and the
+// thing that must never drift is that they agree on direction and on which step
+// a score lands in. The reason they are separate at all is contrast: only two
+// steps of the fill ramp are legible as type on white.
+describe('scoreToInk', () => {
+  it('lands on the same step index as the fill ramp', () => {
+    for (let s = 0; s <= 1.0001; s += 0.01) {
+      expect(frontierInk.indexOf(scoreToInk(s) as typeof frontierInk[number]))
+        .toBe(frontierRamp.indexOf(scoreToColor(s) as typeof frontierRamp[number]))
+    }
+  })
+
+  it('is readable as text at every step', () => {
+    const rel = (hex: string) => {
+      const h = hex.replace('#', '')
+      const ch = [0, 2, 4].map(i => {
+        const c = parseInt(h.slice(i, i + 2), 16) / 255
+        return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+      })
+      return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+    }
+    // Against white panels and against the slate-100 page ground, which is the
+    // darker of the two backgrounds this type ever sits on.
+    for (const ground of ['#ffffff', '#f1f5f9']) {
+      for (const step of frontierInk) {
+        const contrast = (rel(ground) + 0.05) / (rel(step) + 0.05)
+        expect(contrast).toBeGreaterThanOrEqual(4.5)
+      }
+    }
   })
 })
 
 describe('scoreToOpacity', () => {
-  it('returns 0.25 at score 0', () => {
-    expect(scoreToOpacity(0)).toBeCloseTo(0.25)
+  it('is high enough at the low end to stay legible over tiles', () => {
+    expect(scoreToOpacity(0)).toBeCloseTo(0.60)
   })
-  it('returns 0.80 at score 1', () => {
-    expect(scoreToOpacity(1)).toBeCloseTo(0.80)
+
+  it('rises with the score without reaching full opacity', () => {
+    expect(scoreToOpacity(1)).toBeCloseTo(0.85)
+    expect(scoreToOpacity(1)).toBeLessThan(1)
   })
 })

@@ -62,23 +62,31 @@ export default function InfoTooltip({
       <button
         ref={btnRef}
         onClick={handleOpen}
-        className="w-4 h-4 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-400 hover:text-slate-200 text-[9px] font-bold leading-none flex items-center justify-center transition-colors ml-1 shrink-0"
+        className="w-4 h-4 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 text-[10px] font-bold grid place-items-center transition-colors ml-1 shrink-0"
         aria-label="More information"
         type="button"
       >
-        ?
+        {/* Optical, not geometric. Centring puts the ink box of `?` within a
+            twentieth of a pixel of the circle's centre — the layout is right
+            and the badge still looks wrong, because the glyph is top-heavy:
+            almost all its mass is in the bowl and the only thing below is a
+            small dot with a gap. Rasterising it and weighting by coverage puts
+            the centroid 0.073em above the box centre and 0.016em right of the
+            advance centre. These are those numbers, and they are specific to
+            this face and this character — re-measure before reusing them. */}
+        <span className="block leading-none translate-x-[-0.016em] translate-y-[0.088em]" aria-hidden="true">?</span>
       </button>
       {open && pos && createPortal(
         <div
           ref={popoverRef}
           style={{ top: pos.top, left: pos.left }}
-          className="fixed z-[9999] w-64 bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-xl text-xs text-slate-300 leading-relaxed"
+          className="fixed z-[9999] w-64 bg-white border border-slate-200 rounded-lg p-3 shadow-lg text-xs text-slate-600 leading-relaxed"
         >
           <p>{content}</p>
           {learnMore && onLearnMore && (
             <button
               onClick={() => { onLearnMore(learnMore.sectionId); setOpen(false) }}
-              className="mt-2 block text-blue-400 hover:text-blue-300 transition-colors"
+              className="mt-2 block font-medium text-brand-ink hover:underline transition-colors"
               type="button"
             >
               {learnMore.label ?? t('learnMore')}

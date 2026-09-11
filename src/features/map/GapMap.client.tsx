@@ -6,7 +6,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { ScoredHexbin } from '@/lib/types'
 import { hexBoundary } from '@/lib/h3-utils'
-import { scoreToColor, scoreToOpacity } from '@/lib/color'
+import { scoreToColor, scoreToOpacity, frontierRamp } from '@/lib/color'
 import type { GapMapProps } from './GapMap'
 import InfoTooltip from '@/components/ui/InfoTooltip'
 
@@ -16,6 +16,21 @@ import InfoTooltip from '@/components/ui/InfoTooltip'
  * `bindPopup` takes raw HTML — so this is the boundary where untrusted text
  * stops being markup.
  */
+// Leaflet paints SVG attributes directly, so these cannot be utility classes.
+// One block, each entry named for the thing in globals.css it mirrors — if a
+// colour there moves, this is the only other place that has to move with it.
+const MAP = {
+  noData:      '#94a3b8',  // slate-400, at low opacity
+  selected:    '#0f172a',  // slate-900 — the selection ring was #ffffff, which
+                           // is invisible the moment the basemap goes light
+  // Community records must NOT be green. The frontier ramp is now green end to
+  // end, so a green marker reads as another score rather than as a different
+  // KIND of observation. Indigo is the one hue in this palette that separates
+  // from the ramp under deuteranopia as well as normal vision (ΔE 80+).
+  community:      '#4841af',
+  communityFill:  '#ffffff',
+} as const
+
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
@@ -42,9 +57,38 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
 
     const map = L.map(containerRef.current, { zoomControl: true }).setView([-27.5, -51.0], 7)
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-      maxZoom: 18,
+    // Basemap in two halves, with the data sandwiched between them.
+    //
+    // Standard OSM tiles are a saturated street map — beige roads, green parks,
+    // pink motorways — and every one of those colours competes with a hexbin
+    // fill for the same attention. Esri's Light Gray Canvas is a cartography
+    // drawn to sit *under* data: coastline, rivers, borders and place names,
+    // almost no hue. Free, keyless, attribution required.
+    //
+    // Splitting the labels off puts place names in a pane ABOVE the hexbins, so
+    // a town stays readable through a 0.8-opacity fill instead of being buried
+    // by the data drawn over it.
+    //
+    // Note the /Canvas/ path segment: Esri answers a wrong service path by
+    // failing the tile request rather than erroring, so dropping it shows up
+    // only as a map with no place names.
+    const ESRI = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas'
+
+    L.tileLayer(`${ESRI}/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://www.esri.com/">Esri</a>',
+      maxZoom: 16,
+      className: 'basemap-ground',
+    }).addTo(map)
+
+    map.createPane('labels')
+    map.getPane('labels')!.style.zIndex = '650'
+    map.getPane('labels')!.style.pointerEvents = 'none'
+
+    L.tileLayer(`${ESRI}/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, {
+      maxZoom: 16,
+      pane: 'labels',
+      className: 'basemap-labels',
     }).addTo(map)
 
     mapRef.current = map
@@ -76,8 +120,8 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
         weight:      0.8,
       } : {
         color:       'transparent',
-        fillColor:   '#475569',
-        fillOpacity: 0.10,
+        fillColor:   MAP.noData,
+        fillOpacity: 0.16,
         weight:      0,
       })
 
@@ -100,7 +144,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
   useEffect(() => {
     polygonsRef.current.forEach((polygon, hexId) => {
       if (hexId === selectedHexId) {
-        polygon.setStyle({ color: '#ffffff', weight: 2, fillOpacity: 0.9 })
+        polygon.setStyle({ color: MAP.selected, weight: 2, fillOpacity: 0.9 })
         polygon.bringToFront()
       } else {
         const hex = hexbins[hexId]
@@ -113,7 +157,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
           } : {
             color:       'transparent',
             weight:      0,
-            fillOpacity: 0.10,
+            fillOpacity: 0.16,
           })
         }
       }
@@ -138,9 +182,9 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
       communitySubmissions.map(s =>
         L.circleMarker([s.latitude, s.longitude], {
           radius: 5,
-          color: '#34d399',
+          color: MAP.community,
           weight: 2,
-          fillColor: '#065f46',
+          fillColor: MAP.communityFill,
           fillOpacity: 0.9,
         }).bindPopup(
           `<div style="font-size:12px;line-height:1.5">
@@ -162,31 +206,49 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
       <div ref={containerRef} className="w-full h-full" />
 
       {/* Legend */}
-      <div className="absolute bottom-8 left-4 z-[1000] bg-slate-900/90 backdrop-blur rounded-lg px-3 py-2 text-xs text-slate-300 border border-slate-700">
+      <div className="absolute bottom-8 left-4 z-[1000] bg-white/95 backdrop-blur rounded-lg px-3 py-2 text-xs text-slate-500 border border-slate-200">
         <div className="flex items-center mb-2">
-          <p className="text-slate-400 uppercase tracking-widest text-[10px] font-semibold">{t('surveyCoverage')}</p>
+          <p className="text-slate-500 uppercase tracking-widest text-[10px] font-semibold">{t('surveyCoverage')}</p>
           <InfoTooltip
             content={t('tooltipCoverage')}
             learnMore={{ sectionId: 'geographic-scope' }}
             onLearnMore={onOpenMethodology}
           />
         </div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="w-3 h-3 rounded-sm inline-block" style={{ background: 'rgb(59,130,246)' }} />
-          {t('wellSurveyed')}
+        {/* A sequential scale deserves a continuous legend. Two swatches
+            implied two categories; the ramp is one quantity getting deeper.
+            Hard stops rather than a smooth blend, because the fill on the map
+            can only ever be one of seven steps and a gradient would promise a
+            precision the data does not have. */}
+        <div className="mb-2">
+          <div
+            className="h-2 rounded-sm border border-slate-200"
+            style={{
+              background: `linear-gradient(to right, ${
+                frontierRamp.map((c, i) =>
+                  `${c} ${(i / frontierRamp.length) * 100}% ${((i + 1) / frontierRamp.length) * 100}%`,
+                ).join(', ')
+              })`,
+            }}
+          />
+          <div className="flex justify-between gap-3 mt-1 text-[10px] text-slate-500 leading-tight">
+            <span>{t('wellSurveyed')}</span>
+            <span className="text-right">{t('highFrontier')}</span>
+          </div>
         </div>
         <div className="flex items-center gap-2 mb-1">
-          <span className="w-3 h-3 rounded-sm inline-block" style={{ background: 'rgb(239,68,68)' }} />
-          {t('highFrontier')}
-        </div>
-        <div className="flex items-center gap-2 mb-1">
-          <span className="w-3 h-3 rounded-sm inline-block bg-slate-600 opacity-50" />
+          <span
+            className="w-3 h-3 rounded-sm inline-block shrink-0 border border-slate-200"
+            style={{ background: MAP.noData, opacity: 0.4 }}
+          />
           {t('unsurveyed')}
         </div>
         <div className="flex items-center gap-2">
+          {/* Round, because the thing it stands for is a round marker on the
+              map. A legend swatch that is not the shape of its mark is a lie. */}
           <span
-            className="w-3 h-3 rounded-full inline-block"
-            style={{ background: '#065f46', border: '2px solid #34d399' }}
+            className="w-3 h-3 rounded-full inline-block shrink-0"
+            style={{ background: MAP.communityFill, border: `2px solid ${MAP.community}` }}
           />
           {t('communityRecord')}
         </div>
