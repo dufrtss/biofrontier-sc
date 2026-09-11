@@ -62,23 +62,28 @@ export default function InfoTooltip({
       <button
         ref={btnRef}
         onClick={handleOpen}
-        className="w-4 h-4 rounded-full bg-line hover:bg-line-loud text-secondary hover:text-primary text-[9px] font-bold leading-none flex items-center justify-center transition-colors ml-1 shrink-0"
+        className="w-4 h-4 rounded-full border border-edge bg-raised hover:border-system hover:text-system text-secondary text-[10px] font-bold grid place-items-center transition-colors ml-1 shrink-0"
         aria-label="More information"
         type="button"
       >
-        ?
+        {/* The glyph is wrapped rather than set directly on the button: flex
+            and grid centring both align the line box, which is symmetric about
+            the em square, while the ink of `?` runs from the baseline to the
+            cap height and leaves the descender space empty. Centred markup,
+            visibly high glyph. .glyph-center shifts it back down. */}
+        <span className="glyph-center" aria-hidden="true">?</span>
       </button>
       {open && pos && createPortal(
         <div
           ref={popoverRef}
           style={{ top: pos.top, left: pos.left }}
-          className="fixed z-[9999] w-64 bg-raised border border-line-loud rounded-lg p-3 shadow-xl text-xs text-secondary leading-relaxed"
+          className="fixed z-[9999] w-64 bg-raised border border-edge p-3 shadow-xl text-xs text-secondary leading-relaxed emit-soft"
         >
           <p>{content}</p>
           {learnMore && onLearnMore && (
             <button
               onClick={() => { onLearnMore(learnMore.sectionId); setOpen(false) }}
-              className="mt-2 block text-brand hover:text-brand transition-colors"
+              className="mt-2 block hud-label text-brand hover:text-highlight transition-colors"
               type="button"
             >
               {learnMore.label ?? t('learnMore')}

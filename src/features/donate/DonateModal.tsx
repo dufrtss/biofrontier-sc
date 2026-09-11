@@ -49,7 +49,9 @@ export default function DonateModal({ open, onClose }: DonateModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[2100] flex items-center justify-center p-4 bg-black/60"
+      /* Near-opaque black rather than a grey scrim: the map behind should go
+         dark, not hazy, so the dialog is the only lit thing on the panel. */
+      className="fixed inset-0 z-[2100] flex items-center justify-center p-4 bg-background/92"
       onClick={onClose}
     >
       <div
@@ -58,19 +60,22 @@ export default function DonateModal({ open, onClose }: DonateModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="donate-title"
-        className="w-full max-w-md bg-surface border border-line rounded-lg shadow-xl"
+        /* Hairline edge plus a tight cyan bloom instead of a drop shadow: the
+           overlay should read as lit from within, not as paper floating above
+           the map. */
+        className="w-full max-w-md bg-surface border border-edge emit-soft"
         onClick={e => e.stopPropagation()}
       >
-        <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-line/60">
+        <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-edge">
           <h2
             id="donate-title"
-            className="text-sm font-semibold text-primary uppercase tracking-wider font-condensed"
+            className="text-sm font-semibold text-primary uppercase tracking-[0.14em]"
           >
             {t('title')}
           </h2>
           <button
             onClick={onClose}
-            className="text-muted hover:text-secondary text-lg leading-none"
+            className="text-muted hover:text-system text-lg leading-none transition-colors"
             aria-label={t('close')}
           >
             ✕
@@ -81,13 +86,13 @@ export default function DonateModal({ open, onClose }: DonateModalProps) {
           <p>{t('usingIt')}</p>
           <p>{t('contributing')}</p>
           <p>{t('supporting')}</p>
-          <p className="text-system/90">{t('freeEitherWay')}</p>
+          <p className="text-system">{t('freeEitherWay')}</p>
         </div>
 
         <div className="flex items-center justify-end gap-3 px-5 pb-4 pt-1">
           <button
             onClick={onClose}
-            className="text-xs text-muted hover:text-secondary transition-colors"
+            className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted hover:text-secondary transition-colors"
           >
             {t('later')}
           </button>
@@ -98,7 +103,8 @@ export default function DonateModal({ open, onClose }: DonateModalProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}
-            className="text-xs px-3 py-1.5 rounded border border-system/40 text-system hover:bg-system/10 transition-colors"
+            className="notch border border-system bg-system/10 px-4 py-2 font-mono text-[10px]
+                       uppercase tracking-[0.14em] text-system hover:bg-system/20 transition-colors"
           >
             {t('continue')}
           </a>
