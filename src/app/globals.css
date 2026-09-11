@@ -12,10 +12,14 @@
   --font-sans: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, monospace;
 
-  /* ── Surfaces, darkest to lightest ─────────────────────────────── */
+  /* ── Surfaces, darkest to lightest ─────────────────────────────
+     Pure black ground with surfaces barely lifted off it. The earlier
+     #0B1012 / #11181C pair read as dark grey panels on black; these sit
+     close enough that the chrome recedes and the map and the data are
+     the only things with real presence. */
   --color-background: #000000;
-  --color-surface:    #0B1012;
-  --color-raised:     #11181C;
+  --color-surface:    #060809;
+  --color-raised:     #0C0F11;
 
   /* ── Ink ───────────────────────────────────────────────────────── */
   --color-primary:    #E2E8E9;  /* 15.45:1 on surface */
@@ -27,9 +31,20 @@
                                    rather than shipping 60-odd unreadable labels. */
 
   /* ── Lines ─────────────────────────────────────────────────────── */
-  --color-line:       #202D33;  /* decorative dividers — deliberately quiet */
-  --color-line-loud:  #4E646C;  /* 3.07:1 — inputs, focus rings, anything
-                                   the eye has to find to operate */
+  --color-line:       #1A2428;  /* decorative dividers — deliberately quiet */
+  --color-line-loud:  #52686F;  /* 3.41:1 on surface, 3.27:1 on raised — inputs,
+                                   focus rings, anything the eye must find to
+                                   operate. Lifted when the surfaces went darker:
+                                   the old value measured 2.73:1 against black. */
+
+  /* ── Biomechanical greens ──────────────────────────────────────
+     Tertiary only. Cyan stays the voice of the app; these are the
+     organic counterweight to it — chitin, acid, phosphor — and they
+     appear on secondary detail, never on primary actions or the
+     frontier ramp. */
+  --color-bio:        #007e5b;  /* chitin — deep, structural */
+  --color-acid:       #82a000;  /* acid blood — the sharpest green here */
+  --color-phosphor:   #4ade9a;  /* live readout, terminal green */
 
   /* ── Identity ──────────────────────────────────────────────────── */
   --color-brand:      #617BB9;  /* 4.60:1 on surface */
@@ -54,9 +69,9 @@
      not magnitude. Validated all-pairs on the raised surface (worst
      deuteranopia ΔE 11.9, normal-vision 23.5, all ≥ 3:1). Each bar also
      carries its own text label, so identity never rests on colour alone. */
-  --color-component-habitat:        #15ab83;
-  --color-component-gap:            #b95e17;
-  --color-component-incompleteness: #9470cd;
+  --color-component-habitat:        #007e5b;  /* deep chitin green */
+  --color-component-gap:            #82a000;  /* acid — the Alien note */
+  --color-component-incompleteness: #8d6cc2;
 
   /* ── Status. Reserved meaning; never reused as a series colour. ── */
   --color-danger:     #FF8A8A;
@@ -107,11 +122,26 @@
    warmer than Cold Signal. Darkening and cooling it in CSS keeps the map
    as ground beneath the data rather than a grey slab competing with it,
    and avoids hosting a restyled tile set just to change its tone. */
-.basemap-ground {
-  filter: brightness(0.42) contrast(1.15) saturate(0.5) hue-rotate(175deg);
+.basemap-relief {
+  /* Inverted so flats read black and lit slopes carry the light, then pushed
+     toward the bio green so the terrain belongs to the palette rather than
+     sitting under it as grey. Kept low — terrain should be felt, not read,
+     and must never compete with the hexbin ramp. */
+  filter: brightness(0.34) contrast(1.75) sepia(0.75)
+          hue-rotate(90deg) saturate(1.3);
 }
-/* Labels are the one part of the basemap that must stay readable, so they
-   are lifted rather than dimmed with the ground. */
+
+.basemap-ground {
+  /* Rides over the relief at 0.62 opacity (set on the layer). The filter only
+     cools it and holds it down; at the earlier brightness(0.42) the coastline,
+     the rivers and the reservoirs had all collapsed into the same black as the
+     ocean, which is a loss of information on a map whose subject is where
+     things are. */
+  filter: brightness(0.62) contrast(1.05) saturate(0.5) hue-rotate(175deg);
+}
+
+/* Labels are the one part of the basemap that must stay readable, so they are
+   lifted rather than dimmed with the ground. */
 .basemap-labels {
   filter: brightness(0.95) contrast(1.05) saturate(0.3) hue-rotate(175deg);
   opacity: 0.55;

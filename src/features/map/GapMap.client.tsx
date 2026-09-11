@@ -25,7 +25,7 @@ function escapeHtml(value: string): string {
 // One block, each entry named for the Cold Signal token it mirrors — if a token
 // in globals.css moves, this is the only other place that has to move with it.
 const MAP = {
-  noData:      '#11181C',  // --color-raised
+  noData:      '#0C0F11',  // --color-raised
   hoverStroke: '#B7F0FF',  // --color-highlight
   community:   '#87DEFF',  // --color-system
 } as const
@@ -68,20 +68,47 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
     // Splitting labels off puts place names in a pane ABOVE the hexbins, so a
     // town stays readable through a 0.8-opacity fill instead of being buried by
     // the data drawn over it.
-    const ESRI = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas'
+    const ESRI = 'https://services.arcgisonline.com/ArcGIS/rest/services'
 
-    L.tileLayer(`${ESRI}/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
+    // Terrain first, as the actual ground.
+    //
+    // The previous pass dimmed the basemap so hard that the state read as a
+    // black void with hexagons floating in it. For this tool the terrain is not
+    // decoration: where a river runs and where the land rises is the context
+    // that makes an under-surveyed hexbin mean anything, and the biologist
+    // reading it is placing the map against country they know.
+    //
+    // Esri's hillshade is a near-white relief raster, so it is inverted — flats
+    // fall to black, lit slopes come through — and tinted toward the bio green.
+    // The Serra do Mar and the coastal escarpment are legible without lifting
+    // the map's overall brightness.
+    //
+    // This was first tried as a screen-blended pane above the ground. Don't:
+    // mix-blend-mode makes a Leaflet pane isolate, so instead of screening into
+    // the ground it paints over it and the basemap goes entirely black.
+    // Stacking two ordinary layers costs nothing and has no such trap.
+    L.tileLayer(`${ESRI}/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}`, {
       attribution:
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://www.esri.com/">Esri</a>',
       maxZoom: 16,
+      className: 'basemap-relief',
+    }).addTo(map)
+
+    // Then the cartography — coastline, rivers, reservoirs, borders — over the
+    // relief at partial opacity, so both survive.
+    L.tileLayer(`${ESRI}/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
+      maxZoom: 16,
+      opacity: 0.45,
       className: 'basemap-ground',
     }).addTo(map)
 
+    // Labels go ABOVE the hexbins, so a town stays readable through a
+    // 0.8-opacity fill instead of being buried by the data drawn over it.
     map.createPane('labels')
     map.getPane('labels')!.style.zIndex = '650'
     map.getPane('labels')!.style.pointerEvents = 'none'
 
-    L.tileLayer(`${ESRI}/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, {
+    L.tileLayer(`${ESRI}/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, {
       maxZoom: 16,
       pane: 'labels',
       className: 'basemap-labels',
