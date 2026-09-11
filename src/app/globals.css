@@ -54,7 +54,8 @@
 }
 .biofrontier-tooltip::before { display: none !important; }
 
-.leaflet-container { background: var(--color-slate-100) !important; }
+/* OSM's own sea colour, so tiles that have not loaded do not flash grey. */
+.leaflet-container { background: #aad3df !important; }
 
 /* Leaflet ships light chrome already, so this only aligns the greys and
    the radius with everything else rather than repainting it. */
@@ -76,14 +77,13 @@
 }
 
 /* ── Basemap tone ───────────────────────────────────────────────
-   Esri's Light Gray Canvas is already a near-neutral cartography meant to
-   sit under data. It only needs holding down a little so the hexbin ramp
-   stays the brightest thing on the map. */
+   OSM's cartography is the point — water, cover and the road network are
+   what let a reader place a survey gap against country they know — so the
+   filter is deliberately gentle. Just enough desaturation and lift to keep
+   the tiles a ground rather than a competitor, and not so much that the
+   sea stops being blue. */
 .basemap-ground {
-  filter: saturate(0.55) brightness(1.02);
-}
-.basemap-labels {
-  opacity: 0.85;
+  filter: saturate(0.88) brightness(1.03);
 }
 
 /* ── Interaction ─────────────────────────────────────────────────

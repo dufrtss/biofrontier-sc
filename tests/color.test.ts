@@ -38,6 +38,11 @@ describe('scoreToColor', () => {
 // which is the failure the blue→red ramp this replaced actually had at its
 // midpoint.
 describe('the frontier ramp', () => {
+  const contrast = (a: string, b: string) => {
+    const la = luminance(a), lb = luminance(b)
+    return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05)
+  }
+
   const luminance = (hex: string) => {
     const h = hex.replace('#', '')
     const ch = [0, 2, 4].map(i => {
@@ -53,14 +58,27 @@ describe('the frontier ramp', () => {
     }
   })
 
-  it('keeps its palest step visible against the basemap', () => {
-    // Esri Light Gray Canvas sits around #f2f2f2. A ramp whose low end matched
-    // it would make "well surveyed" and "no data" look identical, which is the
+  it('keeps its palest step visible against open land', () => {
+    // OSM's land fill is about #f2efe9. A ramp whose low end matched it would
+    // make "well surveyed" and "no data" look identical, which is the
     // distinction the map exists to draw.
-    const basemap = luminance('#f2f2f2')
-    const palest = luminance(frontierRamp[0])
-    const contrast = (Math.max(basemap, palest) + 0.05) / (Math.min(basemap, palest) + 0.05)
-    expect(contrast).toBeGreaterThan(1.3)
+    expect(contrast(frontierRamp[0], '#f2efe9')).toBeGreaterThan(1.3)
+  })
+
+  // The fill cannot carry the low end on its own any more, and it is worth
+  // being explicit about why rather than discovering it again. The basemap is
+  // OSM, whose forest and water fills sit in the same part of the spectrum as
+  // a green ramp: the palest step measures 1.16 against woodland and 1.01
+  // against water — that is invisible. What keeps a low-frontier hexbin
+  // readable there is its STROKE, drawn in the ink colour, so the stroke is
+  // load-bearing rather than decorative and has to clear 3:1 everywhere the
+  // basemap can go.
+  it('draws every cell edge clearly against any OSM ground', () => {
+    for (const ground of ['#f2efe9', '#c8e6a0', '#aad3df', '#e8e0d8']) {
+      for (const step of frontierInk) {
+        expect(contrast(step, ground)).toBeGreaterThanOrEqual(3)
+      }
+    }
   })
 })
 
@@ -98,11 +116,13 @@ describe('scoreToInk', () => {
 
 describe('scoreToOpacity', () => {
   it('is high enough at the low end to stay legible over tiles', () => {
-    expect(scoreToOpacity(0)).toBeCloseTo(0.60)
+    expect(scoreToOpacity(0)).toBeCloseTo(0.38)
   })
 
-  it('rises with the score without reaching full opacity', () => {
-    expect(scoreToOpacity(1)).toBeCloseTo(0.85)
-    expect(scoreToOpacity(1)).toBeLessThan(1)
+  // Never opaque: the basemap under these hexbins is cartography the reader is
+  // meant to see through, not a backdrop.
+  it('rises with the score while still letting the basemap through', () => {
+    expect(scoreToOpacity(1)).toBeCloseTo(0.66)
+    expect(scoreToOpacity(1)).toBeLessThan(0.8)
   })
 })

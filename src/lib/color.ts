@@ -30,8 +30,14 @@ export function scoreToColor(score: number): string {
 // it disappeared into the basemap entirely and "no data" and "well surveyed"
 // looked identical. Lightness carries the magnitude now; opacity only has to
 // keep every hexbin legible over the tiles.
+//
+// The band is narrow and deliberately not opaque. Over a grey canvas 0.60-0.85
+// was right; over cartography that anyone is meant to read THROUGH, it buried
+// the rivers and the coastline that are the reason for using those tiles. The
+// hexbins keep their definition from a stroke in their own ink colour instead
+// — see GapMap.client.tsx.
 export function scoreToOpacity(score: number): number {
-  return 0.60 + Math.max(0, Math.min(1, score)) * 0.25  // 0.60 → 0.85
+  return 0.38 + Math.max(0, Math.min(1, score)) * 0.28  // 0.38 → 0.66
 }
 
 // The same score, in a colour that can be a letterform.

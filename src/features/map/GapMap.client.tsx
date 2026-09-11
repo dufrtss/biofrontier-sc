@@ -6,7 +6,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { ScoredHexbin } from '@/lib/types'
 import { hexBoundary } from '@/lib/h3-utils'
-import { scoreToColor, scoreToOpacity, frontierRamp } from '@/lib/color'
+import { scoreToColor, scoreToOpacity, scoreToInk, frontierRamp } from '@/lib/color'
 import type { GapMapProps } from './GapMap'
 import InfoTooltip from '@/components/ui/InfoTooltip'
 
@@ -19,6 +19,14 @@ import InfoTooltip from '@/components/ui/InfoTooltip'
 // Leaflet paints SVG attributes directly, so these cannot be utility classes.
 // One block, each entry named for the thing in globals.css it mirrors — if a
 // colour there moves, this is the only other place that has to move with it.
+// A hexbin over cartography needs an edge. At the opacity that lets a river
+// show through, a fill alone loses its shape against OSM's greens — which sit
+// in the same part of the spectrum as the frontier ramp — and the grid stops
+// reading as a grid. A hairline in the cell's own ink colour costs nothing and
+// restores the boundary without raising the fill back over the map.
+const EDGE_WEIGHT  = 0.6
+const EDGE_OPACITY = 0.40
+
 const MAP = {
   noData:      '#94a3b8',  // slate-400, at low opacity
   selected:    '#0f172a',  // slate-900 — the selection ring was #ffffff, which
@@ -57,38 +65,22 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
 
     const map = L.map(containerRef.current, { zoomControl: true }).setView([-27.5, -51.0], 7)
 
-    // Basemap in two halves, with the data sandwiched between them.
+    // Standard OSM tiles, because the terrain is part of the reading.
     //
-    // Standard OSM tiles are a saturated street map — beige roads, green parks,
-    // pink motorways — and every one of those colours competes with a hexbin
-    // fill for the same attention. Esri's Light Gray Canvas is a cartography
-    // drawn to sit *under* data: coastline, rivers, borders and place names,
-    // almost no hue. Free, keyless, attribution required.
+    // A grey canvas basemap is the textbook choice for sitting under data, and
+    // it was wrong here: a biologist looking at an under-surveyed hexbin is
+    // placing it against country they know, and blue water, green cover and the
+    // road network are how they do that. A river, a reservoir and a ridge are
+    // context that changes what a survey gap MEANS — a gap behind the Serra do
+    // Mar and a gap beside a highway are not the same finding.
     //
-    // Splitting the labels off puts place names in a pane ABOVE the hexbins, so
-    // a town stays readable through a 0.8-opacity fill instead of being buried
-    // by the data drawn over it.
-    //
-    // Note the /Canvas/ path segment: Esri answers a wrong service path by
-    // failing the tile request rather than erroring, so dropping it shows up
-    // only as a map with no place names.
-    const ESRI = 'https://services.arcgisonline.com/ArcGIS/rest/services/Canvas'
-
-    L.tileLayer(`${ESRI}/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`, {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://www.esri.com/">Esri</a>',
-      maxZoom: 16,
+    // The cost is real and is paid for below: OSM's greens sit in the same part
+    // of the spectrum as the frontier ramp, so the hexbin fills are held apart
+    // from them by opacity and a stroke rather than by hue alone.
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 18,
       className: 'basemap-ground',
-    }).addTo(map)
-
-    map.createPane('labels')
-    map.getPane('labels')!.style.zIndex = '650'
-    map.getPane('labels')!.style.pointerEvents = 'none'
-
-    L.tileLayer(`${ESRI}/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`, {
-      maxZoom: 16,
-      pane: 'labels',
-      className: 'basemap-labels',
     }).addTo(map)
 
     mapRef.current = map
@@ -144,20 +136,22 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
   useEffect(() => {
     polygonsRef.current.forEach((polygon, hexId) => {
       if (hexId === selectedHexId) {
-        polygon.setStyle({ color: MAP.selected, weight: 2, fillOpacity: 0.9 })
+        polygon.setStyle({ color: MAP.selected, opacity: 1, weight: 2, fillOpacity: 0.9 })
         polygon.bringToFront()
       } else {
         const hex = hexbins[hexId]
         if (hex) {
           const hasData = hex.rank > 0
           polygon.setStyle(hasData ? {
-            color:       'transparent',
-            weight:      0.8,
+            color:       scoreToInk(hex.frontierScore),
+            opacity:     EDGE_OPACITY,
+            weight:      EDGE_WEIGHT,
             fillOpacity: scoreToOpacity(hex.frontierScore),
           } : {
-            color:       'transparent',
-            weight:      0,
-            fillOpacity: 0.16,
+            color:       MAP.noData,
+            opacity:     0.18,
+            weight:      0.5,
+            fillOpacity: 0.02,
           })
         }
       }
