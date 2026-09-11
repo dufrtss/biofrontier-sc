@@ -374,5 +374,8 @@
     "continue": "Continuar para o PayPal",
     "later": "Talvez depois",
     "close": "Fechar"
+  },
+  "ThemeToggle": {
+    "label": "Alternar entre tema claro e escuro"
   }
 }

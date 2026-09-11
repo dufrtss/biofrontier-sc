@@ -80,7 +80,7 @@ export default function InfoTooltip({
         <div
           ref={popoverRef}
           style={{ top: pos.top, left: pos.left }}
-          className="fixed z-[9999] w-64 bg-white border border-slate-200 rounded-lg p-3 shadow-lg text-xs text-slate-600 leading-relaxed"
+          className="fixed z-[9999] w-64 bg-panel border border-slate-200 rounded-lg p-3 shadow-lg text-xs text-slate-600 leading-relaxed"
         >
           <p>{content}</p>
           {learnMore && onLearnMore && (

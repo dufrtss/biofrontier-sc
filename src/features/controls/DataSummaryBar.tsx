@@ -43,7 +43,7 @@ export default function DataSummaryBar({
 
   return (
     <div
-      className="flex items-center gap-x-4 px-5 py-1.5 bg-white border-b border-slate-200 text-xs text-slate-500 tabular-nums shrink-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+      className="flex items-center gap-x-4 px-5 py-1.5 bg-panel border-b border-slate-200 text-xs text-slate-500 tabular-nums shrink-0 overflow-x-auto [&::-webkit-scrollbar]:hidden"
       style={{ scrollbarWidth: 'none' }}
     >
       <span className="flex items-center shrink-0">

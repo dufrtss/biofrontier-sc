@@ -374,5 +374,8 @@
     "continue": "Continue to PayPal",
     "later": "Maybe later",
     "close": "Close"
+  },
+  "ThemeToggle": {
+    "label": "Switch between light and dark theme"
   }
 }
