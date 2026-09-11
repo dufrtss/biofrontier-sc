@@ -28,9 +28,19 @@ interface Props {
 
 const HIGH_FRONTIER = 0.6
 
+/* True black fill rather than a grey one: on OLED the field is an unlit hole
+   and the hairline around it is the whole control. `focus:outline-none` is
+   deliberately absent — the global :focus-visible ring is the keyboard
+   affordance, and the cyan border is the mouse-visible one on top of it. */
 const inputClass =
-  'w-full rounded bg-background border border-line px-2 py-1.5 text-xs text-primary ' +
-  'placeholder:text-muted focus:outline-none focus:border-brand'
+  'w-full bg-background border border-edge px-2.5 py-1.5 text-xs text-primary ' +
+  'placeholder:text-muted focus:border-system transition-colors'
+
+/* The one loud action in the panel: cut corner, cyan edge, no filled slab. */
+const primaryAction =
+  'notch-sm border border-system bg-system/10 px-3 py-2 hud-label text-system ' +
+  'hover:bg-system/20 disabled:border-edge disabled:bg-transparent ' +
+  'disabled:text-muted transition-colors'
 
 export default function CommunityPanel({ hexId, center, frontierScore, onSubmitted }: Props) {
   const t = useTranslations('Community')
@@ -116,18 +126,20 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
   return (
     <div className="px-4 py-4 space-y-3">
       <div className="flex items-center justify-between">
-        <h3 className="text-[10px] font-bold text-muted uppercase tracking-[0.18em]">
-          {t('title')}
-        </h3>
+        <h3 className="hud-label">{t('title')}</h3>
         {user && (
-          <button onClick={signOut} className="text-[10px] text-muted hover:text-secondary underline">
+          <button onClick={signOut} className={`hud-label text-muted hover:text-system transition-colors`}>
             {t('signOut')}
           </button>
         )}
       </div>
 
+      {/* A solid cyan edge rather than a tinted box: the prompt is the panel's
+          live signal, and on black a lit rule carries further than a fill. */}
       {isHighFrontier && (
-        <p className="text-[11px] leading-relaxed text-system/90">{t('highFrontierPrompt')}</p>
+        <p className="border-l-2 border-system pl-2.5 text-[11px] leading-relaxed text-system">
+          {t('highFrontierPrompt')}
+        </p>
       )}
 
       {/* The score is a hypothesis about where records are missing, not a
@@ -142,8 +154,7 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
           />
           <button
             onClick={handleSignIn} disabled={busy || !email.trim()}
-            className="w-full rounded bg-brand hover:bg-brand disabled:bg-raised
-                       disabled:text-muted px-3 py-1.5 text-xs font-medium text-white transition-colors"
+            className={`w-full ${primaryAction}`}
           >
             {t('sendMagicLink')}
           </button>
@@ -151,8 +162,8 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
       ) : !formOpen ? (
         <button
           onClick={() => setFormOpen(true)}
-          className="w-full rounded border border-brand bg-surface/40 hover:bg-raised/40
-                     px-3 py-1.5 text-xs font-medium text-system transition-colors"
+          className={`w-full border border-edge bg-background px-3 py-2 hud-label
+                      text-secondary hover:text-system hover:border-system transition-colors`}
         >
           {t('addObservation')}
         </button>
@@ -163,25 +174,25 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
             placeholder={t('speciesPlaceholder')} className={inputClass}
           />
           <input type="date" value={date} max={new Date().toISOString().slice(0, 10)}
-                 onChange={e => setDate(e.target.value)} className={inputClass} />
+                 onChange={e => setDate(e.target.value)} className={`${inputClass} technical`} />
           <textarea
             value={notes} onChange={e => setNotes(e.target.value)} rows={2}
             placeholder={t('notesPlaceholder')} className={inputClass}
           />
-          <p className="text-[10px] text-muted">
+          <p className="text-[10px] leading-relaxed text-muted">
             {t('coordinateNote', { lat: center[0].toFixed(4), lng: center[1].toFixed(4) })}
           </p>
           <div className="flex gap-2">
             <button
               onClick={handleSubmit} disabled={busy || !name.trim()}
-              className="flex-1 rounded bg-brand hover:bg-brand disabled:bg-raised
-                         disabled:text-muted px-3 py-1.5 text-xs font-medium text-white transition-colors"
+              className={`flex-1 ${primaryAction}`}
             >
               {t('submit')}
             </button>
             <button
               onClick={() => setFormOpen(false)}
-              className="rounded border border-line px-3 py-1.5 text-xs text-secondary hover:text-primary"
+              className={`border border-edge px-3 py-2 hud-label text-muted
+                          hover:text-primary hover:border-line-loud transition-colors`}
             >
               {t('cancel')}
             </button>
@@ -191,56 +202,65 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
 
       {user && pending.length > 0 && (
         <div className="space-y-2 pt-1">
-          <h4 className="text-[10px] font-bold text-muted uppercase tracking-[0.15em]">
-            {t('awaitingReview')}
-          </h4>
+          <h4 className="hud-label">{t('awaitingReview')}</h4>
           {pending.map(s => {
             const agrees   = s.identifications.filter(i => i.verdict === 'agree').length
             const disagree = s.identifications.filter(i => i.verdict === 'disagree').length
             const mine     = s.observer_id === user.id
             const myVote   = s.identifications.find(i => i.user_id === user.id)
             return (
-              <div key={s.id} className="rounded border border-line bg-background/60 px-2.5 py-2 space-y-1.5">
+              <div key={s.id} className="border border-edge bg-background px-2.5 py-2 space-y-1.5">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-xs italic text-secondary truncate">{s.scientific_name}</span>
-                  <span className="text-[10px] font-mono text-muted shrink-0">
+                  {/* A count that reaches the threshold is a confirmed record,
+                      and phosphor is this palette's "live readout" — the green
+                      says approved without spending cyan on it. */}
+                  <span
+                    className={`technical text-[10px] shrink-0 ${
+                      agrees >= CONSENSUS_THRESHOLD ? 'text-phosphor' : 'text-muted'
+                    }`}
+                  >
                     {t('confirmations', { n: agrees, of: CONSENSUS_THRESHOLD })}
                   </span>
                 </div>
-                <div className="text-[10px] text-muted">{s.observed_on}</div>
+                <div className="technical text-[10px] text-muted">{s.observed_on}</div>
                 {disagree > 0 && (
-                  <div className="text-[10px] text-warning/80">{t('disputed', { n: disagree })}</div>
+                  <div className="text-[10px] text-warning">{t('disputed', { n: disagree })}</div>
                 )}
                 {s.notes && <p className="text-[10px] text-muted leading-relaxed">{s.notes}</p>}
 
                 {mine ? (
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-muted">{t('yourRecord')}</span>
+                    <span className="hud-label">{t('yourRecord')}</span>
                     <button
                       onClick={() => handleWithdraw(s.id)} disabled={busy}
-                      className="text-[10px] text-muted hover:text-danger underline"
+                      className={`hud-label text-muted hover:text-danger transition-colors`}
                     >
                       {t('withdraw')}
                     </button>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
+                  /* One segmented control, not two pills: a single hairline box
+                     split by a shared border, so the pair reads as one switch
+                     with two positions. The cast verdict is held by an inset
+                     bar under the label rather than by a filled slab. */
+                  <div className="flex border border-edge">
                     <button
                       onClick={() => handleVote(s.id, 'agree')} disabled={busy}
-                      className={`flex-1 rounded px-2 py-1 text-[10px] font-medium transition-colors ${
+                      className={`flex-1 border-r border-edge px-2 py-1.5 hud-label transition-colors ${
                         myVote?.verdict === 'agree'
-                          ? 'bg-raised text-white'
-                          : 'border border-line text-secondary hover:text-system hover:border-brand'
+                          ? 'bg-phosphor/10 text-phosphor shadow-[inset_0_-2px_0_0_var(--color-phosphor)]'
+                          : 'text-muted hover:text-system'
                       }`}
                     >
                       {t('confirm')}
                     </button>
                     <button
                       onClick={() => handleVote(s.id, 'disagree')} disabled={busy}
-                      className={`flex-1 rounded px-2 py-1 text-[10px] font-medium transition-colors ${
+                      className={`flex-1 px-2 py-1.5 hud-label transition-colors ${
                         myVote?.verdict === 'disagree'
-                          ? 'bg-raised text-white'
-                          : 'border border-line text-secondary hover:text-warning hover:border-warning'
+                          ? 'bg-warning/10 text-warning shadow-[inset_0_-2px_0_0_var(--color-warning)]'
+                          : 'text-muted hover:text-warning'
                       }`}
                     >
                       {t('dispute')}

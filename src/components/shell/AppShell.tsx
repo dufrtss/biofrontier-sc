@@ -46,8 +46,11 @@ export default function AppShell() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 bg-background">
-        <div className="w-6 h-6 rounded-full border-2 border-line border-t-emerald-500 animate-spin" />
-        <p className="text-muted text-sm tracking-widest uppercase font-condensed">
+        {/* Genuinely a circle, so `rounded-full` stays. The leading arc was a
+            raw emerald that belongs to no family here; the live-state cyan is
+            what the rest of the app uses to say "working". */}
+        <div className="w-6 h-6 rounded-full border-2 border-line border-t-system animate-spin" />
+        <p className="hud-label">
           {t('loadingData')}
         </p>
       </div>
@@ -57,7 +60,7 @@ export default function AppShell() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 bg-background">
-        <p className="text-danger text-sm font-condensed tracking-wide uppercase">{t('errorLoading')}</p>
+        <p className="hud-label text-danger">{t('errorLoading')}</p>
         <p className="text-muted text-xs">{error}</p>
       </div>
     )
@@ -66,10 +69,16 @@ export default function AppShell() {
   return (
     <div className="flex flex-col h-full">
       {/* Top bar */}
-      <header className="relative flex items-center justify-between px-3 py-2 sm:px-5 sm:py-3 bg-surface border-b border-line/60 shrink-0 z-10">
+      {/* Chrome is drawn with lines, not with slabs: on an OLED panel a
+          near-black grey bar across the top is a visible grey bar, while true
+          black plus one hairline is an edge between lit and unlit. */}
+      <header className="relative flex items-center justify-between px-3 py-2 sm:px-5 sm:py-3 bg-background border-b border-edge shrink-0 z-10">
         <div>
-          <h1 className="text-base font-bold text-white tracking-tight font-condensed uppercase leading-none">
-            BioFrontier SC
+          {/* The identity reads as a designation rather than a brand: tight
+              tracking, and the suffix carried in the cyan the app speaks in. */}
+          <h1 className="text-base font-bold text-primary tracking-[-0.02em] uppercase leading-none">
+            BioFrontier{' '}
+            <span className="text-brand">SC</span>
           </h1>
           <p className="text-xs text-muted mt-0.5 hidden sm:block">
             {t('tagline')}
@@ -84,7 +93,7 @@ export default function AppShell() {
           />
           <button
             onClick={() => openMethodology()}
-            className="text-xs text-muted hover:text-secondary transition-colors hidden md:block"
+            className="hud-label hover:text-system transition-colors hidden md:block"
           >
             {t('howItWorks')}
           </button>
@@ -105,7 +114,7 @@ export default function AppShell() {
       <div className="flex flex-1 overflow-hidden">
         <aside
           className={[
-            'bg-surface border-r border-line/60 overflow-hidden',
+            'bg-background border-r border-edge overflow-hidden',
             rankingOpen
               ? 'fixed inset-0 z-[1500] flex flex-col sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
               : 'hidden sm:flex sm:flex-col sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
@@ -142,9 +151,13 @@ export default function AppShell() {
             onOpenMethodology={openMethodology}
             communitySubmissions={communitySubmissions}
           />
+          {/* A machined tab, not a button: no fill to speak of, a hairline that
+              brightens under the cursor, and the arrow carrying the cyan. Taller
+              and narrower than before so it reads as a latch on the panel edge
+              rather than a control floating over the map. */}
           <button
             onClick={() => setRankingOpen(o => !o)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-[1000] h-10 w-5 flex items-center justify-center bg-raised/90 hover:bg-line border border-line rounded text-secondary hover:text-primary transition-colors"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-[1000] h-12 w-4 flex items-center justify-center bg-background/90 border border-edge hover:border-line-loud text-muted hover:text-system transition-colors"
             aria-label={rankingOpen ? 'Hide ranking panel' : 'Show ranking panel'}
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -158,7 +171,7 @@ export default function AppShell() {
 
         <aside
           className={[
-            'bg-surface border-l border-line overflow-hidden',
+            'bg-background border-l border-edge overflow-hidden',
             selectedHex
               ? 'fixed inset-0 z-[1500] sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
               : 'hidden sm:block sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
@@ -177,11 +190,11 @@ export default function AppShell() {
       </div>
 
       {/* Footer — locale switcher + donate */}
-      <footer className="shrink-0 flex items-center justify-between px-4 py-2 bg-surface border-t border-line/60">
+      <footer className="shrink-0 flex items-center justify-between px-4 py-2 bg-background border-t border-edge">
         <LocaleSwitcher />
         <button
           onClick={() => setDonateOpen(true)}
-          className="text-xs text-muted hover:text-secondary transition-colors"
+          className="hud-label hover:text-system transition-colors"
         >
           {t('donate')}
         </button>

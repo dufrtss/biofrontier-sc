@@ -26,11 +26,16 @@ export default function TaxonSelector({ value, options, onChange, onOpenMethodol
         a time, and without `aria-checked` which one is active is carried by
         background colour alone — invisible to a screen reader, and marginal for
         anyone who does not perceive the contrast.
+
+        One outline around the group and a shared hairline between segments,
+        rather than a pill per option: a segmented control should read as a
+        single machined part that has been divided, not as a row of separate
+        consumer buttons floating in a tray.
       */}
       <div
         role="radiogroup"
         aria-label={t('groupLabel')}
-        className="flex gap-1 bg-raised rounded-full p-1 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+        className="flex border border-edge overflow-x-auto [&::-webkit-scrollbar]:hidden"
         style={{ scrollbarWidth: 'none' }}
       >
         {options.map(filter => (
@@ -40,10 +45,16 @@ export default function TaxonSelector({ value, options, onChange, onOpenMethodol
             aria-checked={value === filter}
             onClick={() => onChange(filter)}
             className={[
-              'px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap',
+              // `.hud-label` is unlayered CSS and therefore outranks Tailwind's
+              // colour utilities; the `!` is what lets a segment be anything
+              // other than muted.
+              'hud-label px-3 py-2 whitespace-nowrap transition-colors',
+              'border-l border-edge first:border-l-0',
               value === filter
-                ? 'bg-brand text-white shadow'
-                : 'text-secondary hover:text-primary',
+                // `.emit` draws its ring outside the box, so the active segment
+                // is lifted above its neighbours to keep the bloom unclipped.
+                ? 'emit relative z-10 bg-raised text-highlight'
+                : 'text-muted hover:text-system',
             ].join(' ')}
           >
             {t(`labels.${filter}`)}

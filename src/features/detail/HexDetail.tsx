@@ -49,15 +49,19 @@ function AnimatedBar({ label, labelExtra, value, color, animate }: AnimatedBarPr
   return (
     <div className="space-y-1">
       <div className="flex justify-between items-baseline">
-        <span className="flex items-center text-[11px] text-secondary tracking-wide uppercase font-medium">
+        <span className="flex items-center hud-label">
           {label}{labelExtra}
         </span>
-        <span className="text-xs font-mono text-secondary tabular-nums">{pct}%</span>
+        <span className="technical text-xs text-secondary">{pct}%</span>
       </div>
-      <div className="h-1.5 rounded-full bg-raised overflow-hidden border border-line/50">
+      {/* Square ends on a hairline track over black. The component hues are
+          validated for colour-blind separation and are the only thing carrying
+          identity here, so the bar gives them a hard edge to end on rather than
+          a rounded cap that softens the reading. */}
+      <div className="h-1.5 bg-background overflow-hidden border border-line">
         <div
           ref={barRef}
-          className="h-full rounded-full"
+          className="h-full"
           style={{ width: animate ? '0%' : `${pct}%`, background: color }}
         />
       </div>
@@ -91,18 +95,18 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
     t('wellSurveyed')
 
   return (
-    <div className="flex flex-col h-full bg-surface" style={{ borderLeft: '1px solid var(--color-line)' }}>
+    <div className="flex flex-col h-full bg-background" style={{ borderLeft: '1px solid var(--color-edge)' }}>
 
-      {/* Header band */}
-      <div
-        className="relative px-4 pt-4 pb-3 overflow-hidden"
-        style={{
-          background: `linear-gradient(135deg, ${accentColor}18 0%, transparent 60%)`,
-          borderBottom: `1px solid ${accentColor}28`,
-        }}
+      {/* Header band. The wash that used to fade the ramp colour across this
+          block is gone: a gradient over true black is the one place the panel
+          still looked moulded. What is left is a flat ground, the technical
+          hatch, and the ramp colour spent where it reads hardest — the figures
+          and a solid 1px rule under them. */}
+      <div className="relative px-4 pt-4 pb-3 overflow-hidden bg-background"
+        style={{ borderBottom: `1px solid ${accentColor}` }}
       >
         <div
-          className="absolute inset-0 opacity-[0.04] pointer-events-none"
+          className="absolute inset-0 opacity-[0.05] pointer-events-none"
           style={{
             backgroundImage: `repeating-linear-gradient(45deg, ${accentColor} 0px, ${accentColor} 1px, transparent 1px, transparent 8px)`,
           }}
@@ -114,22 +118,22 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
               {hex.rank > 0 ? (
                 <>
                   <span
-                    className="text-5xl font-black leading-none tabular-nums tracking-tighter"
-                    style={{ color: accentColor, fontFeatureSettings: '"tnum"' }}
+                    className="technical text-5xl font-black leading-none"
+                    style={{ color: accentColor }}
                   >
                     #{hex.rank}
                   </span>
                   <div>
-                    <div className="text-2xl font-bold leading-none tabular-nums" style={{ color: accentColor }}>
+                    <div className="technical text-2xl font-bold leading-none" style={{ color: accentColor }}>
                       {frontierPct}%
                     </div>
-                    <div className="text-[9px] font-bold tracking-[0.15em] mt-0.5" style={{ color: `${accentColor}cc` }}>
+                    <div className="hud-label mt-1" style={{ color: accentColor }}>
                       {frontierLabel}
                     </div>
                   </div>
                 </>
               ) : (
-                <span className="text-sm font-semibold text-muted bg-raised rounded px-2 py-1">
+                <span className="hud-label border border-edge px-2 py-1">
                   {t('unsurveyed')}
                 </span>
               )}
@@ -143,7 +147,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
 
           <button
             onClick={onClose}
-            className="text-muted hover:text-secondary transition-colors text-base leading-none mt-0.5 ml-2 shrink-0 w-7 h-7 flex items-center justify-center rounded hover:bg-line/60"
+            className="text-muted hover:text-system transition-colors text-base leading-none mt-0.5 ml-2 shrink-0 w-7 h-7 flex items-center justify-center"
             aria-label={t('closePanel')}
           >
             ✕
@@ -163,14 +167,15 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
               { label: t('observers'),  value: td.uniqueObserverCount.toLocaleString(), icon: '◎', tip: null, section: null },
               { label: t('surveyDays'), value: td.uniqueDateCount.toLocaleString(),    icon: '◇', tip: null, section: null },
             ]) as Array<{ label: string; value: string; icon: string; tip: string | null; section: string | null }>).map(({ label, value, icon, tip, section }) => (
+              /* Outlined cells on black rather than grey tiles: the figure is
+                 the content and the box only has to say where it stops. */
               <div
                 key={label}
-                className="rounded-lg px-3 py-2.5"
-                style={{ background: 'var(--color-raised)', border: '1px solid var(--color-line)' }}
+                className="px-3 py-2.5 bg-background border border-edge"
               >
-                <div className="flex items-center gap-1.5 mb-1">
-                  <span className="text-[10px]" style={{ color: `${accentColor}99` }}>{icon}</span>
-                  <span className="text-[10px] text-muted uppercase tracking-wider font-medium">{label}</span>
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <span className="text-[10px]" style={{ color: accentColor }}>{icon}</span>
+                  <span className="hud-label">{label}</span>
                   {tip && (
                     <InfoTooltip
                       content={tip}
@@ -187,12 +192,11 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
           </div>
 
           {td.firstDate && (
-            <div
-              className="mt-2 px-3 py-2 rounded-lg text-[11px] font-mono text-muted tracking-wide"
-              style={{ background: 'var(--color-raised)', border: '1px solid var(--color-line)' }}
-            >
-              <span className="text-muted">{t('period')}</span>
-              &nbsp;&nbsp;{td.firstDate}&nbsp;→&nbsp;{td.lastDate}
+            <div className="mt-2 px-3 py-2 flex items-center gap-2 bg-background border border-edge">
+              <span className="hud-label">{t('period')}</span>
+              <span className="technical text-[11px] text-secondary">
+                {td.firstDate}&nbsp;→&nbsp;{td.lastDate}
+              </span>
             </div>
           )}
         </div>
@@ -202,7 +206,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
         {/* Score breakdown */}
         <div className="px-4 py-4 space-y-3.5">
           <div className="flex items-center">
-            <h3 className="text-[10px] font-bold text-muted uppercase tracking-[0.18em]">
+            <h3 className="hud-label text-secondary">
               {t('scoreBreakdown')}
             </h3>
             <InfoTooltip
@@ -229,7 +233,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
           {habitatIsPlaceholder ? (
             <div className="space-y-1">
               <div className="flex justify-between items-baseline">
-                <span className="flex items-center text-[11px] text-muted tracking-wide uppercase font-medium">
+                <span className="flex items-center hud-label">
                   {t('habitatQuality')}
                   <InfoTooltip
                     content={t('tooltipHabitatPlaceholder')}
@@ -237,7 +241,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
                     onLearnMore={onOpenMethodology}
                   />
                 </span>
-                <span className="text-xs font-mono text-muted">—</span>
+                <span className="technical text-xs text-muted">—</span>
               </div>
               <p className="text-[10px] text-muted leading-relaxed">
                 {t('habitatPlaceholderNote')}
@@ -298,7 +302,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
           ) : (
             <div className="space-y-1">
               <div className="flex justify-between items-baseline">
-                <span className="flex items-center text-[11px] text-muted tracking-wide uppercase font-medium">
+                <span className="flex items-center hud-label">
                   {t('taxonomicIncompleteness')}
                   <InfoTooltip
                     content={t('tooltipIncompleteness')}
@@ -306,7 +310,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
                     onLearnMore={onOpenMethodology}
                   />
                 </span>
-                <span className="text-xs font-mono text-muted">—</span>
+                <span className="technical text-xs text-muted">—</span>
               </div>
               <p className="text-[10px] text-muted leading-relaxed">
                 {t('incompletenessUnavailable')}
@@ -314,10 +318,9 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
             </div>
           )}
 
-          <div
-            className="rounded px-2.5 py-2 text-[10px] leading-relaxed text-muted"
-            style={{ background: 'var(--color-surface)', border: '1px solid var(--color-line)' }}
-          >
+          {/* Prose, so it stays in sentence case — the label register is for
+              labels, and uppercasing an explanation makes it unreadable. */}
+          <div className="px-2.5 py-2 text-[10px] leading-relaxed text-muted bg-background border border-line">
             {t('scoreAnnotation')}
           </div>
         </div>
@@ -328,7 +331,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
             <div className="mx-4 border-t border-line" />
             <div className="px-4 py-4">
               <div className="flex items-center mb-3">
-                <h3 className="text-[10px] font-bold text-muted uppercase tracking-[0.18em]">
+                <h3 className="hud-label text-secondary">
                   {t('topRecordedSpecies')}
                 </h3>
                 <InfoTooltip
@@ -345,15 +348,12 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
                       href={gbifSpeciesUrl(name, gbifKeyByName.get(name))}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[12px] italic truncate text-brand/80 hover:text-brand transition-colors flex-1 min-w-0"
+                      className="text-[12px] italic truncate text-brand hover:text-highlight transition-colors flex-1 min-w-0"
                       title={name}
                     >
                       {name}
                     </a>
-                    <span
-                      className="text-[11px] font-mono text-muted tabular-nums shrink-0 rounded px-1.5 py-0.5"
-                      style={{ background: 'var(--color-raised)', border: '1px solid var(--color-line)' }}
-                    >
+                    <span className="technical text-[11px] text-secondary shrink-0 px-1.5 py-0.5 bg-background border border-line">
                       {count}
                     </span>
                   </li>
@@ -382,7 +382,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
 
       {/* Footer */}
       <div
-        className="px-4 py-2.5 text-[10px] font-mono text-muted tracking-wide leading-relaxed"
+        className="px-4 py-2.5 hud-label leading-relaxed"
         style={{ borderTop: '1px solid var(--color-line)' }}
       >
         {t('footer')}

@@ -13,29 +13,39 @@
   --font-mono: var(--font-mono-face), ui-monospace, SFMono-Regular, monospace;
 
   /* ── Surfaces, darkest to lightest ─────────────────────────────
-     Pure black ground with surfaces barely lifted off it. The earlier
-     #0B1012 / #11181C pair read as dark grey panels on black; these sit
-     close enough that the chrome recedes and the map and the data are
-     the only things with real presence. */
+     Carbon: true black ground, surfaces barely lifted off it and cast
+     cyan rather than neutral, so the whole shell reads as one cold
+     material instead of grey panels sitting on black.
+
+     #000000 is not a stylistic choice on OLED — a black pixel is an
+     off pixel, so the ground is a real edge between lit and unlit
+     rather than a dark grey. Everything else is kept close enough to
+     it that the panel edges are lines, not slabs. */
   --color-background: #000000;
-  --color-surface:    #060809;
-  --color-raised:     #0C0F11;
+  --color-surface:    #04080A;
+  --color-raised:     #0A1116;
 
   /* ── Ink ───────────────────────────────────────────────────────── */
-  --color-primary:    #E2E8E9;  /* 15.45:1 on surface */
-  --color-secondary:  #9BA8AC;  /*  7.83:1 — AAA */
-  --color-muted:      #767D80;  /*  4.57:1 — AA at body size.
+  --color-primary:    #E2E8E9;  /* 16.23:1 on surface */
+  --color-secondary:  #9BA8AC;  /*  8.23:1 — AAA */
+  --color-muted:      #767D80;  /*  4.80:1 — AA at body size.
                                    The palette's #686F72 measured 3.74:1, which
                                    is large-text only, and this app sets almost
                                    every count and label small. Lifted two steps
                                    rather than shipping 60-odd unreadable labels. */
 
   /* ── Lines ─────────────────────────────────────────────────────── */
-  --color-line:       #1A2428;  /* decorative dividers — deliberately quiet */
-  --color-line-loud:  #52686F;  /* 3.41:1 on surface, 3.27:1 on raised — inputs,
+  --color-line:       #13252C;  /* decorative dividers — deliberately quiet */
+  --color-line-loud:  #4F6B75;  /* 3.54:1 on surface, 3.34:1 on raised — inputs,
                                    focus rings, anything the eye must find to
                                    operate. Lifted when the surfaces went darker:
-                                   the old value measured 2.73:1 against black. */
+                                   #4E646C measured 2.73:1 against black. */
+  --color-edge:       #1E3C46;  /* structural hairline: panel and control
+                                   outlines. Loud enough to draw a shape on
+                                   black, quiet enough not to read as a box.
+                                   1.71:1 — decorative by definition. Anything
+                                   the eye must FIND carries line-loud or
+                                   system instead. */
 
   /* ── Biomechanical greens ──────────────────────────────────────
      Tertiary only. Cyan stays the voice of the app; these are the
@@ -47,7 +57,10 @@
   --color-phosphor:   #4ade9a;  /* live readout, terminal green */
 
   /* ── Identity ──────────────────────────────────────────────────── */
-  --color-brand:      #617BB9;  /* 4.60:1 on surface */
+  --color-brand:      #3FC9E8;  /* 10.28:1 on surface. Was #617BB9, a periwinkle
+                                   that belonged to no family here; links and
+                                   the identity now sit in the cyan the rest of
+                                   the app speaks in. */
   --color-system:     #87DEFF;  /* 12.69:1 — live/system state */
   --color-highlight:  #B7F0FF;  /* 15.42:1 — the brightest thing on screen */
 
@@ -76,24 +89,171 @@
   /* ── Status. Reserved meaning; never reused as a series colour. ── */
   --color-danger:     #FF8A8A;
   --color-warning:    #F0C674;
+
+  /* ── Geometry ──────────────────────────────────────────────────
+     Every radius in the scale is zero. A soft corner is a friendly,
+     consumer signal and this is an instrument; the shapes should look
+     cut rather than moulded. Redefining the scale rather than hunting
+     class names means a stray `rounded-lg` cannot quietly reintroduce
+     one. `rounded-full` is untouched and still draws a true circle —
+     reserved for things that are genuinely round: status dots, the
+     spinner, the information badge. */
+  --radius-xs:   0px;
+  --radius-sm:   0px;
+  --radius-md:   0px;
+  --radius-lg:   0px;
+  --radius-xl:   0px;
+  --radius-2xl:  0px;
+  --radius-3xl:  0px;
+  --radius-4xl:  0px;
 }
+
+/* The one radius the theme scale cannot reach.
+   `rounded-sm` and up compile to `var(--radius-sm)` and so on, and follow the
+   values above. Bare `rounded` does not: Tailwind emits a hardcoded
+   `border-radius: .25rem` for it, with no variable in between. Zeroing the
+   scale therefore squares off every corner in the app except the ones written
+   `rounded`, which is not a distinction anyone can see in a diff. */
+@layer utilities {
+  .rounded { border-radius: 0; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   INTERACTION
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Anything that responds to a click says so under the cursor. The UA
+   stylesheet gives <button> `cursor: default`, which is a browser default
+   nobody wants and which every app then re-fixes one component at a time —
+   so it is fixed once, here, by role rather than by class. A control that is
+   off says that too: not-allowed, never a pointer. */
+@layer base {
+  button,
+  summary,
+  select,
+  a[href],
+  label[for],
+  [role='button'],
+  [role='tab'],
+  [role='option'],
+  .leaflet-interactive {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  /* Selection in the app's own voice. The browser default is a blue that
+     belongs to no palette here and is the one colour a user sees that we
+     never chose. */
+  ::selection {
+    background: var(--color-system);
+    color: #000000;
+  }
+
+  /* Thin, cold scrollbars. A default scrollbar is a wide light-grey slab and
+     on a near-black panel it is the brightest thing on screen. */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-edge) transparent;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   HUD PRIMITIVES
+   The vocabulary that makes this read as an instrument rather than a
+   product page. Sparingly — an interface where everything is loud has
+   no emphasis left to spend.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* These live in @layer components on purpose. Unlayered CSS beats anything
+   inside a layer, so a plain `.hud-label` declared at the top level would
+   outrank every Tailwind colour utility — `hud-label text-system` would
+   silently render muted and the only way back would be `!text-system` on
+   every call site. Declared as components, the utilities layer wins, which
+   is the behaviour anyone writing the class expects. */
+@layer components {
+
+/* Section and field labels. Mono, small, tracked wide, uppercase: the
+   register of a readout legend, not of a form. */
+.hud-label {
+  font-family: var(--font-mono-face), ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+/* Cut corner. One bevel, bottom-right, on the few elements that should
+   look machined — primary actions, the active filter. A shape that has
+   been cut rather than rounded is most of the difference between this
+   and a generic dark theme, and it costs one property. */
+.notch {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%);
+}
+.notch-sm {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%);
+}
+
+/* Live cyan edge for the current selection. Against a true black ground a
+   1px line plus a tight bloom reads as emission rather than as a border,
+   which is the whole reason this palette wants an OLED panel. */
+.emit {
+  box-shadow: 0 0 0 1px var(--color-system), 0 0 12px -2px var(--color-system);
+}
+.emit-soft {
+  box-shadow: 0 0 10px -3px var(--color-system);
+}
+
+/* Optically centre a single glyph inside a round badge.
+
+   This is an OPTICAL correction, not a fix for a layout bug. Measured in
+   Space Grotesk, `place-items: center` puts the `?` ink box within 0.05px
+   of the badge centre — geometrically it is already centred, and anything
+   that reasons about line boxes or descenders is chasing a problem that
+   is not there.
+
+   What is there: the ink of `?` is top-heavy. Nearly all of its mass is
+   in the bowl, and the only thing below is a small dot with a gap above
+   it, so the alpha-weighted centroid sits 0.073em ABOVE the centre of
+   the bounding box and 0.016em to the right of the advance centre. The
+   eye centres on mass, not on bounding boxes, so a perfectly boxed `?`
+   reads as high and slightly right — which is exactly the complaint that
+   sends someone to inspect the CSS and find nothing wrong with it.
+
+   These two numbers are that centroid, measured by rasterising the glyph
+   and weighting by coverage. They are specific to this face: re-measure
+   before reusing them for another font or another character. */
+.glyph-center {
+  display: block;
+  line-height: 1;
+  transform: translate(-0.016em, 0.088em);
+}
+
+}  /* @layer components */
 
 /* ── Technical text ──────────────────────────────────────────────
    Coordinates, hex ids, scores, counts. Tabular figures so a column
    of numbers lines up, and slightly tightened because Space Mono runs
    wide at default tracking. */
-.technical {
-  font-family: var(--font-mono-face), ui-monospace, monospace;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
+@layer components {
+  .technical {
+    font-family: var(--font-mono-face), ui-monospace, monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+  }
 }
 
 /* ── Leaflet, dragged into the theme ─────────────────────────────── */
 .biofrontier-tooltip {
   background: var(--color-raised) !important;
-  border: 1px solid var(--color-line) !important;
+  border: 1px solid var(--color-edge) !important;
   color: var(--color-primary) !important;
-  border-radius: 6px !important;
+  border-radius: 0 !important;
   font-size: 12px !important;
   padding: 4px 8px !important;
   box-shadow: 0 4px 16px rgb(0 0 0 / 0.6) !important;
@@ -101,6 +261,13 @@
 .biofrontier-tooltip::before { display: none !important; }
 
 .leaflet-container { background: var(--color-background) !important; }
+
+/* The selected hexbin, lit. SVG has no box-shadow, so the bloom is a filter on
+   the path itself — see the selection effect in GapMap.client.tsx for why this
+   is a class rather than a Leaflet style. */
+.hex-selected {
+  filter: drop-shadow(0 0 6px rgb(135 222 255 / 0.85));
+}
 
 /* Leaflet's own chrome ships light; repaint it rather than hide it. */
 .leaflet-control-attribution {
@@ -110,34 +277,36 @@
 }
 .leaflet-control-attribution a { color: var(--color-secondary) !important; }
 
+.leaflet-bar,
+.leaflet-bar a {
+  border-radius: 0 !important;
+}
 .leaflet-bar a {
   background: var(--color-raised) !important;
-  color: var(--color-primary) !important;
-  border-bottom: 1px solid var(--color-line) !important;
+  color: var(--color-secondary) !important;
+  border-bottom: 1px solid var(--color-edge) !important;
 }
-.leaflet-bar a:hover { background: var(--color-line) !important; }
+.leaflet-bar a:hover {
+  background: var(--color-raised) !important;
+  color: var(--color-system) !important;
+}
 
 /* ── Basemap tone ───────────────────────────────────────────────
    Esri's Dark Gray Canvas is a neutral mid-grey — clean, but lighter and
    warmer than Cold Signal. Darkening and cooling it in CSS keeps the map
    as ground beneath the data rather than a grey slab competing with it,
    and avoids hosting a restyled tile set just to change its tone. */
-.basemap-relief {
-  /* Inverted so flats read black and lit slopes carry the light, then pushed
-     toward the bio green so the terrain belongs to the palette rather than
-     sitting under it as grey. Kept low — terrain should be felt, not read,
-     and must never compete with the hexbin ramp. */
-  filter: brightness(0.34) contrast(1.75) sepia(0.75)
-          hue-rotate(90deg) saturate(1.3);
-}
-
 .basemap-ground {
-  /* Rides over the relief at 0.62 opacity (set on the layer). The filter only
-     cools it and holds it down; at the earlier brightness(0.42) the coastline,
-     the rivers and the reservoirs had all collapsed into the same black as the
-     ocean, which is a loss of information on a map whose subject is where
-     things are. */
-  filter: brightness(0.62) contrast(1.05) saturate(0.5) hue-rotate(175deg);
+  /* Held down hard and pushed cyan. The hillshade relief that briefly sat
+     under this gave the terrain real presence, and that was the problem: on a
+     true-black OLED ground the map became the loudest thing on screen and the
+     hexbins — the entire point — read as decoration over a landscape. The
+     basemap is context, and context that competes is noise.
+
+     Terrain is not gone, it is quiet: contrast is up rather than down, so the
+     coastline, the reservoirs and the big rivers still separate from the ocean
+     instead of collapsing into it the way they did at brightness(0.42). */
+  filter: brightness(0.46) contrast(1.35) saturate(0.42) hue-rotate(175deg);
 }
 
 /* Labels are the one part of the basemap that must stay readable, so they are

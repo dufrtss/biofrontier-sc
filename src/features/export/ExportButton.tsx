@@ -54,7 +54,7 @@ export default function ExportButton({
   }
 
   return (
-    <div className="relative border-t border-line/60 shrink-0">
+    <div className="relative border-t border-edge shrink-0">
       {open && !disabled && (
         <>
           {/* Click-away layer. Sits below the menu but above the panel. */}
@@ -63,27 +63,30 @@ export default function ExportButton({
             onClick={() => setOpen(false)}
             aria-hidden
           />
+          {/* Flush to the trigger and outlined rather than shadowed: a drop
+              shadow is invisible against true black, while a hairline plus a
+              tight bloom reads as a panel that has been lit. */}
           <div
-            className="absolute bottom-full left-3 right-3 mb-1 z-[1601] rounded-lg overflow-hidden bg-raised border border-line shadow-xl"
+            className="absolute bottom-full left-0 right-0 z-[1601] overflow-hidden bg-raised border border-edge emit-soft"
             role="menu"
           >
             <button
               onClick={() => exportCsv('visible')}
-              className="w-full text-left px-3 py-2.5 text-xs text-secondary hover:bg-line transition-colors"
+              className="w-full text-left px-3 py-2.5 text-xs text-secondary hover:text-system transition-colors"
               role="menuitem"
               type="button"
             >
               <div className="font-medium">{t('scopeVisible', { count: Math.min(visibleCount, totalCount) })}</div>
-              <div className="text-[10px] text-muted mt-0.5">{t('scopeVisibleHint')}</div>
+              <div className="hud-label mt-1">{t('scopeVisibleHint')}</div>
             </button>
             <button
               onClick={() => exportCsv('all')}
-              className="w-full text-left px-3 py-2.5 text-xs text-secondary hover:bg-line transition-colors border-t border-line/60"
+              className="w-full text-left px-3 py-2.5 text-xs text-secondary hover:text-system transition-colors border-t border-edge"
               role="menuitem"
               type="button"
             >
               <div className="font-medium">{t('scopeAll', { count: totalCount })}</div>
-              <div className="text-[10px] text-muted mt-0.5">{t('scopeAllHint')}</div>
+              <div className="hud-label mt-1">{t('scopeAllHint')}</div>
             </button>
           </div>
         </>
@@ -96,10 +99,13 @@ export default function ExportButton({
         aria-haspopup="menu"
         type="button"
         className={[
-          'w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-medium tracking-wide uppercase transition-colors',
+          // The one primary action in the sidebar, so it is the one thing here
+          // that spends a cut corner and the cyan. `.hud-label` is unlayered and
+          // beats Tailwind's colour utilities, hence the `!`.
+          'notch w-full flex items-center justify-center gap-2 px-4 py-3 hud-label transition-colors',
           disabled
             ? 'text-muted cursor-not-allowed'
-            : 'text-secondary hover:text-primary hover:bg-raised',
+            : 'bg-raised text-system hover:text-highlight',
         ].join(' ')}
       >
         <svg

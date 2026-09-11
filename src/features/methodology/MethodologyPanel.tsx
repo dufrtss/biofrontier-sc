@@ -60,7 +60,12 @@ interface SectionProps {
 function Section({ id, title, children }: SectionProps) {
   return (
     <section id={`methodology-${id}`} className="scroll-mt-4">
-      <h3 className="text-sm font-semibold text-primary uppercase tracking-wider mb-3 pb-2 border-b border-line/60">
+      {/* A lit tick before the title is the section marker: it gives the
+          reader a repeating anchor down a long scroll without spending a
+          heading weight on it. The prose below stays prose. */}
+      <h3 className="flex items-center gap-2 mb-3 pb-2 border-b border-edge
+                     font-mono text-[11px] uppercase tracking-[0.14em] text-primary">
+        <span aria-hidden className="h-3 w-px bg-system shrink-0" />
         {title}
       </h3>
       <div className="text-xs text-secondary leading-relaxed space-y-2">{children}</div>
@@ -70,7 +75,7 @@ function Section({ id, title, children }: SectionProps) {
 
 function Code({ children }: { children: string }) {
   return (
-    <pre className="bg-raised border border-line rounded px-3 py-2 font-mono text-system text-[11px] overflow-x-auto whitespace-pre-wrap">
+    <pre className="bg-background border border-edge px-3 py-2 font-mono text-system text-[11px] overflow-x-auto whitespace-pre-wrap">
       {children}
     </pre>
   )
@@ -83,7 +88,7 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
         <thead>
           <tr>
             {headers.map(h => (
-              <th key={h} className="text-left text-muted font-medium px-2 py-1.5 border-b border-line">
+              <th key={h} className="hud-label text-left px-2 py-1.5 border-b border-edge">
                 {h}
               </th>
             ))}
@@ -120,26 +125,29 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
   return (
     <>
       {open && (
-        <div className="fixed inset-0 bg-black/50 z-[1999]" onClick={onClose} aria-hidden />
+        <div className="fixed inset-0 bg-background/90 z-[1999]" onClick={onClose} aria-hidden />
       )}
       <div
         className={[
-          'fixed right-0 top-0 h-full w-full md:w-[480px] bg-surface border-l border-line z-[2000] flex flex-col transition-transform duration-200',
+          // True black ground rather than a surface slab: the reader is a full
+          // panel, and a large near-black grey is the thing this palette is
+          // getting away from. The lit left edge separates it from the map.
+          'fixed right-0 top-0 h-full w-full md:w-[480px] bg-background border-l border-edge emit-soft z-[2000] flex flex-col transition-transform duration-200',
           open ? 'translate-x-0' : 'translate-x-full',
         ].join(' ')}
         aria-hidden={!open}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-line/60 shrink-0">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-edge shrink-0">
           <div>
-            <h2 className="text-sm font-semibold text-primary uppercase tracking-wider font-condensed">
+            <h2 className="text-sm font-semibold text-primary uppercase tracking-[0.14em]">
               {t('title')}
             </h2>
             <p className="text-xs text-muted mt-0.5">{t('subtitle')}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-muted hover:text-secondary text-lg leading-none"
+            className="text-muted hover:text-system text-lg leading-none transition-colors"
             aria-label={t('close')}
           >
             ✕
@@ -158,7 +166,7 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
             />
             <p>{t('frontierScore.weightsNote')}</p>
             <p>{t('frontierScore.renormalisationNote')}</p>
-            <p className="text-warning/80 font-medium">{t('frontierScore.calibrationStatus')}</p>
+            <p className="text-warning font-medium">{t('frontierScore.calibrationStatus')}</p>
             <p className="text-muted italic">{t('frontierScore.caveat')}</p>
           </Section>
 
@@ -199,14 +207,14 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
 
           <Section id="habitat-quality" title={t('habitatQuality.title')}>
             <p>{t('habitatQuality.intro', habitatSource)}</p>
-            <p className="text-warning/80 font-medium">{t('habitatQuality.warning')}</p>
+            <p className="text-warning font-medium">{t('habitatQuality.warning')}</p>
             <p className="text-muted">
               {t('habitatQuality.sourcesLabel')}{' '}
               <a
                 href="https://mapbiomas.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-brand/80 hover:text-brand transition-colors"
+                className="text-brand hover:text-highlight transition-colors"
               >
                 {t('habitatQuality.source', habitatSource)}
               </a>
