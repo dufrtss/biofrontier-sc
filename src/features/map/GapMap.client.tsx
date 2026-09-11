@@ -59,6 +59,14 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
   const onHexSelectRef = useRef(onHexSelect)
   useEffect(() => { onHexSelectRef.current = onHexSelect }, [onHexSelect])
 
+  // Where the current selection came from. The map only knows `selectedHexId`
+  // changed, not who changed it, and the right behaviour differs: a hexbin
+  // picked from the ranking is usually off-screen and must be brought into
+  // view, while one clicked on the map is already under the cursor and must
+  // NOT be — recentring there drags the ground out from under the reader.
+  const selectedFromMapRef = useRef(false)
+  const lastCenteredRef = useRef<string | null>(null)
+
   // Initialise map once
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
@@ -91,6 +99,48 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
       polygonsRef.current.clear()
     }
   }, [])
+
+  // Both side panels are flex siblings of the map, so opening the ranking or a
+  // hexbin's detail genuinely resizes the map container. Leaflet does not watch
+  // for that: it keeps the size it measured at construction, which leaves tiles
+  // unloaded down one edge and makes every coordinate conversion — including
+  // the centring below — compute against a viewport that no longer exists.
+  useEffect(() => {
+    const map = mapRef.current
+    const el  = containerRef.current
+    if (!map || !el || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(() => map.invalidateSize({ animate: false }))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  // Bring a hexbin chosen from outside the map into view.
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !selectedHexId) {
+      lastCenteredRef.current = null
+      return
+    }
+    if (selectedFromMapRef.current) {
+      // Clicked on the map — already visible, leave the view alone.
+      selectedFromMapRef.current = false
+      lastCenteredRef.current = selectedHexId
+      return
+    }
+    if (lastCenteredRef.current === selectedHexId) return
+    const polygon = polygonsRef.current.get(selectedHexId)
+    if (!polygon) return
+    lastCenteredRef.current = selectedHexId
+
+    // Selecting from the ranking closes the ranking panel and opens the detail
+    // panel in the same commit, so the container has just changed width twice.
+    // Measure before panning or the hexbin lands off-centre by half a sidebar.
+    map.invalidateSize({ animate: false })
+
+    // Zoom is deliberately untouched: the reader chose this view, and a jump in
+    // scale loses the surroundings that make a survey gap mean anything.
+    map.panTo(polygon.getBounds().getCenter(), { animate: true, duration: 0.4 })
+  }, [selectedHexId, hexbins])
 
   // Render / update hex polygons when hexbins data changes
   useEffect(() => {
@@ -126,7 +176,10 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
         polygon.bindTooltip(tRef.current('unsurveyed'), { sticky: true, className: 'biofrontier-tooltip' })
       }
 
-      polygon.on('click', () => onHexSelectRef.current(hex.hexId))
+      polygon.on('click', () => {
+        selectedFromMapRef.current = true
+        onHexSelectRef.current(hex.hexId)
+      })
       polygon.addTo(map)
       polygonsRef.current.set(hex.hexId, polygon)
     })
