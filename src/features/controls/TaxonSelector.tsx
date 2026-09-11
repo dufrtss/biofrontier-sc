@@ -30,7 +30,7 @@ export default function TaxonSelector({ value, options, onChange, onOpenMethodol
       <div
         role="radiogroup"
         aria-label={t('groupLabel')}
-        className="flex gap-1 bg-slate-800 rounded-full p-1 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+        className="flex gap-1 bg-slate-100 rounded-full p-1 overflow-x-auto [&::-webkit-scrollbar]:hidden"
         style={{ scrollbarWidth: 'none' }}
       >
         {options.map(filter => (
@@ -42,8 +42,8 @@ export default function TaxonSelector({ value, options, onChange, onOpenMethodol
             className={[
               'px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap',
               value === filter
-                ? 'bg-blue-600 text-white shadow'
-                : 'text-slate-400 hover:text-slate-200',
+                ? 'bg-brand-ink text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900',
             ].join(' ')}
           >
             {t(`labels.${filter}`)}

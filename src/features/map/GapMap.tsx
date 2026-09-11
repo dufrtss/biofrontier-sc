@@ -10,7 +10,7 @@ const GapMapClient = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex items-center justify-center w-full h-full bg-slate-950 text-slate-500 text-sm">
+      <div className="flex items-center justify-center w-full h-full bg-slate-100 text-slate-500 text-sm">
         Loading map…
       </div>
     ),

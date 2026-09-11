@@ -1,28 +1,122 @@
 @import "tailwindcss";
 
-@theme inline {
-  --font-sans: var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
-  --font-condensed: var(--font-barlow-condensed), ui-sans-serif, system-ui, sans-serif;
+/* ══════════════════════════════════════════════════════════════════
+   A light interface, on GBIF's palette.
+
+   This app sits next to gbif.org in a biologist's tabs and should not
+   announce itself as something else. GBIF's own palette turns out to be
+   Tailwind's slate scale with one green swapped into `--primary`:
+   their `#e2e8f0` is slate-200, `#64748b` is slate-500, `#f1f5f8` is
+   slate-100. So the greys here are the stock scale, used directly by
+   name, and only the things the scale has no word for are declared.
+   ══════════════════════════════════════════════════════════════════ */
+
+@theme {
+  --font-sans:      var(--font-sans-face), ui-sans-serif, system-ui, sans-serif;
+  --font-condensed: var(--font-condensed-face), ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Brand ─────────────────────────────────────────────────────
+     Two greens, because one cannot do both jobs. GBIF's #4C9C2E is
+     3.44:1 on white: correct for a fill, a border or an active state,
+     and a WCAG failure as body-size text. `brand-ink` is the same hue
+     taken down until it clears AA on white (5.20:1) and on the slate-100
+     page ground (4.75:1), for links and green type.
+
+     Reach for `brand` when the green is a surface and `brand-ink` when
+     it is a letterform; the two are not interchangeable. */
+  --color-brand:      #4c9c2e;
+  --color-brand-ink:  #3a7b21;
+  --color-brand-wash: #eef7e9;  /* selected rows, active chips */
+
+  /* ── Status. Reserved meaning; never spent as a series colour. ── */
+  --color-danger:     #b3261e;  /* 6.48:1 on white */
+  --color-warning:    #b45309;  /* 5.02:1 on white */
 }
 
-/* ── App colour tokens ───────────────────────────────────────── */
-:root {
-  --surface-raised:  #1e293b;
-  --border:          #334155;
-  --text-primary:    #f1f5f9;
-  --accent:          #34d399;
-  --text-muted:      #64748b;
-  --text-secondary:  #94a3b8;
-  --border-bright:   #475569;
+/* ── Technical text ──────────────────────────────────────────────
+   Coordinates, hex ids, scores, counts. Plex Sans ships even-width
+   figures, so a column of numbers lines up without switching to a
+   monospace face and without the register change that would bring. */
+.technical {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
 }
 
-/* ── Leaflet tooltip override ────────────────────────────────── */
+/* ── Leaflet, dragged into the theme ─────────────────────────────── */
 .biofrontier-tooltip {
-  background: var(--surface-raised) !important;
-  border: 1px solid var(--border) !important;
-  color: var(--text-primary) !important;
+  background: #ffffff !important;
+  border: 1px solid var(--color-slate-200) !important;
+  color: var(--color-slate-900) !important;
   border-radius: 6px !important;
   font-size: 12px !important;
   padding: 4px 8px !important;
+  box-shadow: 0 2px 8px rgb(15 23 42 / 0.10) !important;
 }
 .biofrontier-tooltip::before { display: none !important; }
+
+.leaflet-container { background: var(--color-slate-100) !important; }
+
+/* Leaflet ships light chrome already, so this only aligns the greys and
+   the radius with everything else rather than repainting it. */
+.leaflet-control-attribution {
+  background: rgb(255 255 255 / 0.85) !important;
+  color: var(--color-slate-500) !important;
+  font-size: 10px !important;
+}
+.leaflet-control-attribution a { color: var(--color-slate-600) !important; }
+
+.leaflet-bar a {
+  background: #ffffff !important;
+  color: var(--color-slate-700) !important;
+  border-bottom: 1px solid var(--color-slate-200) !important;
+}
+.leaflet-bar a:hover {
+  background: var(--color-slate-50) !important;
+  color: var(--color-brand-ink) !important;
+}
+
+/* ── Basemap tone ───────────────────────────────────────────────
+   Esri's Light Gray Canvas is already a near-neutral cartography meant to
+   sit under data. It only needs holding down a little so the hexbin ramp
+   stays the brightest thing on the map. */
+.basemap-ground {
+  filter: saturate(0.55) brightness(1.02);
+}
+.basemap-labels {
+  opacity: 0.85;
+}
+
+/* ── Interaction ─────────────────────────────────────────────────
+   Anything that responds to a click says so. The UA stylesheet gives
+   <button> `cursor: default`, which every app then re-fixes one
+   component at a time; fixed once here, by role rather than by class. */
+@layer base {
+  button,
+  summary,
+  select,
+  a[href],
+  label[for],
+  [role='button'],
+  [role='tab'],
+  [role='option'],
+  .leaflet-interactive {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  select:disabled,
+  [aria-disabled='true'] {
+    cursor: not-allowed;
+  }
+
+  ::selection {
+    background: var(--color-brand-wash);
+    color: var(--color-slate-900);
+  }
+}
+
+/* ── Focus. One visible ring everywhere. ── */
+:focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+}
