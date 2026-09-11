@@ -54,7 +54,7 @@ export default function ExportButton({
   }
 
   return (
-    <div className="relative border-t border-slate-700/60 shrink-0">
+    <div className="relative border-t border-line/60 shrink-0">
       {open && !disabled && (
         <>
           {/* Click-away layer. Sits below the menu but above the panel. */}
@@ -64,26 +64,26 @@ export default function ExportButton({
             aria-hidden
           />
           <div
-            className="absolute bottom-full left-3 right-3 mb-1 z-[1601] rounded-lg overflow-hidden bg-slate-800 border border-slate-700 shadow-xl"
+            className="absolute bottom-full left-3 right-3 mb-1 z-[1601] rounded-lg overflow-hidden bg-raised border border-line shadow-xl"
             role="menu"
           >
             <button
               onClick={() => exportCsv('visible')}
-              className="w-full text-left px-3 py-2.5 text-xs text-slate-300 hover:bg-slate-700 transition-colors"
+              className="w-full text-left px-3 py-2.5 text-xs text-secondary hover:bg-line transition-colors"
               role="menuitem"
               type="button"
             >
               <div className="font-medium">{t('scopeVisible', { count: Math.min(visibleCount, totalCount) })}</div>
-              <div className="text-[10px] text-slate-500 mt-0.5">{t('scopeVisibleHint')}</div>
+              <div className="text-[10px] text-muted mt-0.5">{t('scopeVisibleHint')}</div>
             </button>
             <button
               onClick={() => exportCsv('all')}
-              className="w-full text-left px-3 py-2.5 text-xs text-slate-300 hover:bg-slate-700 transition-colors border-t border-slate-700/60"
+              className="w-full text-left px-3 py-2.5 text-xs text-secondary hover:bg-line transition-colors border-t border-line/60"
               role="menuitem"
               type="button"
             >
               <div className="font-medium">{t('scopeAll', { count: totalCount })}</div>
-              <div className="text-[10px] text-slate-500 mt-0.5">{t('scopeAllHint')}</div>
+              <div className="text-[10px] text-muted mt-0.5">{t('scopeAllHint')}</div>
             </button>
           </div>
         </>
@@ -98,8 +98,8 @@ export default function ExportButton({
         className={[
           'w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-medium tracking-wide uppercase transition-colors',
           disabled
-            ? 'text-slate-600 cursor-not-allowed'
-            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800',
+            ? 'text-muted cursor-not-allowed'
+            : 'text-secondary hover:text-primary hover:bg-raised',
         ].join(' ')}
       >
         <svg
