@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Dark mode is driven by a class, not by the OS, because the app offers a
+   toggle. The inline script in the root layout sets it before first paint. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ══════════════════════════════════════════════════════════════════
    A light interface, on GBIF's palette.
 
@@ -24,13 +28,74 @@
 
      Reach for `brand` when the green is a surface and `brand-ink` when
      it is a letterform; the two are not interchangeable. */
-  --color-brand:      #4c9c2e;
-  --color-brand-ink:  #3a7b21;
-  --color-brand-wash: #eef7e9;  /* selected rows, active chips */
+  --color-brand:       #4c9c2e;
+  --color-brand-ink:   #3a7b21;
+  --color-brand-wash:  #eef7e9;  /* selected rows, active chips */
+
+  /* The green that sits BEHIND white text. It is deliberately identical in both
+     themes: white-on-it is 5.20:1 either way, so the one element that cannot
+     re-tint — a white label — never has to. Everything else in the palette
+     flips; this is the fixed point. */
+  --color-brand-solid: #3a7b21;
+
+  /* Same reasoning for the one amber fill that carries a white label. */
+  --color-warning-solid: #b45309;  /* white-on-it 5.02:1, both themes */
+
+  /* Panels, as a token rather than `bg-white`, because white is the one colour
+     that must NOT invert: `text-white` sits on the green fills above and has to
+     stay white in both themes. */
+  --color-panel: #ffffff;
 
   /* ── Status. Reserved meaning; never spent as a series colour. ── */
   --color-danger:     #b3261e;  /* 6.48:1 on white */
   --color-warning:    #b45309;  /* 5.02:1 on white */
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   DARK
+   Tailwind v4 compiles every colour utility to `var(--color-…)`, so
+   redefining the scale here re-themes the whole app without a single
+   `dark:` variant in a component. That is the only reason a dark mode
+   is cheap in this codebase: the alternative was a `dark:` twin for
+   ~150 class occurrences, each an opportunity to miss one.
+
+   The scale inverts around its middle. In a light theme a higher slate
+   number is darker and therefore more prominent; in a dark one it has
+   to be lighter to mean the same thing, so the ink steps ascend in
+   lightness exactly as they descend above. Measured against the panel:
+   slate-500 6.65:1 through slate-900 15.32:1.
+
+   Two colours deliberately do NOT flip — `--color-white`, because
+   `text-white` labels sit on green fills, and `--color-brand-solid`,
+   which is those fills.
+   ══════════════════════════════════════════════════════════════════ */
+.dark {
+  /* Surfaces, recessed to raised — the same order as light, inverted. */
+  --color-slate-100: #0b1220;  /* page ground */
+  --color-panel:     #131c2b;  /* panels, 1.10:1 off the ground */
+  --color-slate-50:  #1b2536;  /* insets and hovers, lifted again */
+
+  /* Lines */
+  --color-slate-200: #24324a;
+  --color-slate-300: #33455f;
+
+  /* Ink, dimmest to brightest */
+  --color-slate-500: #93a3b8;  /*  6.65:1 on panel */
+  --color-slate-600: #aab8ca;  /*  8.48:1 */
+  --color-slate-700: #c3cfdd;  /* 10.82:1 */
+  --color-slate-800: #dde5ef;  /* 13.45:1 */
+  --color-slate-900: #eef3f9;  /* 15.32:1 */
+
+  /* Brand. The ink green has to climb a long way — #3a7b21 is 1.6:1 on a
+     near-black panel — while the surface green barely moves, because it is
+     read as a fill rather than as a letterform. */
+  --color-brand:      #5cb43a;
+  --color-brand-ink:  #6fbf4a;  /* 7.51:1 on panel */
+  --color-brand-wash: #16301a;
+
+  /* Status, lifted to stay legible on a dark ground. */
+  --color-danger:  #f08a82;
+  --color-warning: #e0a355;
 }
 
 /* ── Technical text ──────────────────────────────────────────────
@@ -44,7 +109,7 @@
 
 /* ── Leaflet, dragged into the theme ─────────────────────────────── */
 .biofrontier-tooltip {
-  background: #ffffff !important;
+  background: var(--color-panel) !important;
   border: 1px solid var(--color-slate-200) !important;
   color: var(--color-slate-900) !important;
   border-radius: 6px !important;
@@ -56,18 +121,19 @@
 
 /* OSM's own sea colour, so tiles that have not loaded do not flash grey. */
 .leaflet-container { background: #aad3df !important; }
+.dark .leaflet-container { background: #1b2b3a !important; }
 
 /* Leaflet ships light chrome already, so this only aligns the greys and
    the radius with everything else rather than repainting it. */
 .leaflet-control-attribution {
-  background: rgb(255 255 255 / 0.85) !important;
+  background: color-mix(in srgb, var(--color-panel) 85%, transparent) !important;
   color: var(--color-slate-500) !important;
   font-size: 10px !important;
 }
 .leaflet-control-attribution a { color: var(--color-slate-600) !important; }
 
 .leaflet-bar a {
-  background: #ffffff !important;
+  background: var(--color-panel) !important;
   color: var(--color-slate-700) !important;
   border-bottom: 1px solid var(--color-slate-200) !important;
 }
@@ -84,6 +150,16 @@
    sea stops being blue. */
 .basemap-ground {
   filter: saturate(0.88) brightness(1.03);
+}
+
+/* A dark map out of light tiles, rather than a second tile provider.
+   Inverting lightness and rotating the hue a half turn keeps water blue and
+   vegetation green instead of flipping them to orange and magenta, so the
+   cartography the map was chosen for — coastline, rivers, relief, the road
+   network — survives the switch. Swapping to a ready-made dark tile set would
+   have changed the texture too, which is the thing worth keeping. */
+.dark .basemap-ground {
+  filter: invert(1) hue-rotate(180deg) brightness(0.82) contrast(0.92) saturate(0.68);
 }
 
 /* ── Interaction ─────────────────────────────────────────────────

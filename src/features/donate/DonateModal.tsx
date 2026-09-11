@@ -58,7 +58,7 @@ export default function DonateModal({ open, onClose }: DonateModalProps) {
         role="dialog"
         aria-modal="true"
         aria-labelledby="donate-title"
-        className="w-full max-w-md bg-white border border-slate-200 rounded-lg shadow-xl"
+        className="w-full max-w-md bg-panel border border-slate-200 rounded-lg shadow-xl"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-start justify-between px-5 pt-4 pb-3 border-b border-slate-200">
@@ -98,7 +98,7 @@ export default function DonateModal({ open, onClose }: DonateModalProps) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={onClose}
-            className="text-xs font-medium px-3 py-1.5 rounded bg-brand-ink text-white hover:bg-brand-ink/90 transition-colors"
+            className="text-xs font-medium px-3 py-1.5 rounded bg-brand-solid text-white hover:bg-brand-solid/90 transition-colors"
           >
             {t('continue')}
           </a>

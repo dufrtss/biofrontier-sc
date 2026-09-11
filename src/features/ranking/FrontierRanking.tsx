@@ -2,7 +2,8 @@
 
 import { useTranslations } from 'next-intl'
 import type { ScoredHexbin, TaxonFilter } from '@/lib/types'
-import { scoreToColor } from '@/lib/color'
+import { scoreToColor, scoreToInk } from '@/lib/color'
+import { useTheme } from '@/hooks/useTheme'
 import { hexCenter } from '@/lib/h3-utils'
 import { taxonDataFor } from '@/lib/hexbins-file'
 import InfoTooltip from '@/components/ui/InfoTooltip'
@@ -30,6 +31,7 @@ function formatCoords(hexId: string): string {
 }
 
 export default function FrontierRanking({ rankedHexIds, hexbins, taxonFilter, selectedHexId, onSelect, onOpenMethodology, onClose, limit = 20 }: Props) {
+  const { theme } = useTheme()
   const t = useTranslations('FrontierRanking')
   const topIds = rankedHexIds.slice(0, limit)
 
@@ -64,7 +66,12 @@ export default function FrontierRanking({ rankedHexIds, hexbins, taxonFilter, se
           const hex = hexbins[hexId]
           if (!hex) return null
           const isSelected = hexId === selectedHexId
-          const color = scoreToColor(hex.frontierScore)
+          // Two colours for one score: the bar is an area and takes the fill
+          // ramp, the rank number is type and takes the ink ramp. They were one
+          // value here, which put a fill colour on a letterform — #105e00 on a
+          // dark panel measures 2.13:1.
+          const barColor  = scoreToColor(hex.frontierScore, theme)
+          const rankColor = scoreToInk(hex.frontierScore, theme)
           const pct = (hex.frontierScore * 100).toFixed(0)
           const td  = taxonDataFor(hex, taxonFilter)
 
@@ -78,15 +85,15 @@ export default function FrontierRanking({ rankedHexIds, hexbins, taxonFilter, se
                 ].join(' ')}
               >
                 <div className="flex items-start justify-between gap-2">
-                  <span className="text-2xl font-bold leading-none" style={{ color }}>
+                  <span className="text-2xl font-bold leading-none" style={{ color: rankColor }}>
                     {hex.rank}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs text-slate-500 truncate">{formatCoords(hexId)}</div>
+                    <div className="text-xs text-slate-600 truncate">{formatCoords(hexId)}</div>
                     <div className="mt-1.5 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: color }} />
+                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: barColor }} />
                     </div>
-                    <div className="flex justify-between mt-1 text-xs text-slate-500">
+                    <div className="flex justify-between mt-1 text-xs text-slate-600">
                       <span>{t('frontierPct', { pct })}</span>
                       <span>{t('recordsCount', { count: td.occurrenceCount })}</span>
                     </div>

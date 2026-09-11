@@ -14,6 +14,7 @@ import LocaleSwitcher from '@/features/controls/LocaleSwitcher'
 import ExportButton from '@/features/export/ExportButton'
 import DonateModal from '@/features/donate/DonateModal'
 import { useCommunitySubmissions } from '@/hooks/useCommunitySubmissions'
+import ThemeToggle from '@/components/ui/ThemeToggle'
 
 /** Hexbins shown in the ranking sidebar, and the default CSV export scope. */
 const RANKING_LIMIT = 20
@@ -66,7 +67,7 @@ export default function AppShell() {
   return (
     <div className="flex flex-col h-full">
       {/* Top bar */}
-      <header className="relative flex items-center justify-between px-3 py-2 sm:px-5 sm:py-3 bg-white border-b border-slate-200 shrink-0 z-10">
+      <header className="relative flex items-center justify-between px-3 py-2 sm:px-5 sm:py-3 bg-panel border-b border-slate-200 shrink-0 z-10">
         <div>
           <h1 className="text-base font-bold text-slate-900 tracking-tight font-condensed uppercase leading-none">
             BioFrontier SC
@@ -105,7 +106,7 @@ export default function AppShell() {
       <div className="flex flex-1 overflow-hidden">
         <aside
           className={[
-            'bg-white border-r border-slate-200 overflow-hidden',
+            'bg-panel border-r border-slate-200 overflow-hidden',
             rankingOpen
               ? 'fixed inset-0 z-[1500] flex flex-col sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
               : 'hidden sm:flex sm:flex-col sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
@@ -144,7 +145,7 @@ export default function AppShell() {
           />
           <button
             onClick={() => setRankingOpen(o => !o)}
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-[1000] h-10 w-5 flex items-center justify-center bg-white/95 hover:bg-slate-100 border border-slate-200 rounded text-slate-500 hover:text-slate-800 transition-colors"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-[1000] h-10 w-5 flex items-center justify-center bg-panel/95 hover:bg-slate-100 border border-slate-200 rounded text-slate-500 hover:text-slate-800 transition-colors"
             aria-label={rankingOpen ? 'Hide ranking panel' : 'Show ranking panel'}
           >
             <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -158,7 +159,7 @@ export default function AppShell() {
 
         <aside
           className={[
-            'bg-white border-l border-slate-200 overflow-hidden',
+            'bg-panel border-l border-slate-200 overflow-hidden',
             selectedHex
               ? 'fixed inset-0 z-[1500] sm:relative sm:flex sm:shrink-0 sm:w-80 sm:opacity-100'
               : 'hidden sm:block sm:w-0 sm:opacity-0 sm:pointer-events-none sm:overflow-hidden',
@@ -176,15 +177,18 @@ export default function AppShell() {
         </aside>
       </div>
 
-      {/* Footer — locale switcher + donate */}
-      <footer className="shrink-0 flex items-center justify-between px-4 py-2 bg-white border-t border-slate-200">
+      {/* Footer — locale switcher + theme + donate */}
+      <footer className="shrink-0 flex items-center justify-between px-4 py-2 bg-panel border-t border-slate-200">
         <LocaleSwitcher />
-        <button
-          onClick={() => setDonateOpen(true)}
-          className="text-xs text-slate-500 hover:text-slate-900 transition-colors"
-        >
-          {t('donate')}
-        </button>
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+          <button
+            onClick={() => setDonateOpen(true)}
+            className="text-xs text-slate-500 hover:text-slate-900 transition-colors"
+          >
+            {t('donate')}
+          </button>
+        </div>
       </footer>
 
       <DonateModal open={donateOpen} onClose={() => setDonateOpen(false)} />

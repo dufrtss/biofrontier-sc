@@ -6,7 +6,8 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { ScoredHexbin } from '@/lib/types'
 import { hexBoundary } from '@/lib/h3-utils'
-import { scoreToColor, scoreToOpacity, scoreToInk, frontierRamp } from '@/lib/color'
+import { scoreToColor, scoreToOpacity, scoreToInk, frontierRamp, frontierRampDark } from '@/lib/color'
+import { useTheme } from '@/hooks/useTheme'
 import type { GapMapProps } from './GapMap'
 import InfoTooltip from '@/components/ui/InfoTooltip'
 
@@ -27,16 +28,28 @@ import InfoTooltip from '@/components/ui/InfoTooltip'
 const EDGE_WEIGHT  = 0.6
 const EDGE_OPACITY = 0.40
 
+// Leaflet paints SVG attributes directly, so none of this can be a utility
+// class and none of it inherits from the stylesheet — every themed colour on
+// the map has to be chosen here, in JS, and re-applied when the theme changes.
+//
+// Community records must NOT be green in either theme. The frontier ramp is
+// green end to end, so a green marker reads as another score rather than as a
+// different KIND of observation. Indigo is the one hue in this palette that
+// separates from the ramp under deuteranopia as well as normal vision (ΔE 80+).
 const MAP = {
-  noData:      '#94a3b8',  // slate-400, at low opacity
-  selected:    '#0f172a',  // slate-900 — the selection ring was #ffffff, which
-                           // is invisible the moment the basemap goes light
-  // Community records must NOT be green. The frontier ramp is now green end to
-  // end, so a green marker reads as another score rather than as a different
-  // KIND of observation. Indigo is the one hue in this palette that separates
-  // from the ramp under deuteranopia as well as normal vision (ΔE 80+).
-  community:      '#4841af',
-  communityFill:  '#ffffff',
+  light: {
+    noData:         '#94a3b8',
+    selected:       '#0f172a',  // near-black ring on a pale map
+    community:      '#4841af',
+    communityFill:  '#ffffff',
+  },
+  dark: {
+    noData:         '#5b6b80',
+    selected:       '#eef3f9',  // and the inverse on a dark one: a slate-900
+                                // ring would vanish into the inverted tiles
+    community:      '#a9a2f5',
+    communityFill:  '#0b1220',
+  },
 } as const
 
 function escapeHtml(value: string): string {
@@ -46,6 +59,8 @@ function escapeHtml(value: string): string {
 
 export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOpenMethodology, communitySubmissions }: GapMapProps) {
   const t = useTranslations('GapMap')
+  const { theme } = useTheme()
+  const palette = MAP[theme]
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef       = useRef<L.Map | null>(null)
   const polygonsRef  = useRef<Map<string, L.Polygon>>(new Map())
@@ -140,7 +155,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
     // Zoom is deliberately untouched: the reader chose this view, and a jump in
     // scale loses the surroundings that make a survey gap mean anything.
     map.panTo(polygon.getBounds().getCenter(), { animate: true, duration: 0.4 })
-  }, [selectedHexId, hexbins])
+  }, [selectedHexId, hexbins, theme, palette])
 
   // Render / update hex polygons when hexbins data changes
   useEffect(() => {
@@ -155,16 +170,28 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
       const boundary = hexBoundary(hex.hexId)
       const hasData  = hex.rank > 0
 
+      // Same style as the re-style path below, and it has to stay that way.
+      // These two fell out of sync once already: an edit landed on the
+      // selection effect but not here, and nothing looked wrong because the
+      // selection effect runs on mount and quietly repainted every cell a
+      // frame later. The bug was invisible until the two were read together.
       const polygon = L.polygon(boundary, hasData ? {
-        color:       'transparent',
-        fillColor:   scoreToColor(hex.frontierScore),
+        color:       scoreToInk(hex.frontierScore, theme),
+        opacity:     EDGE_OPACITY,
+        weight:      EDGE_WEIGHT,
+        fillColor:   scoreToColor(hex.frontierScore, theme),
         fillOpacity: scoreToOpacity(hex.frontierScore),
-        weight:      0.8,
       } : {
-        color:       'transparent',
-        fillColor:   MAP.noData,
-        fillOpacity: 0.16,
-        weight:      0,
+        // Unsurveyed cells are drawn as close to nothing as they can be while
+        // staying hoverable. There are thousands of them, they cover most of
+        // the state, and at this zoom a cell is a few pixels across, so what
+        // reads as a light touch per cell becomes a veil over the rivers and
+        // relief the basemap is there to show.
+        color:       palette.noData,
+        opacity:     0.18,
+        weight:      0.5,
+        fillColor:   palette.noData,
+        fillOpacity: 0.02,
       })
 
       if (hasData) {
@@ -183,25 +210,25 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
       polygon.addTo(map)
       polygonsRef.current.set(hex.hexId, polygon)
     })
-  }, [hexbins])
+  }, [hexbins, theme, palette])
 
   // Highlight selected hexbin
   useEffect(() => {
     polygonsRef.current.forEach((polygon, hexId) => {
       if (hexId === selectedHexId) {
-        polygon.setStyle({ color: MAP.selected, opacity: 1, weight: 2, fillOpacity: 0.9 })
+        polygon.setStyle({ color: palette.selected, opacity: 1, weight: 2, fillOpacity: 0.9 })
         polygon.bringToFront()
       } else {
         const hex = hexbins[hexId]
         if (hex) {
           const hasData = hex.rank > 0
           polygon.setStyle(hasData ? {
-            color:       scoreToInk(hex.frontierScore),
+            color:       scoreToInk(hex.frontierScore, theme),
             opacity:     EDGE_OPACITY,
             weight:      EDGE_WEIGHT,
             fillOpacity: scoreToOpacity(hex.frontierScore),
           } : {
-            color:       MAP.noData,
+            color:       palette.noData,
             opacity:     0.18,
             weight:      0.5,
             fillOpacity: 0.02,
@@ -209,7 +236,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
         }
       }
     })
-  }, [selectedHexId, hexbins])
+  }, [selectedHexId, hexbins, theme, palette])
 
   // Community marker layer.
   //
@@ -229,9 +256,9 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
       communitySubmissions.map(s =>
         L.circleMarker([s.latitude, s.longitude], {
           radius: 5,
-          color: MAP.community,
+          color: palette.community,
           weight: 2,
-          fillColor: MAP.communityFill,
+          fillColor: palette.communityFill,
           fillOpacity: 0.9,
         }).bindPopup(
           `<div style="font-size:12px;line-height:1.5">
@@ -246,14 +273,14 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
 
     communityRef.current = group
     return () => { group.remove() }
-  }, [communitySubmissions])
+  }, [communitySubmissions, palette])
 
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} className="w-full h-full" />
 
       {/* Legend */}
-      <div className="absolute bottom-8 left-4 z-[1000] bg-white/95 backdrop-blur rounded-lg px-3 py-2 text-xs text-slate-500 border border-slate-200">
+      <div className="absolute bottom-8 left-4 z-[1000] bg-panel/95 backdrop-blur rounded-lg px-3 py-2 text-xs text-slate-500 border border-slate-200">
         <div className="flex items-center mb-2">
           <p className="text-slate-500 uppercase tracking-widest text-[10px] font-semibold">{t('surveyCoverage')}</p>
           <InfoTooltip
@@ -272,7 +299,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
             className="h-2 rounded-sm border border-slate-200"
             style={{
               background: `linear-gradient(to right, ${
-                frontierRamp.map((c, i) =>
+                (theme === 'dark' ? frontierRampDark : frontierRamp).map((c, i) =>
                   `${c} ${(i / frontierRamp.length) * 100}% ${((i + 1) / frontierRamp.length) * 100}%`,
                 ).join(', ')
               })`,
@@ -286,7 +313,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
         <div className="flex items-center gap-2 mb-1">
           <span
             className="w-3 h-3 rounded-sm inline-block shrink-0 border border-slate-200"
-            style={{ background: MAP.noData, opacity: 0.4 }}
+            style={{ background: palette.noData, opacity: 0.4 }}
           />
           {t('unsurveyed')}
         </div>
@@ -295,7 +322,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
               map. A legend swatch that is not the shape of its mark is a lie. */}
           <span
             className="w-3 h-3 rounded-full inline-block shrink-0"
-            style={{ background: MAP.communityFill, border: `2px solid ${MAP.community}` }}
+            style={{ background: palette.communityFill, border: `2px solid ${palette.community}` }}
           />
           {t('communityRecord')}
         </div>

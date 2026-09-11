@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import type { ScoredHexbin, TaxonFilter } from '@/lib/types'
 import { scoreToColor, scoreToInk } from '@/lib/color'
+import { useTheme } from '@/hooks/useTheme'
 import { hexCenter } from '@/lib/h3-utils'
 import { taxonDataFor } from '@/lib/hexbins-file'
 import { gbifSpeciesUrl } from '@/lib/gbif'
@@ -80,6 +81,7 @@ function AnimatedBar({ label, labelExtra, value, color, animate }: AnimatedBarPr
 
 export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPlaceholder, onClose, onOpenMethodology, onCommunityChange }: Props) {
   const t = useTranslations('HexDetail')
+  const { theme } = useTheme()
   const prevHexIdRef = useRef<string | null>(null)
   const [shouldAnimate, setShouldAnimate] = useState(false)
 
@@ -101,8 +103,8 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
   // only the last two steps of the fill ramp clear AA on white — so anything
   // that is a letterform or a hairline uses the ink and anything that is an
   // area uses the fill. See src/lib/color.ts.
-  const accentFill = scoreToColor(hex.frontierScore)
-  const accentInk  = scoreToInk(hex.frontierScore)
+  const accentFill = scoreToColor(hex.frontierScore, theme)
+  const accentInk  = scoreToInk(hex.frontierScore, theme)
   const frontierPct = Math.round(hex.frontierScore * 100)
 
   const frontierLabel =
@@ -112,7 +114,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
     t('wellSurveyed')
 
   return (
-    <div className="flex flex-col h-full bg-white" style={{ borderLeft: '1px solid #e2e8f0' }}>
+    <div className="flex flex-col h-full bg-panel" style={{ borderLeft: '1px solid var(--color-slate-200)' }}>
 
       {/* Header band */}
       <div
@@ -187,7 +189,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
               <div
                 key={label}
                 className="rounded-lg px-3 py-2.5"
-                style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}
+                style={{ background: 'var(--color-slate-50)', border: '1px solid var(--color-slate-200)' }}
               >
                 <div className="flex items-center gap-1.5 mb-1">
                   <span className="text-[10px]" style={{ color: accentInk, opacity: 0.7 }}>{icon}</span>
@@ -210,7 +212,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
           {td.firstDate && (
             <div
               className="mt-2 px-3 py-2 rounded-lg text-[11px] font-mono text-slate-500 tracking-wide"
-              style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}
+              style={{ background: 'var(--color-slate-50)', border: '1px solid var(--color-slate-200)' }}
             >
               <span className="text-slate-500">{t('period')}</span>
               &nbsp;&nbsp;{td.firstDate}&nbsp;→&nbsp;{td.lastDate}
@@ -344,7 +346,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
 
           <div
             className="rounded px-2.5 py-2 text-[10px] leading-relaxed text-slate-500"
-            style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}
+            style={{ background: 'var(--color-slate-50)', border: '1px solid var(--color-slate-200)' }}
           >
             {t('scoreAnnotation')}
           </div>
@@ -380,7 +382,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
                     </a>
                     <span
                       className="text-[11px] font-mono text-slate-500 tabular-nums shrink-0 rounded px-1.5 py-0.5"
-                      style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}
+                      style={{ background: 'var(--color-slate-50)', border: '1px solid var(--color-slate-200)' }}
                     >
                       {count}
                     </span>
@@ -411,7 +413,7 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
       {/* Footer */}
       <div
         className="px-4 py-2.5 text-[10px] font-mono text-slate-500 tracking-wide leading-relaxed"
-        style={{ borderTop: '1px solid #e2e8f0' }}
+        style={{ borderTop: '1px solid var(--color-slate-200)' }}
       >
         {t('footer')}
       </div>

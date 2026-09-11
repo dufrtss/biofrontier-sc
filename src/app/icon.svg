@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="BioFrontier SC">
+  <title>BioFrontier SC</title>
+  <!-- One H3 cell carrying the frontier ramp across it: the mark is the legend.
+       Pointy-top, to match the hexbins the map actually draws, and the gradient
+       runs pale to deep in the same direction the scale does.
+
+       No outline. A 1.6px stroke looked right at 512px and turned into a grey
+       antialiased halo at 16px, which is the size that actually matters — a
+       browser tab. The shape carries itself, and the ramp's pale end keeps the
+       upper edge visible against a dark tab bar where a flat deep green would
+       close up. Stopping at the ramp's sixth step rather than its seventh for
+       the same reason: #105e00 is nearly black at this scale. -->
+  <defs>
+    <linearGradient id="frontier" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%"   stop-color="#b2d6b4"/>
+      <stop offset="50%"  stop-color="#4c9c2e"/>
+      <stop offset="100%" stop-color="#2f721f"/>
+    </linearGradient>
+  </defs>
+  <polygon points="16.00,0.40 2.49,8.20 2.49,23.80 16.00,31.60 29.51,23.80 29.51,8.20"
+           fill="url(#frontier)"/>
+</svg>

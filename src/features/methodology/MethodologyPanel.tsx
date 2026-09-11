@@ -124,7 +124,7 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
       )}
       <div
         className={[
-          'fixed right-0 top-0 h-full w-full md:w-[480px] bg-white border-l border-slate-200 z-[2000] flex flex-col transition-transform duration-200',
+          'fixed right-0 top-0 h-full w-full md:w-[480px] bg-panel border-l border-slate-200 z-[2000] flex flex-col transition-transform duration-200',
           open ? 'translate-x-0' : 'translate-x-full',
         ].join(' ')}
         aria-hidden={!open}

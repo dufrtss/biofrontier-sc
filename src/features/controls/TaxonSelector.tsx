@@ -42,7 +42,7 @@ export default function TaxonSelector({ value, options, onChange, onOpenMethodol
             className={[
               'px-3 py-1.5 rounded-full text-sm font-medium transition-colors whitespace-nowrap',
               value === filter
-                ? 'bg-brand-ink text-white shadow-sm'
+                ? 'bg-brand-solid text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900',
             ].join(' ')}
           >

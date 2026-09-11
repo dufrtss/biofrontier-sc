@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { scoreToColor, scoreToOpacity, scoreToInk, frontierRamp, frontierInk } from '@/lib/color'
+import {
+  scoreToColor, scoreToOpacity, scoreToInk,
+  frontierRamp, frontierRampDark, frontierInk, frontierInkDark,
+} from '@/lib/color'
 
 // The ramp is sequential, so the properties worth pinning are the ones that
 // make it readable as a magnitude — not the individual hexes, which are
@@ -109,6 +112,60 @@ describe('scoreToInk', () => {
       for (const step of frontierInk) {
         const contrast = (rel(ground) + 0.05) / (rel(step) + 0.05)
         expect(contrast).toBeGreaterThanOrEqual(4.5)
+      }
+    }
+  })
+})
+
+// Dark mode is not the light ramp dimmed. Direction follows the ground: on a
+// pale map the eye reads the darkest patch as the most, on a dark one the
+// brightest — so a ramp that kept falling would make well-surveyed cells shout
+// and frontier cells recede, which is the map saying the opposite of what it
+// means.
+describe('the dark ramps', () => {
+  const rel = (hex: string) => {
+    const h = hex.replace('#', '')
+    const ch = [0, 2, 4].map(i => {
+      const c = parseInt(h.slice(i, i + 2), 16) / 255
+      return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+    })
+    return 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2]
+  }
+  const ratio = (a: string, b: string) =>
+    (Math.max(rel(a), rel(b)) + 0.05) / (Math.min(rel(a), rel(b)) + 0.05)
+
+  it('runs the opposite way to the light ramp', () => {
+    for (let i = 1; i < frontierRampDark.length; i++) {
+      expect(rel(frontierRampDark[i])).toBeGreaterThan(rel(frontierRampDark[i - 1]))
+      expect(rel(frontierRamp[i])).toBeLessThan(rel(frontierRamp[i - 1]))
+    }
+  })
+
+  it('picks the same step as the light ramp for the same score', () => {
+    for (let s = 0; s <= 1.0001; s += 0.01) {
+      expect(frontierRampDark.indexOf(scoreToColor(s, 'dark') as typeof frontierRampDark[number]))
+        .toBe(frontierRamp.indexOf(scoreToColor(s, 'light') as typeof frontierRamp[number]))
+      expect(frontierInkDark.indexOf(scoreToInk(s, 'dark') as typeof frontierInkDark[number]))
+        .toBe(frontierInk.indexOf(scoreToInk(s, 'light') as typeof frontierInk[number]))
+    }
+  })
+
+  it('defaults to the light ramp, so an un-themed caller is not silently dark', () => {
+    expect(scoreToColor(0.5)).toBe(scoreToColor(0.5, 'light'))
+    expect(scoreToInk(0.5)).toBe(scoreToInk(0.5, 'light'))
+  })
+
+  // The dark ink does double duty: type in the detail panel, and the hairline
+  // that keeps a hexbin's shape over inverted map tiles.
+  it('keeps dark ink readable as type and as a hairline', () => {
+    for (const ground of ['#131c2b', '#0b1220']) {        // panel, page
+      for (const step of frontierInkDark) {
+        expect(ratio(step, ground)).toBeGreaterThanOrEqual(4.5)
+      }
+    }
+    for (const ground of ['#2b2f33', '#243447', '#2f3a24']) {  // inverted land, water, woodland
+      for (const step of frontierInkDark) {
+        expect(ratio(step, ground)).toBeGreaterThanOrEqual(3)
       }
     }
   })

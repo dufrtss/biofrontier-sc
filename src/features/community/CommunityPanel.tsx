@@ -200,7 +200,7 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
             const mine     = s.observer_id === user.id
             const myVote   = s.identifications.find(i => i.user_id === user.id)
             return (
-              <div key={s.id} className="rounded border border-slate-200 bg-white/40 px-2.5 py-2 space-y-1.5">
+              <div key={s.id} className="rounded border border-slate-200 bg-panel/40 px-2.5 py-2 space-y-1.5">
                 <div className="flex items-baseline justify-between gap-2">
                   <span className="text-xs italic text-slate-500 truncate">{s.scientific_name}</span>
                   <span className="text-[10px] font-mono text-slate-500 shrink-0">
@@ -229,7 +229,7 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
                       onClick={() => handleVote(s.id, 'agree')} disabled={busy}
                       className={`flex-1 rounded px-2 py-1 text-[10px] font-medium transition-colors ${
                         myVote?.verdict === 'agree'
-                          ? 'bg-brand text-white'
+                          ? 'bg-brand-solid text-white'
                           : 'border border-slate-200 text-slate-500 hover:text-brand-ink hover:border-brand/40'
                       }`}
                     >
@@ -239,7 +239,7 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
                       onClick={() => handleVote(s.id, 'disagree')} disabled={busy}
                       className={`flex-1 rounded px-2 py-1 text-[10px] font-medium transition-colors ${
                         myVote?.verdict === 'disagree'
-                          ? 'bg-warning text-white'
+                          ? 'bg-warning-solid text-white'
                           : 'border border-slate-200 text-slate-500 hover:text-warning hover:border-warning/40'
                       }`}
                     >

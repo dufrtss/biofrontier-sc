@@ -19,10 +19,31 @@ const FRONTIER_RAMP = [
   '#b2d6b4', '#97c197', '#7cad7a', '#62995e', '#498640', '#2f721f', '#105e00',
 ] as const
 
-export function scoreToColor(score: number): string {
+// The same ramp for a dark basemap, and it runs the OTHER WAY.
+//
+// Direction is not a style choice, it follows the ground: on a pale map the eye
+// reads the darkest patch as the most, and on a dark one it reads the brightest.
+// Keeping the light ramp and simply dimming it would invert the meaning of the
+// map — well-surveyed cells would shout and frontier cells would recede — so
+// dark mode gets its own ramp, generated the same way and validated the same
+// way, rising in lightness instead of falling.
+//
+// Monotone L, ΔL ≥ 0.082 per step, hue spread 6.2°.
+const FRONTIER_RAMP_DARK = [
+  '#163c19', '#275428', '#3a6e38', '#4e8848', '#63a358', '#79bf69', '#90db7a',
+] as const
+
+export type Theme = 'light' | 'dark'
+
+/** Which step of a seven-step ramp a score falls in. One definition, so the
+ *  fill and the ink can never disagree about which cell a score belongs to. */
+function step(score: number): number {
   const s = Math.max(0, Math.min(1, score))
-  const i = Math.min(FRONTIER_RAMP.length - 1, Math.floor(s * FRONTIER_RAMP.length))
-  return FRONTIER_RAMP[i]
+  return Math.min(6, Math.floor(s * 7))
+}
+
+export function scoreToColor(score: number, theme: Theme = 'light'): string {
+  return (theme === 'dark' ? FRONTIER_RAMP_DARK : FRONTIER_RAMP)[step(score)]
 }
 
 // Opacity used to ramp 0.25 → 0.80, which double-encoded the score: a
@@ -57,11 +78,18 @@ const FRONTIER_INK = [
   '#427c3f', '#377432', '#2b6c24', '#1f6513', '#115d00', '#005500', '#004d00',
 ] as const
 
-export function scoreToInk(score: number): string {
-  const s = Math.max(0, Math.min(1, score))
-  const i = Math.min(FRONTIER_INK.length - 1, Math.floor(s * FRONTIER_INK.length))
-  return FRONTIER_INK[i]
+// The dark theme's ink. Light greens, because it has to be readable as type on
+// a near-black panel AND as a hairline over inverted map tiles: every step
+// clears 4.5:1 on both dark grounds and 3:1 over dark land, water and woodland.
+const FRONTIER_INK_DARK = [
+  '#6fa170', '#76ae75', '#7ebb7b', '#87c880', '#90d584', '#99e289', '#a3ef8d',
+] as const
+
+export function scoreToInk(score: number, theme: Theme = 'light'): string {
+  return (theme === 'dark' ? FRONTIER_INK_DARK : FRONTIER_INK)[step(score)]
 }
 
-export const frontierRamp = FRONTIER_RAMP
-export const frontierInk = FRONTIER_INK
+export const frontierRamp     = FRONTIER_RAMP
+export const frontierRampDark = FRONTIER_RAMP_DARK
+export const frontierInk      = FRONTIER_INK
+export const frontierInkDark  = FRONTIER_INK_DARK
