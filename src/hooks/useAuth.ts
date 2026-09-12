@@ -14,6 +14,21 @@ import { supabase } from '@/lib/supabase'
 const initialHash = typeof window !== 'undefined' ? window.location.hash : ''
 
 /**
+ * Whether this page load is the return trip from a magic link.
+ *
+ * Read from the same snapshot and for the same reason: `detectSessionInUrl`
+ * consumes the fragment during supabase-js's own initialisation, so by the time
+ * any component renders there is nothing left to look at. The flow is implicit
+ * (see `lib/supabase.ts`), so a successful verification arrives as
+ * `#access_token=...`.
+ *
+ * This is deliberately NOT "is signed in". A session persists across visits,
+ * and something that explains what just changed should appear when something
+ * just changed — not on every load for the rest of the month.
+ */
+const arrivedFromMagicLink = /(?:^|[#&])access_token=/.test(initialHash)
+
+/**
  * Where a magic link should land: the current page, minus its fragment.
  *
  * Dropping the fragment is load-bearing. GoTrue reports a failed verification
@@ -99,5 +114,5 @@ export function useAuth() {
     await supabase.auth.signOut()
   }, [])
 
-  return { user, loading, linkError, signIn, signOut }
+  return { user, loading, linkError, arrivedFromMagicLink, signIn, signOut }
 }

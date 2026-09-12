@@ -365,6 +365,18 @@
     "confirm": "Confirm",
     "dispute": "Dispute"
   },
+  "SignedIn": {
+    "title": "You're signed in",
+    "intro": "The link worked. You can now contribute to the community records:",
+    "canAdd": "Add an observation to any frontier location — species, date and field notes.",
+    "canReview": "Confirm or dispute other people's records. {n} independent confirmations mark a record as community-approved.",
+    "canWithdraw": "Withdraw one of your own records, at any time.",
+    "whereToFind": "All of it lives inside a location: open one from the map or the list and scroll to “Community observations” at the bottom of the side panel.",
+    "notInIndex": "Community records do not change the frontier score — they appear on the map as their own layer, so it stays visible where each piece of data came from.",
+    "showRanking": "Show frontier locations",
+    "explore": "I'll explore on my own",
+    "close": "Close"
+  },
   "Donate": {
     "title": "Thank you",
     "usingIt": "BioFrontier SC exists to show where Santa Catarina's Atlantic Forest still hasn't been looked at. That you're here, hunting for those gaps, is already part of the work.",

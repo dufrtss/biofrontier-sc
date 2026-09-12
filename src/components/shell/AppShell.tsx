@@ -13,7 +13,9 @@ import MethodologyPanel from '@/features/methodology/MethodologyPanel'
 import LocaleSwitcher from '@/features/controls/LocaleSwitcher'
 import ExportButton from '@/features/export/ExportButton'
 import DonateModal from '@/features/donate/DonateModal'
+import SignedInModal from '@/features/community/SignedInModal'
 import { useCommunitySubmissions } from '@/hooks/useCommunitySubmissions'
+import { useAuth } from '@/hooks/useAuth'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import Mark from '@/components/ui/Mark'
 
@@ -37,6 +39,14 @@ export default function AppShell() {
   const [methodologyOpen, setMethodologyOpen]       = useState(false)
   const [methodologySection, setMethodologySection] = useState<string | undefined>()
   const [donateOpen, setDonateOpen]                 = useState(false)
+
+  // Arriving from a magic link is the one moment worth interrupting: a real
+  // capability just appeared, and all of it is at the bottom of a panel behind
+  // a hexbin the reader has not picked yet. `arrivedFromMagicLink` is read from
+  // the URL fragment at load — not from "is signed in" — so this fires once, on
+  // the return trip, and never again on an ordinary visit with a live session.
+  const { user, arrivedFromMagicLink } = useAuth()
+  const [signedInDismissed, setSignedInDismissed] = useState(false)
 
   const openMethodology = useCallback((sectionId?: string) => {
     setMethodologySection(sectionId)
@@ -200,6 +210,12 @@ export default function AppShell() {
       </footer>
 
       <DonateModal open={donateOpen} onClose={() => setDonateOpen(false)} />
+
+      <SignedInModal
+        open={arrivedFromMagicLink && !!user && !signedInDismissed}
+        onClose={() => setSignedInDismissed(true)}
+        onShowRanking={() => setRankingOpen(true)}
+      />
 
       {/* Methodology panel */}
       <MethodologyPanel
