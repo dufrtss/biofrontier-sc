@@ -242,9 +242,16 @@ hexbins are precisely what the tool exists to surface.
 The weights are an uncalibrated hypothesis. `scoring-config.ts` documents what
 that means for interpreting the output.
 
-## Attribution
+## Licence and attribution
 
-The bird mark is derived from Phosphor Icons (MIT); basemap tiles are ©
-OpenStreetMap contributors. Occurrence data comes from GBIF and iNaturalist,
-land cover from MapBiomas. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
-for the notices these require.
+The source is MIT — see [LICENSE](LICENSE).
+
+That covers the code. It does **not** cover the derived data files under
+`public/data/`, which are computed from GBIF and iNaturalist occurrence records
+and MapBiomas land cover and carry those sources' terms. The bird mark is
+Phosphor Icons' work under its own MIT grant, and basemap tiles are ©
+OpenStreetMap contributors under ODbL — the attribution control on the map
+satisfies that and must not be removed.
+
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) has the detail and the notices
+these require.

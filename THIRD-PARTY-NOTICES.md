@@ -3,6 +3,21 @@
 Components of this project that are covered by someone else's licence, and the
 notices those licences require to travel with them.
 
+## What the project licence does and does not cover
+
+The MIT licence in `LICENSE` covers **the source code of this project**. It does
+not, and cannot, relicense third-party material distributed alongside it:
+
+- **`public/data/hexbins.json` and `public/data/habitat-by-hex.json` are derived
+  data**, not original work. They are computed from GBIF and iNaturalist
+  occurrence records and from MapBiomas land cover, and they carry whatever
+  terms those sources attach — see the scripts in `scripts/` for exactly what
+  each file is built from. Anyone redistributing them should check the source
+  terms rather than assume MIT.
+- The bird mark is Phosphor Icons' work under its own MIT grant, below.
+- Basemap tiles are served from OpenStreetMap and are not redistributed here at
+  all; the attribution requirement still applies to the running site.
+
 ---
 
 ## Phosphor Icons
