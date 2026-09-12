@@ -32,15 +32,23 @@ const EDGE_OPACITY = 0.40
 // class and none of it inherits from the stylesheet — every themed colour on
 // the map has to be chosen here, in JS, and re-applied when the theme changes.
 //
-// Community records must NOT be green in either theme. The frontier ramp is
-// green end to end, so a green marker reads as another score rather than as a
-// different KIND of observation. Indigo is the one hue in this palette that
-// separates from the ramp under deuteranopia as well as normal vision (ΔE 80+).
+// Community records must not read as a score — the frontier ramp is green end
+// to end, so a green marker would look like another cell rather than a
+// different KIND of observation. That distinction was carried by a violet ring,
+// which worked but made the marker the only chromatic thing in the app that
+// belonged to no family: on a neutral black theme it was visibly the one blue
+// object on screen.
+//
+// It is neutral now, because the SHAPE already does the work: a community
+// record is a small ringed circle and a hexbin is a hexagon, so colour never
+// had to carry the difference on its own. The ring sits one step inside the
+// selection ring's extreme, which keeps "selected" the loudest mark on the map,
+// and clears 6.4:1 against every ground either basemap produces.
 const MAP = {
   light: {
     noData:         '#94a3b8',
     selected:       '#0f172a',  // near-black ring on a pale map
-    community:      '#4841af',
+    community:      '#334155',  // slate-700
     communityFill:  '#ffffff',
   },
   dark: {
@@ -51,7 +59,7 @@ const MAP = {
     noData:         '#6b6b6b',
     selected:       '#f4f4f4',  // the inverse of the light theme's ring: a dark
                                 // one vanishes into the inverted tiles
-    community:      '#a9a2f5',  // stays violet — it must not read as a score
+    community:      '#cbcbcb',  // slate-700's dark value
     communityFill:  '#0e0e0e',  // the panel colour, so the disc reads as a hole
   },
 } as const
