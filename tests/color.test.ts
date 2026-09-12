@@ -158,7 +158,7 @@ describe('the dark ramps', () => {
   // The dark ink does double duty: type in the detail panel, and the hairline
   // that keeps a hexbin's shape over inverted map tiles.
   it('keeps dark ink readable as type and as a hairline', () => {
-    for (const ground of ['#131c2b', '#0b1220']) {        // panel, page
+    for (const ground of ['#0e0e0e', '#000000']) {        // panel, page
       for (const step of frontierInkDark) {
         expect(ratio(step, ground)).toBeGreaterThanOrEqual(4.5)
       }
