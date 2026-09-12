@@ -365,6 +365,18 @@
     "confirm": "Confirmar",
     "dispute": "Cuestionar"
   },
+  "SignedIn": {
+    "title": "Has iniciado sesión",
+    "intro": "El enlace funcionó. Ya puedes contribuir con los registros de la comunidad:",
+    "canAdd": "Añadir una observación a cualquier localidad de frontera — especie, fecha y notas de campo.",
+    "canReview": "Confirmar o cuestionar registros de otras personas. {n} confirmaciones independientes marcan un registro como aprobado por la comunidad.",
+    "canWithdraw": "Retirar uno de tus propios registros, en cualquier momento.",
+    "whereToFind": "Todo esto vive dentro de una localidad: abre una en el mapa o en la lista y desplázate hasta “Observaciones de la comunidad”, al final del panel lateral.",
+    "notInIndex": "Los registros de la comunidad no modifican la puntuación de frontera — aparecen en el mapa como su propia capa, para que se vea de dónde viene cada dato.",
+    "showRanking": "Ver localidades de frontera",
+    "explore": "Explorar por mi cuenta",
+    "close": "Cerrar"
+  },
   "Donate": {
     "title": "Gracias",
     "usingIt": "BioFrontier SC existe para mostrar dónde el Bosque Atlántico de Santa Catarina aún no ha sido observado. Que estés aquí, buscando esos vacíos, ya forma parte del trabajo.",

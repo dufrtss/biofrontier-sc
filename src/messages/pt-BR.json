@@ -365,6 +365,18 @@
     "confirm": "Confirmar",
     "dispute": "Contestar"
   },
+  "SignedIn": {
+    "title": "Você está conectado",
+    "intro": "O link funcionou. A partir de agora você pode contribuir com os registros da comunidade:",
+    "canAdd": "Adicionar uma observação a qualquer localidade de fronteira — espécie, data e notas de campo.",
+    "canReview": "Confirmar ou contestar registros de outras pessoas. {n} confirmações independentes marcam um registro como aprovado pela comunidade.",
+    "canWithdraw": "Retirar um registro seu, a qualquer momento.",
+    "whereToFind": "Tudo isso fica dentro de uma localidade: abra uma no mapa ou na lista e role até “Observações da comunidade”, no fim do painel lateral.",
+    "notInIndex": "Registros da comunidade não alteram o escore de fronteira — eles aparecem no mapa como uma camada própria, para que dê para ver de onde veio cada dado.",
+    "showRanking": "Ver localidades de fronteira",
+    "explore": "Explorar por conta própria",
+    "close": "Fechar"
+  },
   "Donate": {
     "title": "Obrigado",
     "usingIt": "O BioFrontier SC existe para mostrar onde a Mata Atlântica catarinense ainda não foi olhada. Que você esteja aqui, procurando esses vazios no mapa, já faz parte do trabalho.",
