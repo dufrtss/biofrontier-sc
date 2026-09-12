@@ -51,15 +51,19 @@ export default async function RootLayout({
     >
       <head>
         {/* Runs before first paint, which is the whole point: React cannot set
-            this without rendering first, and a dark-mode user would get a full
-            white flash on every navigation. Reads the saved choice, falls back
-            to the OS preference, and writes the class the stylesheet keys on.
-            Wrapped in try/catch because localStorage throws outright in some
-            privacy modes — a theme is not worth a blank page. */}
+            this without rendering first, so a returning dark-mode reader would
+            get a full white flash on every navigation.
+
+            Light is the default rather than the OS preference. This is a public
+            map that people arrive at from a link, and it should look the same
+            as the screenshot they came from; the dark theme is a choice someone
+            makes, which is then remembered. Wrapped in try/catch because
+            localStorage throws outright in some privacy modes — a theme is not
+            worth a blank page. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('biofrontier-theme');`
-              + `if(t!=='light'&&t!=='dark'){t=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}`
+              + `if(t!=='light'&&t!=='dark'){t='light'}`
               + `var e=document.documentElement;if(t==='dark'){e.classList.add('dark')}`
               + `e.style.colorScheme=t}catch(_){}})()`,
           }}

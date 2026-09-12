@@ -17,6 +17,6 @@
       <stop offset="100%" stop-color="#2f721f"/>
     </linearGradient>
   </defs>
-  <polygon points="16.00,0.40 2.49,8.20 2.49,23.80 16.00,31.60 29.51,23.80 29.51,8.20"
+  <polygon points="16.00,2.20 4.05,9.10 4.05,22.90 16.00,29.80 27.95,22.90 27.95,9.10"
            fill="url(#frontier)"/>
 </svg>
