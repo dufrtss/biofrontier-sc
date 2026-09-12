@@ -44,11 +44,15 @@ const MAP = {
     communityFill:  '#ffffff',
   },
   dark: {
-    noData:         '#5b6b80',
-    selected:       '#eef3f9',  // and the inverse on a dark one: a slate-900
-                                // ring would vanish into the inverted tiles
-    community:      '#a9a2f5',
-    communityFill:  '#0b1220',
+    // Neutral, like the rest of the dark theme. These were slate-derived navies
+    // and survived the move to a black palette unnoticed: the community swatch
+    // in the legend was a #0b1220 disc, the one blue object left on a screen
+    // with no blue in it.
+    noData:         '#6b6b6b',
+    selected:       '#f4f4f4',  // the inverse of the light theme's ring: a dark
+                                // one vanishes into the inverted tiles
+    community:      '#a9a2f5',  // stays violet — it must not read as a score
+    communityFill:  '#0e0e0e',  // the panel colour, so the disc reads as a hole
   },
 } as const
 
@@ -263,9 +267,9 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
         }).bindPopup(
           `<div style="font-size:12px;line-height:1.5">
              <em>${escapeHtml(s.scientific_name)}</em><br/>
-             <span style="color:#64748b">${escapeHtml(s.observed_on)}</span><br/>
-             <span style="color:#64748b">${tRef.current('communityConfirmations', { n: s.confirmation_count })}</span>
-             ${s.observer_display_name ? `<br/><span style="color:#64748b">${escapeHtml(s.observer_display_name)}</span>` : ''}
+             <span style="color:var(--color-slate-500)">${escapeHtml(s.observed_on)}</span><br/>
+             <span style="color:var(--color-slate-500)">${tRef.current('communityConfirmations', { n: s.confirmation_count })}</span>
+             ${s.observer_display_name ? `<br/><span style="color:var(--color-slate-500)">${escapeHtml(s.observer_display_name)}</span>` : ''}
            </div>`,
         ),
       ),

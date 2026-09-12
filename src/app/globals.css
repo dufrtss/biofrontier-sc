@@ -70,30 +70,36 @@
    which is those fills.
    ══════════════════════════════════════════════════════════════════ */
 .dark {
-  /* Surfaces, recessed to raised — the same order as light, inverted. */
-  --color-slate-100: #0b1220;  /* page ground */
-  --color-panel:     #131c2b;  /* panels, 1.10:1 off the ground */
-  --color-slate-50:  #1b2536;  /* insets and hovers, lifted again */
+  /* Neutral, not navy. The first dark pass carried a blue cast through the
+     greys — slate all the way down — and against the green it read as a third
+     hue competing with the brand rather than as an absence of colour. These are
+     pure neutrals, so the only chromatic thing on screen is the data.
+
+     The ground is #000000 rather than a very dark grey: on an OLED panel that
+     is the pixel switched off, which makes the page edge a real boundary
+     between lit and unlit instead of a slightly darker rectangle. */
+  --color-slate-100: #000000;  /* page ground */
+  --color-panel:     #0e0e0e;  /* panels, just off the ground */
+  --color-slate-50:  #1a1a1a;  /* insets and hovers, lifted again */
 
   /* Lines */
-  --color-slate-200: #24324a;
-  --color-slate-300: #33455f;
+  --color-slate-200: #262626;
+  --color-slate-300: #383838;
 
-  /* Ink, dimmest to brightest */
-  --color-slate-500: #93a3b8;  /*  6.65:1 on panel */
-  --color-slate-600: #aab8ca;  /*  8.48:1 */
-  --color-slate-700: #c3cfdd;  /* 10.82:1 */
-  --color-slate-800: #dde5ef;  /* 13.45:1 */
-  --color-slate-900: #eef3f9;  /* 15.32:1 */
+  /* Ink, dimmest to brightest. Measured against the panel. */
+  --color-slate-500: #9b9b9b;  /*  6.95:1 */
+  --color-slate-600: #b4b4b4;  /*  9.31:1 */
+  --color-slate-700: #cbcbcb;  /* 11.90:1 */
+  --color-slate-800: #e3e3e3;  /* 15.04:1 */
+  --color-slate-900: #f4f4f4;  /* 17.55:1 */
 
-  /* Brand. The ink green has to climb a long way — #3a7b21 is 1.6:1 on a
-     near-black panel — while the surface green barely moves, because it is
-     read as a fill rather than as a letterform. */
+  /* Brand. The ink green climbs a long way — #3a7b21 is 1.4:1 on a black panel
+     — while the surface green barely moves, being read as a fill. */
   --color-brand:      #5cb43a;
-  --color-brand-ink:  #6fbf4a;  /* 7.51:1 on panel */
-  --color-brand-wash: #16301a;
+  --color-brand-ink:  #6fbf4a;  /* 8.48:1 on panel */
+  --color-brand-wash: #12240d;
 
-  /* Status, lifted to stay legible on a dark ground. */
+  /* Status, lifted to stay legible on a black ground. */
   --color-danger:  #f08a82;
   --color-warning: #e0a355;
 }
@@ -121,7 +127,33 @@
 
 /* OSM's own sea colour, so tiles that have not loaded do not flash grey. */
 .leaflet-container { background: #aad3df !important; }
-.dark .leaflet-container { background: #1b2b3a !important; }
+
+/* Popups. Leaflet ships these white, tip and all, which is invisible in a light
+   theme and a floodlight in a dark one. The tip is a rotated square rather than
+   a border, so it needs the panel colour set on it directly or it stays white
+   under a themed bubble. */
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: var(--color-panel) !important;
+  color: var(--color-slate-700) !important;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.18) !important;
+}
+.leaflet-popup-content-wrapper {
+  border: 1px solid var(--color-slate-200) !important;
+  border-radius: 6px !important;
+}
+.leaflet-popup-tip {
+  border: 1px solid var(--color-slate-200) !important;
+}
+.leaflet-popup-content { margin: 8px 12px !important; }
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--color-slate-500) !important;
+}
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: var(--color-slate-900) !important;
+  background: transparent !important;
+}
+.dark .leaflet-container { background: #0a0a0a !important; }
 
 /* Leaflet ships light chrome already, so this only aligns the greys and
    the radius with everything else rather than repainting it. */
@@ -159,7 +191,7 @@
    network — survives the switch. Swapping to a ready-made dark tile set would
    have changed the texture too, which is the thing worth keeping. */
 .dark .basemap-ground {
-  filter: invert(1) hue-rotate(180deg) brightness(0.82) contrast(0.92) saturate(0.68);
+  filter: invert(1) hue-rotate(180deg) brightness(0.76) contrast(0.94) saturate(0.62);
 }
 
 /* ── Interaction ─────────────────────────────────────────────────
