@@ -15,6 +15,7 @@ import ExportButton from '@/features/export/ExportButton'
 import DonateModal from '@/features/donate/DonateModal'
 import { useCommunitySubmissions } from '@/hooks/useCommunitySubmissions'
 import ThemeToggle from '@/components/ui/ThemeToggle'
+import Mark from '@/components/ui/Mark'
 
 /** Hexbins shown in the ranking sidebar, and the default CSV export scope. */
 const RANKING_LIMIT = 20
@@ -68,13 +69,20 @@ export default function AppShell() {
     <div className="flex flex-col h-full">
       {/* Top bar */}
       <header className="relative flex items-center justify-between px-3 py-2 sm:px-5 sm:py-3 bg-panel border-b border-slate-200 shrink-0 z-10">
-        <div>
-          <h1 className="text-base font-bold text-slate-900 tracking-tight font-condensed uppercase leading-none">
-            BioFrontier SC
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">
-            {t('tagline')}
-          </p>
+        <div className="flex items-center gap-2.5">
+          {/* Decorative here: the <h1> beside it already says the name, and a
+              second announcement would just make a screen reader read it
+              twice. The mark carries its own label in the favicon, where there
+              is no text next to it. */}
+          <Mark size={26} className="shrink-0" />
+          <div>
+            <h1 className="text-base font-bold text-slate-900 tracking-tight font-condensed uppercase leading-none">
+              BioFrontier SC
+            </h1>
+            <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">
+              {t('tagline')}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-3">
           <TaxonSelector
