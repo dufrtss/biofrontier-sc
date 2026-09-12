@@ -40,6 +40,36 @@ above serves the app. All four are in `additional_redirect_urls` for the same
 reason. The app is public and open source, so there was nothing for protection
 to protect — the only thing it did was break authentication once a day.
 
+### Verifying `site_url` without sending a magic link
+
+The rewrite above is the reason this needs checking after a deployment, and
+sending yourself a link to find out is slow enough that it stops happening.
+GoTrue redirects to `site_url` whenever a verify link has no usable
+`redirect_to`, so an invalid token reveals the live value in one GET — nothing
+sent, no real token consumed:
+
+```
+curl -s -o /dev/null -w '%{redirect_url}\n' \
+  "https://$SUPABASE_PROJECT_REF.supabase.co/auth/v1/verify?token=invalid-probe&type=magiclink"
+```
+
+Adding `&redirect_to=<url>` characterises the allow-list too: an allow-listed
+host comes back as itself, anything else falls back to `site_url`.
+
+**Verified 2026-09-12**, after the deployment of `3cf4d57`:
+
+| Probe | Result |
+|---|---|
+| no `redirect_to` | `https://biofrontier.sc.eduardofrafre.com/` — correct, **not** rewritten to the team-scoped host |
+| `biofrontier.sc.eduardofrafre.com/pt-BR` | honoured |
+| `biofrontier-sc.vercel.app/pt-BR` | honoured |
+| `biofrontier-sc-eduardo-freitas-projects.vercel.app/pt-BR` | honoured |
+| `example.com/steal` | **rejected**, fell back to `site_url` |
+
+The last row is the one worth re-running: it is the open-redirect protection,
+and a check that only exercises allowed hosts cannot tell an enforced allow-list
+from an absent one.
+
 ## 2. App domain — `biofrontier.sc.eduardofrafre.com`
 
 **Live.** Serving with a Let's Encrypt certificate issued 2026-09-03, and it is
