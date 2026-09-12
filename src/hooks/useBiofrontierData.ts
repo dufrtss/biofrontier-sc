@@ -16,13 +16,19 @@ import { H3_RES6_AREA_KM2 } from '@/lib/h3-utils'
 /** Shared so a dataset without GBIF keys still returns a stable reference. */
 const NO_GBIF_KEYS: Map<string, number> = new Map()
 
+/** Query parameter carrying the selected hexbin across a sign-in round trip. */
+const HEX_PARAM = 'hex'
+
 export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
   selectHex: (hexId: string | null) => void
+  /** True once the `?hex=` in the URL has been read and acted on. */
+  selectionRestored: boolean
 } {
   const [raw, setRaw]                = useState<NormalizedHexbinsFile | null>(null)
   const [loading, setLoading]        = useState(true)
   const [error, setError]            = useState<string | null>(null)
   const [selectedHexId, setSelected] = useState<string | null>(null)
+  const [selectionRestored, setSelectionRestored] = useState(false)
 
   useEffect(() => {
     const controller = new AbortController()
@@ -143,6 +149,39 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     }
   }, [raw, taxonFilter])
 
+  // ── The selected hexbin lives in the URL ───────────────────────────────
+  //
+  // Not for deep-linking's sake, though that is a nice side effect. A magic
+  // link's `redirect_to` is built from the current URL, so anything not in the
+  // URL is lost across the sign-in round trip — and what someone loses is
+  // precisely the hexbin they were about to contribute to. The comment on
+  // `redirectTarget` in useAuth claimed the link came back to the same hexbin;
+  // it could not, because the selection was React state and nothing else.
+  //
+  // `replaceState` rather than `push`: selecting a cell is not a navigation,
+  // and filling the back button with every hexbin someone clicked would make
+  // leaving the page take twenty presses.
+  useEffect(() => {
+    if (typeof window === 'undefined' || !selectionRestored) return
+    const url = new URL(window.location.href)
+    if (selectedHexId) url.searchParams.set(HEX_PARAM, selectedHexId)
+    else url.searchParams.delete(HEX_PARAM)
+    window.history.replaceState(null, '', url.toString())
+  }, [selectedHexId, selectionRestored])
+
+  // Restore it once the data is in, so an unknown id can be discarded rather
+  // than selecting a hexbin that does not exist.
+  useEffect(() => {
+    if (selectionRestored || loading) return
+    const fromUrl = new URLSearchParams(window.location.search).get(HEX_PARAM)
+    // Read from the URL in an effect, not a lazy initialiser: the server render
+    // has no URL to read, so initialising from it would mismatch on hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (fromUrl && hexbins[fromUrl]) setSelected(fromUrl)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSelectionRestored(true)
+  }, [loading, hexbins, selectionRestored])
+
   return {
     hexbins,
     rankedHexIds,
@@ -159,5 +198,6 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     availableFilters: raw?.availableFilters ?? ['all'],
     gbifKeyByName: raw?.gbifKeyByName ?? NO_GBIF_KEYS,
     selectHex: setSelected,
+    selectionRestored,
   }
 }

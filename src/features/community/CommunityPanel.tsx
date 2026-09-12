@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAuth } from '@/hooks/useAuth'
 import { communityEnabled } from '@/lib/supabase'
@@ -34,7 +34,7 @@ const inputClass =
 
 export default function CommunityPanel({ hexId, center, frontierScore, onSubmitted }: Props) {
   const t = useTranslations('Community')
-  const { user, loading: authLoading, linkError, signIn, signOut } = useAuth()
+  const { user, loading: authLoading, linkError, arrivedFromMagicLink, signIn, signOut } = useAuth()
 
   const [pending, setPending]   = useState<PendingSubmission[]>([])
   const [busy, setBusy]         = useState(false)
@@ -113,8 +113,48 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
 
   const isHighFrontier = frontierScore >= HIGH_FRONTIER
 
+  // ── Arriving from a magic link ─────────────────────────────────────────
+  //
+  // The hexbin came back with them (the selection rides in the URL, see
+  // useBiofrontierData), so the panel they need is already open — just far
+  // below the fold of a side panel they did not scroll. Bringing it into view
+  // and marking it for a moment is the difference between "signed in, now
+  // what" and landing on the thing they came back to do.
+  //
+  // The ring fades itself. A highlight that stays is no longer a highlight,
+  // and this one has done its job the instant it is noticed.
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const [arrivalHighlight, setArrivalHighlight] = useState(false)
+  const greeted = useRef(false)
+
+  useEffect(() => {
+    if (!arrivedFromMagicLink || !user || greeted.current) return
+    greeted.current = true
+    // A task late, not a frame: the detail panel is mounting in this same
+    // commit and scrolling to an element before layout scrolls to where it used
+    // to be — but requestAnimationFrame only runs when the browser paints, and
+    // making something the reader depends on wait for a paint means it silently
+    // does not happen in a tab that is not being painted. A timeout runs
+    // either way, and reading geometry forces the layout it needs.
+    const start = setTimeout(() => {
+      const section = sectionRef.current
+      if (!section) return
+      const smooth = !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+      section.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'center' })
+      setArrivalHighlight(true)
+    }, 0)
+    const fade = setTimeout(() => setArrivalHighlight(false), 2600)
+    return () => { clearTimeout(start); clearTimeout(fade) }
+  }, [arrivedFromMagicLink, user])
+
   return (
-    <div className="px-4 py-4 space-y-3">
+    <div
+      ref={sectionRef}
+      className={[
+        'px-4 py-4 space-y-3 rounded transition-[box-shadow,background-color] duration-700',
+        arrivalHighlight ? 'bg-brand-wash shadow-[0_0_0_2px_var(--color-brand)]' : '',
+      ].join(' ')}
+    >
       <div className="flex items-center justify-between">
         <h3 className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.18em]">
           {t('title')}

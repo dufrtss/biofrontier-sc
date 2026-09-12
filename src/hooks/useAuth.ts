@@ -101,8 +101,10 @@ export function useAuth() {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        // Back to the page they were on, so a link opened on a phone lands on
-        // the same hexbin they were looking at.
+        // Back to the page they were on — including the hexbin, which rides in
+        // `?hex=` precisely so it survives this round trip. Before that it was
+        // React state, and this comment described something that could not
+        // happen: the link returned to the map with nothing selected.
         emailRedirectTo: typeof window !== 'undefined' ? redirectTarget() : undefined,
       },
     })

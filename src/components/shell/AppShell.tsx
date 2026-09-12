@@ -28,7 +28,7 @@ export default function AppShell() {
   const {
     hexbins, rankedHexIds, selectedHexId, loading, error,
     lastUpdated, speciesCount, speciesDataIsPartial, habitatIsPlaceholder, sources,
-    activeComponents, availableFilters, gbifKeyByName, selectHex,
+    activeComponents, availableFilters, gbifKeyByName, selectHex, selectionRestored,
   } = useBiofrontierData(taxonFilter)
 
   // Approved community records. Held here rather than inside GapMap so that a
@@ -40,11 +40,18 @@ export default function AppShell() {
   const [methodologySection, setMethodologySection] = useState<string | undefined>()
   const [donateOpen, setDonateOpen]                 = useState(false)
 
-  // Arriving from a magic link is the one moment worth interrupting: a real
-  // capability just appeared, and all of it is at the bottom of a panel behind
-  // a hexbin the reader has not picked yet. `arrivedFromMagicLink` is read from
-  // the URL fragment at load — not from "is signed in" — so this fires once, on
-  // the return trip, and never again on an ordinary visit with a live session.
+  // Arriving from a magic link, with nothing to go back to.
+  //
+  // When the link carries a hexbin the reader is returned straight to it and
+  // CommunityPanel scrolls the form into view — that is the good path, and a
+  // dialog in front of it would cover the very thing it is pointing at. This is
+  // the other case: a link requested with no hexbin selected, or opened on a
+  // device that never had one. Then there is genuinely nowhere to land, and
+  // saying what changed is better than a page that looks identical.
+  //
+  // `arrivedFromMagicLink` is read from the URL fragment at load rather than
+  // from "is signed in", so it fires once on the return trip and never again on
+  // an ordinary visit with a live session.
   const { user, arrivedFromMagicLink } = useAuth()
   const [signedInDismissed, setSignedInDismissed] = useState(false)
 
@@ -212,7 +219,12 @@ export default function AppShell() {
       <DonateModal open={donateOpen} onClose={() => setDonateOpen(false)} />
 
       <SignedInModal
-        open={arrivedFromMagicLink && !!user && !signedInDismissed}
+        open={
+          arrivedFromMagicLink && !!user && !signedInDismissed &&
+          // Wait for the URL to be read before concluding there is no hexbin,
+          // or the dialog flashes up in the frame before one is restored.
+          selectionRestored && !selectedHex
+        }
         onClose={() => setSignedInDismissed(true)}
         onShowRanking={() => setRankingOpen(true)}
       />
