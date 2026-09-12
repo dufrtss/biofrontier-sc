@@ -1,20 +1,18 @@
-'use client'
-
-import { useId } from 'react'
-
 /**
- * The BioFrontier mark: one H3 cell carrying the frontier ramp across it, so
- * the logo is the legend. Same geometry and same stops as `src/app/icon.svg` —
- * if one moves, move the other.
+ * The BioFrontier mark: the bird, in the brand green.
  *
- * The gradient id comes from useId because a gradient is referenced by id from
- * the fill, and two marks on a page with the same id would make the second one
- * paint from the first one's definition. It costs nothing to be safe here.
+ * Same geometry and same stroke as `src/app/icon.svg` — if one moves, move the
+ * other. The stroke is what keeps the outline legible when this is rendered
+ * small; see the note in that file.
+ *
+ * Colour comes from `--color-brand` rather than a literal, so the mark follows
+ * the theme the way everything else does — the dark theme lifts that green a
+ * step. The favicon cannot do this (a standalone SVG has no access to the
+ * page's custom properties) and carries the light value baked in.
  *
  * Decorative by default. Beside the wordmark in the header there is already an
  * <h1> saying the name, and a labelled image next to it makes a screen reader
- * announce the same thing twice. Pass `label` only where the mark stands alone
- * and has to speak for itself.
+ * announce the same thing twice. Pass `label` only where the mark stands alone.
  */
 export default function Mark({
   size = 22,
@@ -25,25 +23,20 @@ export default function Mark({
   className?: string
   label?: string
 }) {
-  const id = useId()
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 32 32"
+      viewBox="0 0 256 256"
       className={className}
       {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     >
-      <defs>
-        <linearGradient id={id} x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0%" stopColor="#b2d6b4" />
-          <stop offset="50%" stopColor="#4c9c2e" />
-          <stop offset="100%" stopColor="#2f721f" />
-        </linearGradient>
-      </defs>
-      <polygon
-        points="16.00,2.20 4.05,9.10 4.05,22.90 16.00,29.80 27.95,22.90 27.95,9.10"
-        fill={`url(#${id})`}
+      <path
+        d="M176,68a12,12,0,1,1-12-12A12,12,0,0,1,176,68Zm64,12a8,8,0,0,1-3.56,6.66L216,100.28V120A104.11,104.11,0,0,1,112,224H24a16,16,0,0,1-12.49-26l.1-.12L96,96.63V76.89C96,43.47,122.79,16.16,155.71,16H156a60,60,0,0,1,57.21,41.86l23.23,15.48A8,8,0,0,1,240,80Zm-22.42,0L201.9,69.54a8,8,0,0,1-3.31-4.64A44,44,0,0,0,156,32h-.22C131.64,32.12,112,52.25,112,76.89V99.52a8,8,0,0,1-1.85,5.13L24,208h26.9l70.94-85.12a8,8,0,1,1,12.29,10.24L71.75,208H112a88.1,88.1,0,0,0,88-88V96a8,8,0,0,1,3.56-6.66Z"
+        fill="var(--color-brand)"
+        stroke="var(--color-brand)"
+        strokeWidth={9}
+        strokeLinejoin="round"
       />
     </svg>
   )
