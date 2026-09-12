@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="BioFrontier SC">
   <title>BioFrontier SC</title>
-  <!-- Copied from a bird glyph supplied for this project. Outline artwork, in
-       the brand green.
+  <!-- Derived from the `bird` glyph in Phosphor Icons (MIT), recoloured to the
+       brand green. Full notice in THIRD-PARTY-NOTICES.md — the licence requires
+       it to travel with the copy, so it stays there even if this file moves.
 
        The stroke is not decoration: at 16px, which is the only size a browser
        tab renders, the bare outline thins to a smudge and stops reading as a

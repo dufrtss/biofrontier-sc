@@ -1,6 +1,9 @@
 /**
  * The BioFrontier mark: the bird, in the brand green.
  *
+ * Derived from the `bird` glyph in Phosphor Icons (MIT) — see
+ * THIRD-PARTY-NOTICES.md.
+ *
  * Same geometry and same stroke as `src/app/icon.svg` — if one moves, move the
  * other. The stroke is what keeps the outline legible when this is rendered
  * small; see the note in that file.
