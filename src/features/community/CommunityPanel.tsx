@@ -28,6 +28,12 @@ interface Props {
 
 const HIGH_FRONTIER = 0.6
 
+/**
+ * Backstop for the magic-link arrival ring, for a tab opened and left alone.
+ * The reader normally clears it with their first click or keystroke.
+ */
+const ARRIVAL_HIGHLIGHT_MAX_MS = 15_000
+
 const inputClass =
   'w-full rounded bg-slate-100 border border-slate-200 px-2 py-1.5 text-xs text-slate-800 ' +
   'placeholder:text-slate-500 focus:outline-none focus:border-brand'
@@ -121,8 +127,17 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
   // and marking it for a moment is the difference between "signed in, now
   // what" and landing on the thing they came back to do.
   //
-  // The ring fades itself. A highlight that stays is no longer a highlight,
-  // and this one has done its job the instant it is noticed.
+  // The ring is dismissed by the reader, not by a clock. It previously cleared
+  // itself after 2.6s, which held up in the dark theme and did not survive the
+  // light one: a #eef7e9 wash on a white panel behind a 2px #4c9c2e ring, fading
+  // in over 700ms and out again, while the reader is still looking at the map.
+  // Light is the default, so in practice the cue that replaced the sign-in
+  // dialog was invisible to most people and arriving felt like nothing happened.
+  //
+  // So it holds until the first pointer or key event, with a long stop as the
+  // backstop for a tab left open. The ring is `brand-ink` rather than `brand`
+  // because the fill green is 3.44:1 on white, which is a legible fill and a
+  // weak outline; the ink green is 5.20:1 and reads at a glance in both themes.
   const sectionRef = useRef<HTMLDivElement>(null)
   const [arrivalHighlight, setArrivalHighlight] = useState(false)
   const greeted = useRef(false)
@@ -143,8 +158,21 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
       section.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'center' })
       setArrivalHighlight(true)
     }, 0)
-    const fade = setTimeout(() => setArrivalHighlight(false), 2600)
-    return () => { clearTimeout(start); clearTimeout(fade) }
+
+    // Scroll is deliberately not a dismissal: `scrollIntoView` above emits one,
+    // and a smooth scroll keeps emitting for its whole duration, so listening
+    // for it would clear the ring before it had finished being drawn.
+    const dismiss = () => setArrivalHighlight(false)
+    window.addEventListener('pointerdown', dismiss, { once: true })
+    window.addEventListener('keydown', dismiss, { once: true })
+    const stop = setTimeout(dismiss, ARRIVAL_HIGHLIGHT_MAX_MS)
+
+    return () => {
+      clearTimeout(start)
+      clearTimeout(stop)
+      window.removeEventListener('pointerdown', dismiss)
+      window.removeEventListener('keydown', dismiss)
+    }
   }, [arrivedFromMagicLink, user])
 
   return (
@@ -152,7 +180,7 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
       ref={sectionRef}
       className={[
         'px-4 py-4 space-y-3 rounded transition-[box-shadow,background-color] duration-700',
-        arrivalHighlight ? 'bg-brand-wash shadow-[0_0_0_2px_var(--color-brand)]' : '',
+        arrivalHighlight ? 'bg-brand-wash shadow-[0_0_0_3px_var(--color-brand-ink)]' : '',
       ].join(' ')}
     >
       <div className="flex items-center justify-between">
