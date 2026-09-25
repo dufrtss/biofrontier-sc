@@ -4,7 +4,7 @@ An open hexbin atlas of where nobody has looked yet, for Santa Catarina, Brazil.
 
 **[biofrontier.sc.eduardofrafre.com](https://biofrontier.sc.eduardofrafre.com)**
 
-![The map, with a hexbin selected and its score broken down](docs/screenshot.jpg)
+![The hexbin grid over the Santa Catarina coast, filtered to vertebrates, with one cell's frontier score shown on hover](docs/screenshot.jpg)
 
 ## What this is
 
