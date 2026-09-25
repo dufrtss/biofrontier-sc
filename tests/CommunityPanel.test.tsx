@@ -13,7 +13,7 @@ const authState = {
 }
 
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => authState }))
-vi.mock('@/lib/supabase', () => ({ communityEnabled: () => true }))
+vi.mock('@/lib/supabase', () => ({ communityEnabled: true }))
 vi.mock('@/lib/community', async () => {
   const actual = await vi.importActual<typeof import('@/lib/community')>('@/lib/community')
   return {

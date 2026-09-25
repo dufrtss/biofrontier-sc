@@ -74,8 +74,6 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
     return () => { cancelled = true }
   }, [user, hexId, reloadToken])
 
-  if (!communityEnabled) return null
-
   const run = async (fn: () => Promise<void>, successMessage?: string) => {
     setBusy(true); setError(null); setNotice(null)
     try {
@@ -174,6 +172,15 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
       window.removeEventListener('keydown', dismiss)
     }
   }, [arrivedFromMagicLink, user])
+
+  // Below every hook, not above them. This used to sit near the top of the
+  // component, which made the four hooks that follow it conditional: with no
+  // Supabase project configured the component returned before reaching them.
+  // It never broke, because `communityEnabled` is resolved once at import and
+  // so cannot change between renders, but the rule exists to stop exactly this
+  // from becoming a "rendered fewer hooks than expected" crash the day the
+  // value starts varying.
+  if (!communityEnabled) return null
 
   return (
     <div

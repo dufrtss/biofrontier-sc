@@ -1,8 +1,51 @@
 # BioFrontier SC
 
-Interactive frontier intelligence map for biodiversity discovery in Santa Catarina, Brazil. Combines GBIF occurrence data with survey effort scoring and H3 hexagonal grids to rank locations by probability of undescribed species discovery.
+An open hexbin atlas of where nobody has looked yet, for Santa Catarina, Brazil.
+
+**[biofrontier.sc.eduardofrafre.com](https://biofrontier.sc.eduardofrafre.com)**
+
+![The map, with a hexbin selected and its score broken down](docs/screenshot.jpg)
+
+## What this is
+
+Biodiversity records are not spread evenly over a state. They cluster along
+roads, around universities, and wherever somebody already went looking. A map
+of occurrence records is therefore partly a map of species and partly a map of
+effort, and the two are easy to confuse: an empty cell can mean nothing lives
+there, or it can mean nobody has been.
+
+BioFrontier SC separates them. It divides Santa Catarina into H3 hexagons and
+scores each one on how thoroughly it has been surveyed, using distinct
+collectors, distinct survey dates, record density and the span of years they
+cover. Combined with native forest cover from MapBiomas, that produces a
+ranking of places where the gap between habitat and attention is widest: the
+cells most likely to repay a field trip.
+
+The intended reader is a field biologist or a student in Santa Catarina
+deciding where to go next, and the map is in Portuguese first for that reason.
+
+**Scores are an uncalibrated hypothesis.** The weights were chosen from first
+principles and have never been validated against expert judgement, so relative
+ranking is more trustworthy than any absolute number. The methodology panel in
+the app says so too, and shows the formula it is actually running.
 
 **Languages:** PT-BR · EN · ES
+
+## Contributing
+
+Two different things are useful here.
+
+**Observations.** Sign in through the map and submit a record against a hexbin.
+Submissions are reviewed by other contributors, two independent agreements
+approve one, and approved records appear as their own marker layer. They do not
+feed the frontier score, which stays derived from the published datasets alone.
+
+**Code.** Issues and pull requests are welcome. `npm test` and `npm run build`
+are what CI runs, so a green local run is a green CI run. The sections below
+cover the data pipeline and the architecture. If you are changing the scoring
+model, `src/lib/scoring-config.ts` is the one file that owns every weight, and
+the methodology panel renders its formulas from those same constants so the
+published explanation cannot drift from the code.
 
 ---
 
