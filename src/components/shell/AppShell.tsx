@@ -14,6 +14,7 @@ import LocaleSwitcher from '@/features/controls/LocaleSwitcher'
 import ExportButton from '@/features/export/ExportButton'
 import DonateModal from '@/features/donate/DonateModal'
 import SignedInModal from '@/features/community/SignedInModal'
+import { shouldGreetOnArrival } from '@/features/community/greeting'
 import { useCommunitySubmissions } from '@/hooks/useCommunitySubmissions'
 import { useAuth } from '@/hooks/useAuth'
 import ThemeToggle from '@/components/ui/ThemeToggle'
@@ -29,6 +30,7 @@ export default function AppShell() {
     hexbins, rankedHexIds, selectedHexId, loading, error,
     lastUpdated, speciesCount, speciesDataIsPartial, habitatIsPlaceholder, sources,
     activeComponents, availableFilters, gbifKeyByName, selectHex, selectionRestored,
+    arrivedWithHex,
   } = useBiofrontierData(taxonFilter)
 
   // Approved community records. Held here rather than inside GapMap so that a
@@ -48,6 +50,12 @@ export default function AppShell() {
   // the other case: a link requested with no hexbin selected, or opened on a
   // device that never had one. Then there is genuinely nowhere to land, and
   // saying what changed is better than a page that looks identical.
+  //
+  // The decision lives in `shouldGreetOnArrival` and turns on the URL as it
+  // arrived, not on what is selected right now. It used to read live selection,
+  // which meant any open detail panel suppressed the dialog and closing one
+  // released it, so a dialog about having just signed in could arrive several
+  // clicks into the session.
   //
   // `arrivedFromMagicLink` is read from the URL fragment at load rather than
   // from "is signed in", so it fires once on the return trip and never again on
@@ -219,12 +227,13 @@ export default function AppShell() {
       <DonateModal open={donateOpen} onClose={() => setDonateOpen(false)} />
 
       <SignedInModal
-        open={
-          arrivedFromMagicLink && !!user && !signedInDismissed &&
-          // Wait for the URL to be read before concluding there is no hexbin,
-          // or the dialog flashes up in the frame before one is restored.
-          selectionRestored && !selectedHex
-        }
+        open={shouldGreetOnArrival({
+          arrivedFromMagicLink,
+          hasUser: !!user,
+          dismissed: signedInDismissed,
+          selectionRestored,
+          arrivedWithHex,
+        })}
         onClose={() => setSignedInDismissed(true)}
         onShowRanking={() => setRankingOpen(true)}
       />

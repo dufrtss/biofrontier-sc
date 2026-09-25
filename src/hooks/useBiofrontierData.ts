@@ -19,10 +19,23 @@ const NO_GBIF_KEYS: Map<string, number> = new Map()
 /** Query parameter carrying the selected hexbin across a sign-in round trip. */
 const HEX_PARAM = 'hex'
 
+/**
+ * Whether this page load arrived with a hexbin in the URL.
+ *
+ * Snapshotted at module scope, like the fragment in `useAuth`, because the
+ * effect below rewrites `?hex=` every time the selection changes. Ask the URL
+ * later and it answers for the hexbin that is open now, not for the link that
+ * was opened, and those are different questions.
+ */
+const arrivedWithHex =
+  typeof window !== 'undefined' && new URLSearchParams(window.location.search).has(HEX_PARAM)
+
 export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
   selectHex: (hexId: string | null) => void
   /** True once the `?hex=` in the URL has been read and acted on. */
   selectionRestored: boolean
+  /** True when the page was opened with a hexbin already in the URL. */
+  arrivedWithHex: boolean
 } {
   const [raw, setRaw]                = useState<NormalizedHexbinsFile | null>(null)
   const [loading, setLoading]        = useState(true)
@@ -197,6 +210,7 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     availableFilters: raw?.availableFilters ?? ['all'],
     gbifKeyByName: raw?.gbifKeyByName ?? NO_GBIF_KEYS,
     selectHex: setSelected,
+    arrivedWithHex,
     selectionRestored,
   }
 }
