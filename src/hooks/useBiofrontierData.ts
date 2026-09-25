@@ -178,7 +178,6 @@ export function useBiofrontierData(taxonFilter: TaxonFilter): AppState & {
     // has no URL to read, so initialising from it would mismatch on hydration.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (fromUrl && hexbins[fromUrl]) setSelected(fromUrl)
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectionRestored(true)
   }, [loading, hexbins, selectionRestored])
 

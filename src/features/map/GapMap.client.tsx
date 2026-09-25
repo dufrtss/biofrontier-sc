@@ -4,7 +4,6 @@ import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import type { ScoredHexbin } from '@/lib/types'
 import { hexBoundary } from '@/lib/h3-utils'
 import { scoreToColor, scoreToOpacity, scoreToInk, frontierRamp, frontierRampDark } from '@/lib/color'
 import { useTheme } from '@/hooks/useTheme'
@@ -120,10 +119,16 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
 
     mapRef.current = map
 
+    // Captured here rather than read in the cleanup. `polygonsRef` is created
+    // once and only ever mutated, so the two are the same object today, but a
+    // cleanup that reaches through a ref is reading whatever the ref holds when
+    // it runs rather than what it held when the effect set the map up.
+    const polygons = polygonsRef.current
+
     return () => {
       map.remove()
       mapRef.current = null
-      polygonsRef.current.clear()
+      polygons.clear()
     }
   }, [])
 
