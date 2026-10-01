@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Please report privately, through GitHub's
-[private vulnerability reporting](https://github.com/dufrtss/biofrontier-sc/security/advisories/new),
+[private vulnerability reporting](https://github.com/eduardofrafre/biofrontier-sc/security/advisories/new),
 rather than opening a public issue. That keeps the detail out of sight until
 there is a fix.
 

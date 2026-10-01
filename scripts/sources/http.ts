@@ -8,7 +8,7 @@
  */
 
 export const USER_AGENT =
-  'BioFrontier-SC/1.0 (biodiversity gap analysis; https://github.com/dufrtss/omega)'
+  'BioFrontier-SC/1.0 (biodiversity gap analysis; https://github.com/eduardofrafre/omega)'
 
 export interface FetchJsonOptions {
   timeoutMs?: number
