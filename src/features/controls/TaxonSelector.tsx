@@ -20,7 +20,15 @@ export default function TaxonSelector({ value, options, onChange, onOpenMethodol
   const t = useTranslations('TaxonSelector')
 
   return (
-    <div className="flex items-center gap-2">
+    // Below lg the whole row scrolls from screen edge to screen edge, like the
+    // data summary bar under it: the negative margin cancels the header's
+    // padding so pills slide off the edge of the screen rather than being cut
+    // inside the track. From lg up the row shares the header with the name, so
+    // only the track scrolls and the tooltip stays in view.
+    <div
+      className="flex items-center gap-2 min-w-0 flex-1 -mx-3 px-3 sm:-mx-5 sm:px-5 overflow-x-auto [&::-webkit-scrollbar]:hidden lg:mx-0 lg:px-0 lg:flex-initial lg:overflow-visible"
+      style={{ scrollbarWidth: 'none' }}
+    >
       {/*
         Radiogroup rather than a row of buttons: exactly one filter is active at
         a time, and without `aria-checked` which one is active is carried by
@@ -30,7 +38,7 @@ export default function TaxonSelector({ value, options, onChange, onOpenMethodol
       <div
         role="radiogroup"
         aria-label={t('groupLabel')}
-        className="flex gap-1 bg-slate-100 rounded-full p-1 overflow-x-auto [&::-webkit-scrollbar]:hidden"
+        className="flex gap-1 shrink-0 bg-slate-100 rounded-full p-1 lg:shrink lg:min-w-0 lg:overflow-x-auto [&::-webkit-scrollbar]:hidden"
         style={{ scrollbarWidth: 'none' }}
       >
         {options.map(filter => (

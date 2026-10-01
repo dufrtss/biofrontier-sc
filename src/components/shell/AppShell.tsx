@@ -93,23 +93,35 @@ export default function AppShell() {
   return (
     <div className="flex flex-col h-full">
       {/* Top bar */}
-      <header className="relative flex items-center justify-between px-3 py-2 sm:px-5 sm:py-3 bg-panel border-b border-slate-200 shrink-0 z-10">
-        <div className="flex items-center gap-2.5">
-          {/* Decorative here: the <h1> beside it already says the name, and a
-              second announcement would just make a screen reader read it
-              twice. The mark carries its own label in the favicon, where there
-              is no text next to it. */}
-          <Mark size={26} className="shrink-0" />
-          <div>
-            <h1 className="text-base font-bold text-slate-900 tracking-tight font-condensed uppercase leading-none">
-              BioFrontier SC
-            </h1>
-            <p className="text-xs text-slate-500 mt-0.5 hidden sm:block">
-              {t('tagline')}
-            </p>
+      {/* Two rows below lg, one above. Six taxon filters do not fit beside the
+          name on anything narrower, and sharing the row squeezed the name onto
+          two lines and pushed the filters and their tooltip off the screen.
+          The filters scroll sideways when even their own row is too short. */}
+      <header className="relative flex flex-col gap-2 px-3 py-2 sm:px-5 sm:py-3 lg:flex-row lg:items-center lg:justify-between lg:gap-6 bg-panel border-b border-slate-200 shrink-0 z-10">
+        <div className="flex items-center justify-between gap-3 min-w-0">
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Decorative here: the <h1> beside it already says the name, and a
+                second announcement would just make a screen reader read it
+                twice. The mark carries its own label in the favicon, where there
+                is no text next to it. */}
+            <Mark size={26} className="shrink-0" />
+            <div className="min-w-0">
+              <h1 className="text-base font-bold text-slate-900 tracking-tight font-condensed uppercase leading-none whitespace-nowrap">
+                BioFrontier SC
+              </h1>
+              <p className="text-xs text-slate-500 mt-0.5 hidden sm:block truncate">
+                {t('tagline')}
+              </p>
+            </div>
           </div>
+          <button
+            onClick={() => openMethodology()}
+            className="text-xs text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap shrink-0 lg:hidden"
+          >
+            {t('howItWorks')}
+          </button>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <TaxonSelector
             value={taxonFilter}
             options={availableFilters}
@@ -118,7 +130,7 @@ export default function AppShell() {
           />
           <button
             onClick={() => openMethodology()}
-            className="text-xs text-slate-500 hover:text-slate-900 transition-colors hidden md:block"
+            className="text-xs text-slate-500 hover:text-slate-900 transition-colors whitespace-nowrap shrink-0 hidden lg:block"
           >
             {t('howItWorks')}
           </button>
