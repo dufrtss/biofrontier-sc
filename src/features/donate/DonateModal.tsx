@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 
 /**
@@ -10,9 +11,7 @@ import { useTranslations } from 'next-intl'
  * would cost more to operate than it collects.
  */
 export const DONATE_URL =
-  'https://www.paypal.com/donate/?cmd=_donations' +
-  '&business=eduardofragadefreitas@gmail.com' +
-  '&item_name=BioFrontier%20SC&currency_code=BRL'
+  'https://www.paypal.com/donate/?hosted_button_id=N2T3FKPS2Z7DQ'
 
 interface DonateModalProps {
   open: boolean
@@ -82,6 +81,13 @@ export default function DonateModal({ open, onClose }: DonateModalProps) {
           <p>{t('contributing')}</p>
           <p>{t('supporting')}</p>
           <p className="text-brand-ink">{t('freeEitherWay')}</p>
+        </div>
+
+        {/* The QR code is for someone reading on a computer who would rather pay
+            from their phone. On a phone it would be scanning its own screen. */}
+        <div className="hidden sm:flex items-center gap-3 mx-5 mb-3 p-2 border border-slate-200 rounded">
+          <Image src="/donate-qr.svg" alt="" width={96} height={96} className="rounded-sm" />
+          <p className="text-xs text-slate-500 leading-relaxed">{t('scan')}</p>
         </div>
 
         <div className="flex items-center justify-end gap-3 px-5 pb-4 pt-1">

@@ -285,6 +285,12 @@ hexbins are precisely what the tool exists to surface.
 The weights are an uncalibrated hypothesis. `scoring-config.ts` documents what
 that means for interpreting the output.
 
+## Support
+
+The map is free and open source, and nothing sits behind a payment. If you want
+to help pay for hosting, data access and the time to process it, you can
+[donate by PayPal](https://www.paypal.com/donate/?hosted_button_id=N2T3FKPS2Z7DQ).
+
 ## Licence and attribution
 
 The source is MIT. See [LICENSE](LICENSE).
