@@ -12,6 +12,10 @@ import InfoTooltip from '@/components/ui/InfoTooltip'
 import { SENSITIVE_LOCATIONS } from '@/lib/sensitive-taxa'
 import { communityMarkerStyle, communityPopupHtml } from './community-marker'
 
+// Leaflet takes attribution as an HTML string, so the new-tab attributes are
+// written into the markup rather than passed as props.
+const NEW_TAB = 'target="_blank" rel="noopener noreferrer"'
+
 // Leaflet paints SVG attributes directly, so these cannot be utility classes.
 // One block, each entry named for the thing in globals.css it mirrors: if a
 // colour there moves, this is the only other place that has to move with it.
@@ -90,6 +94,14 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
 
     const map = L.map(containerRef.current, { zoomControl: true }).setView([-27.5, -51.0], 7)
 
+    // Attribution links leave the app, so they open in a new tab like every
+    // other external link here. Leaflet's own prefix is patched rather than
+    // rewritten, to keep its markup (and the flag) exactly as shipped.
+    const leafletPrefix = L.Control.Attribution.prototype.options.prefix
+    if (typeof leafletPrefix === 'string') {
+      map.attributionControl.setPrefix(leafletPrefix.replace('<a ', `<a ${NEW_TAB} `))
+    }
+
     // Standard OSM tiles, because the terrain is part of the reading.
     //
     // A grey canvas basemap is the textbook choice for sitting under data, and
@@ -103,7 +115,7 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
     // of the spectrum as the frontier ramp, so the hexbin fills are held apart
     // from them by opacity and a stroke rather than by hue alone.
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      attribution: `&copy; <a href="https://www.openstreetmap.org/copyright" ${NEW_TAB}>OpenStreetMap</a> contributors`,
       maxZoom: 18,
       className: 'basemap-ground',
     }).addTo(map)
