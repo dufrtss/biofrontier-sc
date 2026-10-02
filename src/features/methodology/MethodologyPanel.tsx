@@ -70,6 +70,19 @@ function Section({ id, title, children }: SectionProps) {
   )
 }
 
+function ExternalLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-brand-ink hover:underline transition-colors"
+    >
+      {children}
+    </a>
+  )
+}
+
 function Code({ children }: { children: string }) {
   return (
     <pre className="bg-slate-50 border border-slate-200 rounded px-3 py-2 font-mono text-brand-ink text-[11px] overflow-x-auto whitespace-pre-wrap">
@@ -312,7 +325,29 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
               headers={t.raw('scientificCaveats.tableHeaders') as string[]}
               rows={t.raw('scientificCaveats.tableRows') as string[][]}
             />
+            <p>
+              {t.rich('scientificCaveats.callForResearchers', {
+                email: chunks => (
+                  <a
+                    href="mailto:contact@eduardofrafre.com?subject=BioFrontier%20SC"
+                    className="text-brand-ink hover:underline transition-colors"
+                  >
+                    {chunks}
+                  </a>
+                ),
+                issues: chunks => (
+                  <ExternalLink href="https://github.com/eduardofrafre/biofrontier-sc/issues">{chunks}</ExternalLink>
+                ),
+              })}
+            </p>
           </Section>
+
+          <p className="text-[11px] text-slate-500 border-t border-slate-200 pt-4">
+            {t.rich('credits.text', {
+              author: chunks => <ExternalLink href="https://eduardofrafre.com">{chunks}</ExternalLink>,
+              lab: chunks => <ExternalLink href={t('credits.labUrl')}>{chunks}</ExternalLink>,
+            })}
+          </p>
 
         </div>
       </div>

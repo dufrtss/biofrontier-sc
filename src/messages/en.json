@@ -321,7 +321,8 @@
           "Taxa classification",
           "GBIF backbone taxonomy. May differ from other systems."
         ]
-      ]
+      ],
+      "callForResearchers": "The frontier score's weights are a hypothesis, and calibrating them needs people who know the ground. If you are an ecologist, a taxonomist or anyone who knows Santa Catarina's biodiversity, you can help: <email>write to contact@eduardofrafre.com</email> or <issues>open an issue on GitHub</issues>. In the app itself you can already submit observations and confirm other people's identifications."
     },
     "taxonomicIncompleteness": {
       "title": "Taxonomic Incompleteness",
@@ -366,6 +367,10 @@
       "matchNote": "A record is matched on genus and species, against its own name and against any name a reviewer proposed for it. A listed subspecies obscures its whole species.",
       "unmatchedNote": "A name that is not on these lists, including a synonym or a misspelling, is shown at its exact location.",
       "stateListNote": "The Santa Catarina fauna list used is the 2011 one. Its 2026 replacement (CONSEMA 315/2026) is not yet available in a form that can be loaded, so a species added to the state list in 2026 and absent from the national list is not obscured yet."
+    },
+    "credits": {
+      "text": "Made by <author>Eduardo Freitas</author>. More science projects at <lab>lab.eduardofrafre.com</lab>.",
+      "labUrl": "https://lab.eduardofrafre.com/"
     }
   },
   "Export": {

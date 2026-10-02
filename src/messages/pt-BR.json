@@ -321,7 +321,8 @@
           "Classificação de táxons",
           "Taxonomia backbone do GBIF. Pode diferir de outros sistemas."
         ]
-      ]
+      ],
+      "callForResearchers": "Os pesos do escore de fronteira são uma hipótese, e calibrá-los pede quem conhece o campo. Se você é ecólogo, taxonomista ou conhece a biodiversidade de Santa Catarina, pode ajudar: <email>escreva para contact@eduardofrafre.com</email> ou <issues>abra uma issue no GitHub</issues>. No próprio app você já pode enviar observações e confirmar identificações de outras pessoas."
     },
     "taxonomicIncompleteness": {
       "title": "Incompletude Taxonômica",
@@ -366,6 +367,10 @@
       "matchNote": "O registro é comparado por gênero e espécie, tanto pelo nome dado quanto por qualquer nome que um revisor tenha proposto. Uma subespécie listada oculta a espécie inteira.",
       "unmatchedNote": "Um nome que não está nessas listas, inclusive um sinônimo ou um nome com erro de grafia, aparece na localização exata.",
       "stateListNote": "A lista de fauna de Santa Catarina usada é a de 2011. A que a substitui (CONSEMA 315/2026) ainda não está disponível em formato que possa ser carregado, então uma espécie incluída na lista estadual em 2026 e ausente da lista nacional ainda não é ocultada."
+    },
+    "credits": {
+      "text": "Feito por <author>Eduardo Freitas</author>. Mais projetos de ciência em <lab>lab.eduardofrafre.com</lab>.",
+      "labUrl": "https://lab.eduardofrafre.com/pt-br/"
     }
   },
   "Export": {

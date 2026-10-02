@@ -291,6 +291,15 @@ The map is free and open source, and nothing sits behind a payment. If you want
 to help pay for hosting, data access and the time to process it, you can
 [donate by PayPal](https://www.paypal.com/donate/?hosted_button_id=N2T3FKPS2Z7DQ).
 
+The frontier score's weights are an uncalibrated hypothesis. Ecologists,
+taxonomists and anyone who knows Santa Catarina's biodiversity can help
+calibrate them: write to
+[contact@eduardofrafre.com](mailto:contact@eduardofrafre.com?subject=BioFrontier%20SC)
+or [open an issue](https://github.com/eduardofrafre/biofrontier-sc/issues).
+
+More science projects are at [lab.eduardofrafre.com](https://lab.eduardofrafre.com),
+and the rest of my work at [eduardofrafre.com](https://eduardofrafre.com).
+
 ## Licence and attribution
 
 The source is MIT. See [LICENSE](LICENSE).
