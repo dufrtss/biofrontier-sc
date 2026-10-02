@@ -1,21 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="BioFrontier SC">
   <title>BioFrontier SC</title>
-  <!-- Derived from the `bird` glyph in Phosphor Icons (MIT), recoloured to the
-       brand green. Full notice in THIRD-PARTY-NOTICES.md: the licence requires
-       it to travel with the copy, so it stays there even if this file moves.
+  <!-- Three H3-style cells: two sampled, filled, and one still empty, drawn as
+       an outline. That empty cell is what the atlas looks for. Same geometry
+       as src/components/ui/Mark.tsx: if one moves, move the other.
 
-       The stroke is not decoration: at 16px, which is the only size a browser
-       tab renders, the bare outline thins to a smudge and stops reading as a
-       bird. Painting the path with a 9-unit stroke in its own colour thickens
-       every limb just enough to survive that, while leaving the eye and the
-       wing open: at 13 they start closing up, at 5 the 16px render is still
-       soft. Same file for the favicon and the header logo, so there is one
-       shape to keep in sync rather than two. -->
-  <path
-    d="M176,68a12,12,0,1,1-12-12A12,12,0,0,1,176,68Zm64,12a8,8,0,0,1-3.56,6.66L216,100.28V120A104.11,104.11,0,0,1,112,224H24a16,16,0,0,1-12.49-26l.1-.12L96,96.63V76.89C96,43.47,122.79,16.16,155.71,16H156a60,60,0,0,1,57.21,41.86l23.23,15.48A8,8,0,0,1,240,80Zm-22.42,0L201.9,69.54a8,8,0,0,1-3.31-4.64A44,44,0,0,0,156,32h-.22C131.64,32.12,112,52.25,112,76.89V99.52a8,8,0,0,1-1.85,5.13L24,208h26.9l70.94-85.12a8,8,0,1,1,12.29,10.24L71.75,208H112a88.1,88.1,0,0,0,88-88V96a8,8,0,0,1,3.56-6.66Z"
-    fill="#4c9c2e"
-    stroke="#4c9c2e"
-    stroke-width="9"
-    stroke-linejoin="round"
-  />
+       Sized for 16px, the only size a browser tab renders. The gaps between
+       cells and the 20-unit outline are the smallest that keep three separate
+       cells at that size; tighter and they merge into one blob. -->
+  <polygon points="70.8,24.0 117.6,51.0 117.6,105.0 70.8,132.0 24.1,105.0 24.1,51.0" fill="#4c9c2e"/>
+  <polygon points="185.2,24.0 231.9,51.0 231.9,105.0 185.2,132.0 138.4,105.0 138.4,51.0" fill="#4c9c2e"/>
+  <polygon points="128.0,134.0 165.2,155.5 165.2,198.5 128.0,220.0 90.8,198.5 90.8,155.5" fill="none" stroke="#4c9c2e" stroke-width="20" stroke-linejoin="round"/>
 </svg>

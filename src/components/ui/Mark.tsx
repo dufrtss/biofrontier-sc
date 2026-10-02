@@ -1,12 +1,8 @@
 /**
- * The BioFrontier mark: the bird, in the brand green.
+ * The BioFrontier mark: three H3-style cells in the brand green, two sampled
+ * and one still empty. The empty one is what the atlas exists to find.
  *
- * Derived from the `bird` glyph in Phosphor Icons (MIT), see
- * THIRD-PARTY-NOTICES.md.
- *
- * Same geometry and same stroke as `src/app/icon.svg`: if one moves, move the
- * other. The stroke is what keeps the outline legible when this is rendered
- * small; see the note in that file.
+ * Same geometry as `src/app/icon.svg`: if one moves, move the other.
  *
  * Colour comes from `--color-brand` rather than a literal, so the mark follows
  * the theme the way everything else does: the dark theme lifts that green a
@@ -34,11 +30,13 @@ export default function Mark({
       className={className}
       {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     >
-      <path
-        d="M176,68a12,12,0,1,1-12-12A12,12,0,0,1,176,68Zm64,12a8,8,0,0,1-3.56,6.66L216,100.28V120A104.11,104.11,0,0,1,112,224H24a16,16,0,0,1-12.49-26l.1-.12L96,96.63V76.89C96,43.47,122.79,16.16,155.71,16H156a60,60,0,0,1,57.21,41.86l23.23,15.48A8,8,0,0,1,240,80Zm-22.42,0L201.9,69.54a8,8,0,0,1-3.31-4.64A44,44,0,0,0,156,32h-.22C131.64,32.12,112,52.25,112,76.89V99.52a8,8,0,0,1-1.85,5.13L24,208h26.9l70.94-85.12a8,8,0,1,1,12.29,10.24L71.75,208H112a88.1,88.1,0,0,0,88-88V96a8,8,0,0,1,3.56-6.66Z"
-        fill="var(--color-brand)"
+      <polygon points="70.8,24.0 117.6,51.0 117.6,105.0 70.8,132.0 24.1,105.0 24.1,51.0" fill="var(--color-brand)" />
+      <polygon points="185.2,24.0 231.9,51.0 231.9,105.0 185.2,132.0 138.4,105.0 138.4,51.0" fill="var(--color-brand)" />
+      <polygon
+        points="128.0,134.0 165.2,155.5 165.2,198.5 128.0,220.0 90.8,198.5 90.8,155.5"
+        fill="none"
         stroke="var(--color-brand)"
-        strokeWidth={9}
+        strokeWidth={20}
         strokeLinejoin="round"
       />
     </svg>

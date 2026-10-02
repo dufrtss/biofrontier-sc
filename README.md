@@ -306,8 +306,7 @@ The source is MIT. See [LICENSE](LICENSE).
 
 That covers the code. It does **not** cover the derived data files under
 `public/data/`, which are computed from GBIF and iNaturalist occurrence records
-and MapBiomas land cover and carry those sources' terms. The bird mark is
-Phosphor Icons' work under its own MIT grant, and basemap tiles are ©
+and MapBiomas land cover and carry those sources' terms. Basemap tiles are ©
 OpenStreetMap contributors under ODbL, the attribution control on the map
 satisfies that and must not be removed.
 

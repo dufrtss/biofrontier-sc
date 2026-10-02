@@ -14,49 +14,8 @@ not, and cannot, relicense third-party material distributed alongside it:
   terms those sources attach, see the scripts in `scripts/` for exactly what
   each file is built from. Anyone redistributing them should check the source
   terms rather than assume MIT.
-- The bird mark is Phosphor Icons' work under its own MIT grant, below.
 - Basemap tiles are served from OpenStreetMap and are not redistributed here at
   all; the attribution requirement still applies to the running site.
-
----
-
-## Phosphor Icons
-
-The BioFrontier mark (the bird used as the site logo and favicon) is derived
-from the `bird` glyph (regular weight) in Phosphor Icons.
-
-**Used in:** `src/app/icon.svg`, `src/app/favicon.ico`, `src/app/apple-icon.png`,
-and `src/components/ui/Mark.tsx`.
-
-**Modifications:** recoloured to the project's brand green, and the path painted
-with a stroke in its own colour so the outline survives rendering at 16px.
-The path geometry is otherwise unchanged.
-
-**Source:** https://phosphoricons.com · https://github.com/phosphor-icons/core
-
-```
-MIT License
-
-Copyright (c) 2023 Phosphor Icons
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
 
 ---
 
