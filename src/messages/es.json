@@ -95,7 +95,9 @@
     "unsurveyed": "No relevado",
     "tooltipCoverage": "Cada celda es una unidad hexagonal H3 (~36 km²). Los límites son algorítmicos, no administrativos — no coinciden con municipios ni áreas protegidas.",
     "communityRecord": "Registro de la comunidad",
-    "communityConfirmations": "{n} confirmaciones de la comunidad"
+    "communityConfirmations": "{n} confirmaciones de la comunidad",
+    "communityObscured": "Ubicación ocultada en unos {area} km²: especie amenazada.",
+    "communityRecordObscured": "Registro de la comunidad, ubicación ocultada"
   },
   "MethodologyPanel": {
     "title": "Cómo Funciona",
@@ -356,6 +358,14 @@
       "filterNote": "Por defecto el ranking muestra solo localidades con al menos {min} registros. El mínimo se puede cambiar en el panel del ranking y también se aplica a la exportación CSV. No cambia ninguna puntuación ni posición.",
       "labelNote": "Las etiquetas absolutas como \"brecha crítica\" o \"bien relevado\" no se usan en localidades con evidencia débil.",
       "caveat": "Los límites de cada nivel son una elección, no una calibración, igual que los pesos de la puntuación."
+    },
+    "sensitiveLocations": {
+      "title": "Ubicación de especies amenazadas",
+      "intro": "Los registros de la comunidad de una especie que figura en una lista oficial de amenazadas se publican en el centro de un hexágono mayor, de unos {area} km², en lugar de su propio hexágono, y sin el identificador del hexágono. Solo quien envió el registro ve la ubicación exacta. La reducción de precisión ocurre en la base de datos, así que nada en esta página puede recuperar el punto original.",
+      "listsLabel": "Listas usadas, descargadas el {date}:",
+      "matchNote": "El registro se compara por género y especie, con su propio nombre y con cualquier nombre que un revisor haya propuesto. Una subespecie listada oculta la especie entera.",
+      "unmatchedNote": "Un nombre que no figura en estas listas, incluidos un sinónimo o un nombre mal escrito, se muestra en su ubicación exacta.",
+      "stateListNote": "La lista de fauna de Santa Catarina usada es la de 2011. Su reemplazo (CONSEMA 315/2026) todavía no está disponible en un formato que se pueda cargar, así que una especie incluida en la lista estatal en 2026 y ausente de la lista nacional todavía no se oculta."
     }
   },
   "Export": {
@@ -387,7 +397,9 @@
     "yourRecord": "Tu registro",
     "withdraw": "Retirar",
     "confirm": "Confirmar",
-    "dispute": "Cuestionar"
+    "dispute": "Cuestionar",
+    "locationObscured": "Ubicación mostrada solo con precisión de unos {area} km²: la especie está en una lista oficial de amenazadas.",
+    "locationObscuredForOthers": "Esta especie está en una lista oficial de amenazadas. Otras personas ven este registro solo con precisión de unos {area} km²."
   },
   "SignedIn": {
     "title": "Has iniciado sesión",

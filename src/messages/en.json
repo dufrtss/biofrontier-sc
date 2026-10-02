@@ -95,7 +95,9 @@
     "unsurveyed": "Unsurveyed",
     "tooltipCoverage": "Each cell is an H3 hexagonal grid unit (~36 km²). Boundaries are algorithmic, not administrative — they don't align with municipalities or protected areas.",
     "communityRecord": "Community record",
-    "communityConfirmations": "{n} community confirmations"
+    "communityConfirmations": "{n} community confirmations",
+    "communityObscured": "Location obscured to about {area} km²: threatened species.",
+    "communityRecordObscured": "Community record, location obscured"
   },
   "MethodologyPanel": {
     "title": "How It Works",
@@ -356,6 +358,14 @@
       "filterNote": "By default the ranking lists only locations with at least {min} records. The minimum can be changed in the ranking panel and applies to the CSV export too. It does not change any score or rank.",
       "labelNote": "Absolute labels such as \"critical gap\" or \"well surveyed\" are not used on locations with weak evidence.",
       "caveat": "The level boundaries are a choice, not a calibration, just like the score weights."
+    },
+    "sensitiveLocations": {
+      "title": "Locations of threatened species",
+      "intro": "Community records of a species on an official threatened list are published at the centre of a larger hexagon, about {area} km², instead of their own hexbin, and without the hexbin id. Only the person who submitted a record sees its exact location. The coarsening happens in the database, so nothing on this page can recover the original point.",
+      "listsLabel": "Lists used, downloaded on {date}:",
+      "matchNote": "A record is matched on genus and species, against its own name and against any name a reviewer proposed for it. A listed subspecies obscures its whole species.",
+      "unmatchedNote": "A name that is not on these lists, including a synonym or a misspelling, is shown at its exact location.",
+      "stateListNote": "The Santa Catarina fauna list used is the 2011 one. Its 2026 replacement (CONSEMA 315/2026) is not yet available in a form that can be loaded, so a species added to the state list in 2026 and absent from the national list is not obscured yet."
     }
   },
   "Export": {
@@ -387,7 +397,9 @@
     "yourRecord": "Your record",
     "withdraw": "Withdraw",
     "confirm": "Confirm",
-    "dispute": "Dispute"
+    "dispute": "Dispute",
+    "locationObscured": "Location shown only to within about {area} km²: this species is on an official threatened list.",
+    "locationObscuredForOthers": "This species is on an official threatened list. Others see this record only to within about {area} km²."
   },
   "SignedIn": {
     "title": "You're signed in",

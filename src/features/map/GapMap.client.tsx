@@ -9,13 +9,9 @@ import { scoreToColor, scoreToOpacity, scoreToInk, frontierRamp, frontierRampDar
 import { useTheme } from '@/hooks/useTheme'
 import type { GapMapProps } from './GapMap'
 import InfoTooltip from '@/components/ui/InfoTooltip'
+import { SENSITIVE_LOCATIONS } from '@/lib/sensitive-taxa'
+import { communityMarkerStyle, communityPopupHtml } from './community-marker'
 
-/**
- * Escapes text interpolated into a Leaflet popup. Species names, dates and
- * display names in the community layer are written by contributors, and
- * `bindPopup` takes raw HTML, so this is the boundary where untrusted text
- * stops being markup.
- */
 // Leaflet paints SVG attributes directly, so these cannot be utility classes.
 // One block, each entry named for the thing in globals.css it mirrors: if a
 // colour there moves, this is the only other place that has to move with it.
@@ -62,11 +58,6 @@ const MAP = {
     communityFill:  '#0e0e0e',  // the panel colour, so the disc reads as a hole
   },
 } as const
-
-function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, c =>
-    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
-}
 
 export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOpenMethodology, communitySubmissions }: GapMapProps) {
   const t = useTranslations('GapMap')
@@ -270,22 +261,14 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
     if (communitySubmissions.length === 0) { communityRef.current = null; return }
 
     const group = L.layerGroup(
-      communitySubmissions.map(s =>
-        L.circleMarker([s.latitude, s.longitude], {
-          radius: 5,
-          color: palette.community,
-          weight: 2,
-          fillColor: palette.communityFill,
-          fillOpacity: 0.9,
-        }).bindPopup(
-          `<div style="font-size:12px;line-height:1.5">
-             <em>${escapeHtml(s.scientific_name)}</em><br/>
-             <span style="color:var(--color-slate-500)">${escapeHtml(s.observed_on)}</span><br/>
-             <span style="color:var(--color-slate-500)">${tRef.current('communityConfirmations', { n: s.confirmation_count })}</span>
-             ${s.observer_display_name ? `<br/><span style="color:var(--color-slate-500)">${escapeHtml(s.observer_display_name)}</span>` : ''}
-           </div>`,
+      communitySubmissions
+        // A null point means its coarse cell was missing server-side, which
+        // fails closed. There is nothing honest to draw for it.
+        .filter(s => s.latitude != null && s.longitude != null)
+        .map(s =>
+          L.circleMarker([s.latitude as number, s.longitude as number], communityMarkerStyle(s, palette))
+            .bindPopup(communityPopupHtml(s, tRef.current, SENSITIVE_LOCATIONS.areaKm2)),
         ),
-      ),
     ).addTo(map)
 
     communityRef.current = group
@@ -343,6 +326,17 @@ export default function GapMapClient({ hexbins, selectedHexId, onHexSelect, onOp
           />
           {t('communityRecord')}
         </div>
+        {/* Only when one is on the map: a legend entry for a mark the reader
+            cannot find is noise. Dashed and hollow, like the marker. */}
+        {communitySubmissions.some(s => s.location_obscured) && (
+          <div className="flex items-center gap-2 mt-1">
+            <span
+              className="w-3 h-3 rounded-full inline-block shrink-0"
+              style={{ border: `1.5px dashed ${palette.community}` }}
+            />
+            {t('communityRecordObscured')}
+          </div>
+        )}
       </div>
     </div>
   )

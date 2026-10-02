@@ -12,6 +12,7 @@ import {
   withdrawSubmission,
   type PendingSubmission,
 } from '@/lib/community'
+import { SENSITIVE_LOCATIONS } from '@/lib/sensitive-taxa'
 
 interface Props {
   hexId: string
@@ -283,6 +284,16 @@ export default function CommunityPanel({ hexId, center, frontierScore, onSubmitt
                   </span>
                 </div>
                 <div className="text-[10px] text-slate-500">{s.observed_on}</div>
+                {s.location_obscured && (
+                  <div className="text-[10px] text-slate-500">
+                    {t('locationObscured', { area: SENSITIVE_LOCATIONS.areaKm2 })}
+                  </div>
+                )}
+                {mine && s.sensitive && (
+                  <div className="text-[10px] text-slate-500">
+                    {t('locationObscuredForOthers', { area: SENSITIVE_LOCATIONS.areaKm2 })}
+                  </div>
+                )}
                 {disagree > 0 && (
                   <div className="text-[10px] text-warning">{t('disputed', { n: disagree })}</div>
                 )}

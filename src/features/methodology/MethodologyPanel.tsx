@@ -9,6 +9,7 @@ import {
   EVIDENCE_CONFIG,
 } from '@/lib/scoring-config'
 import { HABITAT_SOURCE } from '@/lib/habitat-source'
+import { SENSITIVE_LOCATIONS } from '@/lib/sensitive-taxa'
 
 /**
  * Same reasoning as the formulas: the habitat section names the MapBiomas
@@ -255,6 +256,24 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
             <ul className="list-disc pl-4 space-y-1 text-slate-500">
               {(t.raw('dataSource.excluded') as string[]).map(s => <li key={s}>{s}</li>)}
             </ul>
+          </Section>
+
+          {/* Lists, snapshot date and cell size come from SENSITIVE_LOCATIONS,
+              the file the seed script downloads from, so this cannot name a
+              list the database does not hold. */}
+          <Section id="sensitive-locations" title={t('sensitiveLocations.title')}>
+            <p>{t('sensitiveLocations.intro', { area: format.number(SENSITIVE_LOCATIONS.areaKm2) })}</p>
+            <p className="text-slate-500">
+              {t('sensitiveLocations.listsLabel', {
+                date: format.dateTime(new Date(`${SENSITIVE_LOCATIONS.snapshotDate}T12:00:00Z`), { dateStyle: 'long' }),
+              })}
+            </p>
+            <ul className="list-disc pl-4 space-y-1 text-slate-500">
+              {SENSITIVE_LOCATIONS.lists.map(l => <li key={l.uid}>{l.label}</li>)}
+            </ul>
+            <p>{t('sensitiveLocations.matchNote')}</p>
+            <p className="text-warning font-medium">{t('sensitiveLocations.unmatchedNote')}</p>
+            <p className="text-slate-500 italic">{t('sensitiveLocations.stateListNote')}</p>
           </Section>
 
           <Section id="taxa-coverage" title={t('taxaCoverage.title')}>

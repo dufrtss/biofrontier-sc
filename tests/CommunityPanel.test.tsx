@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import { render, screen, cleanup, act } from '@testing-library/react'
 import { NextIntlClientProvider } from 'next-intl'
 import messages from '@/messages/pt-BR.json'
+import type { PendingSubmission } from '@/lib/community'
 
 const authState = {
   user: null as { id: string; email: string } | null,
@@ -142,5 +143,45 @@ describe('CommunityPanel: magic-link arrival', () => {
     act(() => { vi.advanceTimersByTime(10) })
 
     expect(scrollIntoView).not.toHaveBeenCalled()
+  })
+})
+
+const { fetchReviewableSubmissions } = await import('@/lib/community')
+
+describe('CommunityPanel: threatened species', () => {
+  const row = (over: Partial<PendingSubmission>): PendingSubmission => ({
+    id: 's1', hex_id: '86a8100dfffffff', obscured_cell: null, latitude: -27.5, longitude: -48.5,
+    sensitive: false, location_obscured: false, observed_on: '2026-09-30',
+    scientific_name: 'Turdus rufiventris', class_name: null, notes: null, status: 'pending',
+    observer_id: 'someone-else', created_at: '2026-09-30', identifications: [], ...over,
+  })
+
+  afterEach(() => { cleanup() })
+
+  it('tells a reviewer the location is coarsened, and why', async () => {
+    authState.user = { id: 'u1', email: 'a@b.c' }
+    vi.mocked(fetchReviewableSubmissions).mockResolvedValueOnce([
+      row({ hex_id: null, obscured_cell: '85a8100ffffffff', sensitive: true, location_obscured: true, scientific_name: 'Leopardus guttulus' }),
+    ])
+    mount()
+    expect(await screen.findByText(/lista oficial de ameaçadas/)).toBeInTheDocument()
+    expect(screen.getByText(/252 km²/)).toBeInTheDocument()
+  })
+
+  it('tells the observer that others see their record coarsened', async () => {
+    authState.user = { id: 'u1', email: 'a@b.c' }
+    vi.mocked(fetchReviewableSubmissions).mockResolvedValueOnce([
+      row({ observer_id: 'u1', sensitive: true, location_obscured: false, scientific_name: 'Leopardus guttulus' }),
+    ])
+    mount()
+    expect(await screen.findByText(/Outras pessoas veem este registro/)).toBeInTheDocument()
+  })
+
+  it('says nothing about location for an unlisted species', async () => {
+    authState.user = { id: 'u1', email: 'a@b.c' }
+    vi.mocked(fetchReviewableSubmissions).mockResolvedValueOnce([row({})])
+    mount()
+    expect(await screen.findByText('Turdus rufiventris')).toBeInTheDocument()
+    expect(screen.queryByText(/ameaçadas/)).not.toBeInTheDocument()
   })
 })

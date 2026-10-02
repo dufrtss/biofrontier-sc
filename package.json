@@ -15,7 +15,8 @@
     "data:habitat": "tsx scripts/compute-habitat.ts",
     "data:habitat-merge": "tsx scripts/merge-habitat.ts",
     "data:fetch": "tsx scripts/fetch-occurrences.ts",
-    "data:gbif-keys": "tsx scripts/gbif-keys.ts"
+    "data:gbif-keys": "tsx scripts/gbif-keys.ts",
+    "data:sensitive-taxa": "tsx scripts/build-sensitive-taxa.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.114.0",

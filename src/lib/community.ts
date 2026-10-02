@@ -1,4 +1,6 @@
+import { cellToParent, isValidCell } from 'h3-js'
 import { supabase } from './supabase'
+import { SENSITIVE_LOCATIONS } from './sensitive-taxa'
 
 /**
  * Data access for the community contribution layer.
@@ -13,13 +15,21 @@ import { supabase } from './supabase'
  *  2. Anonymous visitors read `approved_submissions` and nothing else. The
  *     underlying tables are authenticated-only, so the pending-review queries
  *     below simply return empty for a signed-out caller rather than failing.
+ *  3. Nobody reads a location from `submissions` itself. Both views publish
+ *     a record of a threatened species at the centre of its coarser H3 cell,
+ *     with no hexbin id, to everyone but its observer (see
+ *     `src/lib/sensitive-taxa.ts`). `latitude`/`longitude` are null only if
+ *     that cell is missing from the database, which fails closed.
  */
 
 export interface ApprovedSubmission {
   id: string
-  hex_id: string
-  latitude: number
-  longitude: number
+  /** Null when the location is obscured for this caller. */
+  hex_id: string | null
+  latitude: number | null
+  longitude: number | null
+  /** True when the point is a coarse cell centre rather than the record's hexbin. */
+  location_obscured: boolean
   observed_on: string
   scientific_name: string
   class_name: string | null
@@ -31,9 +41,16 @@ export interface ApprovedSubmission {
 
 export interface PendingSubmission {
   id: string
-  hex_id: string
-  latitude: number
-  longitude: number
+  /** Null when the location is obscured for this caller. */
+  hex_id: string | null
+  /** The coarse cell an obscured record is shown in; null when shown exactly. */
+  obscured_cell: string | null
+  latitude: number | null
+  longitude: number | null
+  /** The taxon is on a threatened list: others see this record coarsened. */
+  sensitive: boolean
+  /** This caller is seeing the coarse location, not the record's own. */
+  location_obscured: boolean
   observed_on: string
   scientific_name: string
   class_name: string | null
@@ -82,13 +99,26 @@ export async function fetchApprovedSubmissions(): Promise<ApprovedSubmission[]> 
 export async function fetchReviewableSubmissions(hexId: string): Promise<PendingSubmission[]> {
   if (!supabase) return []
   const { data, error } = await supabase
-    .from('submissions')
+    .from('community_submissions')
     .select('*, identifications(id, user_id, verdict, proposed_name, comment)')
-    .eq('hex_id', hexId)
+    .or(reviewableLocationFilter(hexId))
     .in('status', ['pending', 'disputed'])
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
   return (data ?? []) as PendingSubmission[]
+}
+
+/**
+ * PostgREST filter for the records a hexbin's panel lists: the ones placed in
+ * this hexbin, plus obscured ones whose coarse cell contains it. An obscured
+ * record has no hexbin id to match, so without the second half a threatened
+ * species could never be reviewed by anyone but its observer. Showing it in
+ * every hexbin of its coarse cell says no more than its map marker does.
+ */
+export function reviewableLocationFilter(hexId: string): string {
+  if (!isValidCell(hexId)) throw new Error(`Not an H3 cell: ${hexId}`)
+  const parent = cellToParent(hexId, SENSITIVE_LOCATIONS.resolution)
+  return `hex_id.eq.${hexId},obscured_cell.eq.${parent}`
 }
 
 /**
