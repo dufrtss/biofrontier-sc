@@ -7,9 +7,15 @@ import { useTheme } from '@/hooks/useTheme'
 import { hexCenter } from '@/lib/h3-utils'
 import { taxonDataFor } from '@/lib/hexbins-file'
 import InfoTooltip from '@/components/ui/InfoTooltip'
+import EvidenceBadge from '@/components/ui/EvidenceBadge'
+import { evidenceLevel } from '@/lib/evidence'
+import { EVIDENCE_CONFIG } from '@/lib/scoring-config'
 
 interface Props {
+  /** Ranked ids already filtered to `minRecords`, in ranking order. */
   rankedHexIds: string[]
+  /** Ranked hexbins before the minimum-records filter, for the count line. */
+  totalRankedCount: number
   hexbins: Record<string, ScoredHexbin>
   /**
    * The ranking itself is computed per filter, so the record count shown
@@ -23,6 +29,9 @@ interface Props {
   onOpenMethodology: (sectionId: string) => void
   onClose?: () => void
   limit?: number
+  /** Records a hexbin needs to be listed. 1 lists every ranked hexbin. */
+  minRecords: number
+  onMinRecordsChange: (min: number) => void
 }
 
 function formatCoords(hexId: string): string {
@@ -30,7 +39,10 @@ function formatCoords(hexId: string): string {
   return `${Math.abs(lat).toFixed(2)}°S, ${Math.abs(lng).toFixed(2)}°W`
 }
 
-export default function FrontierRanking({ rankedHexIds, hexbins, taxonFilter, selectedHexId, onSelect, onOpenMethodology, onClose, limit = 20 }: Props) {
+export default function FrontierRanking({
+  rankedHexIds, totalRankedCount, hexbins, taxonFilter, selectedHexId,
+  onSelect, onOpenMethodology, onClose, limit = 20, minRecords, onMinRecordsChange,
+}: Props) {
   const { theme } = useTheme()
   const t = useTranslations('FrontierRanking')
   const topIds = rankedHexIds.slice(0, limit)
@@ -59,7 +71,53 @@ export default function FrontierRanking({ rankedHexIds, hexbins, taxonFilter, se
           />
         </div>
         <p className="text-xs text-slate-500 mt-0.5">{t('subtitle')}</p>
+
+        {/* The minimum sits above the list it filters, with the count it leaves
+            in view, so the threshold is never applied silently. */}
+        <div className="mt-2.5 flex items-center gap-2">
+          <span className="text-xs text-slate-600 whitespace-nowrap">{t('minRecordsLabel')}</span>
+          <div
+            role="radiogroup"
+            aria-label={t('minRecordsLabel')}
+            className="flex gap-1 bg-slate-100 rounded-full p-0.5"
+          >
+            {EVIDENCE_CONFIG.minRecordOptions.map(min => (
+              <button
+                key={min}
+                type="button"
+                role="radio"
+                aria-checked={minRecords === min}
+                onClick={() => onMinRecordsChange(min)}
+                className={[
+                  'px-2.5 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap',
+                  minRecords === min
+                    ? 'bg-brand-solid text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900',
+                ].join(' ')}
+              >
+                {min === 1 ? t('minRecordsAll') : t('minRecordsOption', { min })}
+              </button>
+            ))}
+          </div>
+          <InfoTooltip
+            content={t('tooltipMinRecords')}
+            learnMore={{ sectionId: 'evidence' }}
+            onLearnMore={onOpenMethodology}
+            align="right"
+          />
+        </div>
+        <p className="text-[11px] text-slate-500 mt-1.5">
+          {minRecords > 1
+            ? t('shownOfTotal', { shown: rankedHexIds.length, total: totalRankedCount, min: minRecords })
+            : t('shownAll', { total: totalRankedCount })}
+        </p>
       </div>
+
+      {topIds.length === 0 && (
+        <p className="px-4 py-6 text-xs text-slate-500 leading-relaxed">
+          {t('emptyFiltered', { min: minRecords })}
+        </p>
+      )}
 
       <ul className="flex-1 overflow-y-auto divide-y divide-slate-200 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
         {topIds.map(hexId => {
@@ -74,6 +132,7 @@ export default function FrontierRanking({ rankedHexIds, hexbins, taxonFilter, se
           const rankColor = scoreToInk(hex.frontierScore, theme)
           const pct = (hex.frontierScore * 100).toFixed(0)
           const td  = taxonDataFor(hex, taxonFilter)
+          const level = evidenceLevel(td.occurrenceCount)
 
           return (
             <li key={hexId}>
@@ -89,9 +148,17 @@ export default function FrontierRanking({ rankedHexIds, hexbins, taxonFilter, se
                     {hex.rank}
                   </span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs text-slate-600 truncate">{formatCoords(hexId)}</div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-slate-600 truncate">{formatCoords(hexId)}</span>
+                      <EvidenceBadge level={level} className="shrink-0" />
+                    </div>
+                    {/* A weak-evidence bar is drawn faded: the length is the
+                        score, the fade is how little stands behind it. */}
                     <div className="mt-1.5 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: barColor }} />
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{ width: `${pct}%`, background: barColor, opacity: level === 'weak' ? 0.45 : 1 }}
+                      />
                     </div>
                     <div className="flex justify-between mt-1 text-xs text-slate-600">
                       <span>{t('frontierPct', { pct })}</span>

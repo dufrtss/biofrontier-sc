@@ -164,6 +164,41 @@ export const INCOMPLETENESS_CONFIG = {
 } as const
 
 /**
+ * How much evidence sits behind a hexbin's score, and how much the ranking
+ * demands before listing one.
+ *
+ * The score rewards the absence of survey effort, so the top of the ranking is
+ * where evidence is thinnest by construction. Measured on the production
+ * dataset (2,396 ranked hexbins, 2026-09-16): 28.1% hold exactly one record,
+ * 48.1% hold three or fewer, median 4. A cell with one 2023 observation scored
+ * 81% is a place nobody has been to, which is a weaker claim than a critical
+ * gap. These levels let the interface say so without touching the formula.
+ *
+ * The level reads record count under the active taxon filter and nothing else.
+ * Observers, survey days and span already feed the score through the effort
+ * term; reusing them here would make the disclosure a second copy of the thing
+ * it is disclosing about. Record count is also the one number a reader can
+ * check against the detail panel.
+ *
+ * Like the weights above, the thresholds are a judgement, not a calibration.
+ */
+export const EVIDENCE_CONFIG = {
+  /** Record counts at which a hexbin's evidence becomes moderate, then strong. */
+  thresholds: {
+    moderate: 5,
+    strong: 20,
+  },
+  /**
+   * Minimum records a hexbin needs to be listed in the ranking by default.
+   * Five is the moderate threshold, so the default list carries no
+   * weak-evidence cell; at this setting roughly half the ranked set is shown.
+   */
+  defaultMinRecords: 5,
+  /** Minimums offered in the ranking panel. 1 means "every ranked hexbin". */
+  minRecordOptions: [1, 5, 20],
+} as const
+
+/**
  * Fails fast at import time if a weight set has been edited into an invalid
  * state. Cheap insurance: a typo here silently skews every ranking in the app
  * and would be very hard to spot from the UI.

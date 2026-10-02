@@ -9,6 +9,9 @@ import { hexCenter } from '@/lib/h3-utils'
 import { taxonDataFor } from '@/lib/hexbins-file'
 import { gbifSpeciesUrl } from '@/lib/gbif'
 import InfoTooltip from '@/components/ui/InfoTooltip'
+import EvidenceBadge from '@/components/ui/EvidenceBadge'
+import { evidenceLevel, frontierVerdict } from '@/lib/evidence'
+import { EVIDENCE_CONFIG } from '@/lib/scoring-config'
 import CommunityPanel from '@/features/community/CommunityPanel'
 
 interface Props {
@@ -81,6 +84,7 @@ function AnimatedBar({ label, labelExtra, value, color, animate }: AnimatedBarPr
 
 export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPlaceholder, onClose, onOpenMethodology, onCommunityChange }: Props) {
   const t = useTranslations('HexDetail')
+  const tEvidence = useTranslations('Evidence')
   const { theme } = useTheme()
   const prevHexIdRef = useRef<string | null>(null)
   const [shouldAnimate, setShouldAnimate] = useState(false)
@@ -107,11 +111,11 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
   const accentInk  = scoreToInk(hex.frontierScore, theme)
   const frontierPct = Math.round(hex.frontierScore * 100)
 
-  const frontierLabel =
-    hex.frontierScore >= 0.8 ? t('criticalGap') :
-    hex.frontierScore >= 0.6 ? t('highPotential') :
-    hex.frontierScore >= 0.4 ? t('moderate') :
-    t('wellSurveyed')
+  // The verdict reads the evidence as well as the score: a single record
+  // scored 81% is a place nobody has been, not a critical gap.
+  const level = evidenceLevel(td.occurrenceCount)
+  const frontierLabel = t(frontierVerdict(hex.frontierScore, level))
+  const { moderate, strong } = EVIDENCE_CONFIG.thresholds
 
   return (
     <div className="flex flex-col h-full bg-panel" style={{ borderLeft: '1px solid var(--color-slate-200)' }}>
@@ -162,6 +166,20 @@ export default function HexDetail({ hex, taxonFilter, gbifKeyByName, habitatIsPl
               {Math.abs(lat).toFixed(4)}°S&nbsp;&nbsp;
               {Math.abs(lng).toFixed(4)}°W
             </div>
+
+            {hex.rank > 0 && (
+              <div className="mt-1.5 flex items-center gap-1.5">
+                <EvidenceBadge level={level} />
+                <span className="text-[11px] text-slate-600">
+                  {tEvidence('records', { count: td.occurrenceCount })}
+                </span>
+                <InfoTooltip
+                  content={tEvidence('tooltip', { moderate, strong, strongMinusOne: strong - 1 })}
+                  learnMore={{ sectionId: 'evidence' }}
+                  onLearnMore={onOpenMethodology}
+                />
+              </div>
+            )}
           </div>
 
           <button

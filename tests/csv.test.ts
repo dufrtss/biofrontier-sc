@@ -316,3 +316,43 @@ describe('escapeCsvField: numeric strings are not mistaken for formulas', () => 
     expect(escapeCsvField('-1+cmd|calc')).toBe("'-1+cmd|calc")
   })
 })
+
+describe('buildFrontierCsv: evidence', () => {
+  const hexbins = { '86a91b477ffffff': scoredHex() }
+
+  const csvWith = (options: Partial<Parameters<typeof buildFrontierCsv>[2]> = {}) =>
+    buildFrontierCsv(['86a91b477ffffff'], hexbins, {
+      taxonFilter: 'all', activeComponents: ALL_ACTIVE, ...options,
+    })
+
+  it('writes the evidence level for each row under the active filter', () => {
+    // Read the last cell: the species column holds a quoted comma, so a plain
+    // split by position would land inside it.
+    const lastCell = (csv: string) => dataLines(csv)[1].split(',').at(-1)
+    const thin = {
+      '86a91b477ffffff': scoredHex({
+        taxa: { all: taxonRecord(), birds: taxonRecord({ occurrenceCount: 2 }) },
+      }),
+    }
+
+    expect(lastCell(csvWith())).toBe('moderate')
+    // Same hexbin, birds only: the level follows the filter's own record
+    // count (2), not the all-taxa total (12).
+    expect(lastCell(buildFrontierCsv(['86a91b477ffffff'], thin, {
+      taxonFilter: 'birds', activeComponents: ALL_ACTIVE,
+    }))).toBe('weak')
+  })
+
+  it('appends the evidence column rather than shifting existing ones', () => {
+    expect(FRONTIER_CSV_HEADERS[FRONTIER_CSV_HEADERS.length - 1]).toBe('evidence_level')
+  })
+
+  it('states the minimum-records filter in the provenance header', () => {
+    const h = csvWith({ minRecords: 5 }).split('\n').filter(l => l.startsWith('#')).join('\n')
+    expect(h).toContain('# minimum records per hexbin: 5')
+  })
+
+  it('omits the minimum-records line when no minimum was applied', () => {
+    expect(csvWith()).not.toContain('minimum records')
+  })
+})

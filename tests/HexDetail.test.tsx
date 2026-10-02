@@ -64,3 +64,40 @@ describe('HexDetail species links', () => {
       .toHaveAttribute('href', 'https://www.gbif.org/taxon/search?q=Boana%20faber')
   })
 })
+
+function renderWith(records: number, frontierScore: number) {
+  const thin: ScoredHexbin = {
+    ...hex,
+    frontierScore,
+    taxa: { all: { ...taxonRecord(), occurrenceCount: records } },
+  }
+  return render(
+    <NextIntlClientProvider locale="en" messages={messages}>
+      <HexDetail
+        hex={thin}
+        taxonFilter="all"
+        gbifKeyByName={new Map()}
+        habitatIsPlaceholder={false}
+        onClose={() => {}}
+        onOpenMethodology={() => {}}
+        onCommunityChange={() => {}}
+      />
+    </NextIntlClientProvider>,
+  )
+}
+
+describe('HexDetail verdict and evidence', () => {
+  it('keeps "critical gap" for a high score on moderate evidence', () => {
+    renderWith(12, 0.85)
+    expect(screen.getByText('CRITICAL GAP')).toBeInTheDocument()
+    expect(screen.getByText('Moderate evidence')).toBeInTheDocument()
+  })
+
+  it('withholds "critical gap" from a single record', () => {
+    renderWith(1, 0.85)
+    expect(screen.queryByText('CRITICAL GAP')).not.toBeInTheDocument()
+    expect(screen.getByText('HIGH POTENTIAL, LITTLE EVIDENCE')).toBeInTheDocument()
+    expect(screen.getByText('Weak evidence')).toBeInTheDocument()
+    expect(screen.getByText('1 record')).toBeInTheDocument()
+  })
+})

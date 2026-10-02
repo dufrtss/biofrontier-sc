@@ -1,11 +1,12 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { useTranslations } from 'next-intl'
+import { useFormatter, useTranslations } from 'next-intl'
 import {
   EFFORT_WEIGHTS,
   FRONTIER_WEIGHTS,
   INCOMPLETENESS_CONFIG,
+  EVIDENCE_CONFIG,
 } from '@/lib/scoring-config'
 import { HABITAT_SOURCE } from '@/lib/habitat-source'
 
@@ -106,6 +107,10 @@ function Table({ headers, rows }: { headers: string[]; rows: string[][] }) {
 export default function MethodologyPanel({ open, initialSection, onClose }: MethodologyPanelProps) {
   const t = useTranslations('MethodologyPanel')
   const tTaxon = useTranslations('TaxonSelector')
+  const tEvidence = useTranslations('Evidence')
+  const format = useFormatter()
+  const evidenceModerate = format.number(EVIDENCE_CONFIG.thresholds.moderate)
+  const evidenceStrong = format.number(EVIDENCE_CONFIG.thresholds.strong)
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -160,6 +165,29 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
             <p>{t('frontierScore.renormalisationNote')}</p>
             <p className="text-warning font-medium">{t('frontierScore.calibrationStatus')}</p>
             <p className="text-slate-500 italic">{t('frontierScore.caveat')}</p>
+          </Section>
+
+          {/* Thresholds read from EVIDENCE_CONFIG, the same constants the
+              ranking and detail panel use, so this table cannot drift. */}
+          <Section id="evidence" title={t('evidence.title')}>
+            <p>{t('evidence.intro')}</p>
+            <Table
+              headers={t.raw('evidence.levelHeaders') as string[]}
+              rows={[
+                [tEvidence('weak'), t('evidence.rangeBelow', { n: evidenceModerate })],
+                [
+                  tEvidence('moderate'),
+                  t('evidence.rangeBetween', {
+                    from: evidenceModerate,
+                    to: format.number(EVIDENCE_CONFIG.thresholds.strong - 1),
+                  }),
+                ],
+                [tEvidence('strong'), t('evidence.rangeAtLeast', { n: evidenceStrong })],
+              ]}
+            />
+            <p>{t('evidence.filterNote', { min: format.number(EVIDENCE_CONFIG.defaultMinRecords) })}</p>
+            <p>{t('evidence.labelNote')}</p>
+            <p className="text-slate-500 italic">{t('evidence.caveat')}</p>
           </Section>
 
           <Section id="taxonomic-incompleteness" title={t('taxonomicIncompleteness.title')}>

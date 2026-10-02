@@ -26,7 +26,14 @@
     "subtitle": "Highest discovery potential in Santa Catarina",
     "tooltipRanking": "Ranked by Frontier Score among hexbins with at least one recorded observation. Higher score = more under-surveyed relative to habitat quality.",
     "frontierPct": "{pct}% frontier",
-    "recordsCount": "{count} records"
+    "recordsCount": "{count} records",
+    "minRecordsLabel": "Minimum records",
+    "minRecordsAll": "All",
+    "minRecordsOption": "≥ {min, number}",
+    "shownOfTotal": "{shown, plural, one {# location} other {# locations}} of {total, number} with at least {min, plural, one {# record} other {# records}}",
+    "shownAll": "All {total, plural, one {# ranked location} other {# ranked locations}}, including those with weak evidence",
+    "emptyFiltered": "No location has {min, plural, one {# record} other {# records}} or more under this filter. Lower the minimum to see the rest.",
+    "tooltipMinRecords": "Locations with the fewest records score highest precisely because almost nobody has been there. The minimum takes them off the list without changing anyone's score or rank, which is why the numbering can skip."
   },
   "TaxonSelector": {
     "groupLabel": "Taxon filter",
@@ -77,7 +84,9 @@
     "incompletenessUnavailable": "Not enough comparable neighbouring hexbins with data to estimate what may be missing here.",
     "tooltipIncompleteness": "The share of species found in ecologically similar nearby hexbins that have never been recorded here. A high value means either the species are genuinely absent, or nobody has looked — paired with a large survey gap, the second becomes more likely.",
     "tooltipHabitatPlaceholder": "Real Atlantic Forest cover data has not been loaded yet, so this component is excluded from the frontier score rather than counted as a guess.",
-    "habitatPlaceholderNote": "Awaiting real forest-cover data — excluded from the score."
+    "habitatPlaceholderNote": "Awaiting real forest-cover data — excluded from the score.",
+    "highPotentialWeakEvidence": "HIGH POTENTIAL, LITTLE EVIDENCE",
+    "weakEvidence": "LITTLE EVIDENCE"
   },
   "GapMap": {
     "surveyCoverage": "Survey Coverage",
@@ -333,6 +342,20 @@
       ],
       "paramPrevalence": "Min share of neighbours recording a species",
       "prevalenceNote": "The prevalence threshold is what keeps this metric useful. Expecting every species ever recorded anywhere nearby would mark almost every hexbin as ~100% incomplete — measured against real Santa Catarina data, that formulation gave a median of exactly 1.000 and separated nothing. Requiring a species to turn up in a reasonable share of comparable neighbours asks the sharper question instead."
+    },
+    "evidence": {
+      "title": "Evidence behind the score",
+      "intro": "The score rewards a lack of survey effort, so the top of the ranking is, by construction, where records are fewest. A hexbin with a single observation can score high: that marks a place few people have visited, a weaker claim than a confirmed gap.",
+      "levelHeaders": [
+        "Level",
+        "Records under the active filter"
+      ],
+      "rangeBelow": "fewer than {n}",
+      "rangeBetween": "{from} to {to}",
+      "rangeAtLeast": "{n} or more",
+      "filterNote": "By default the ranking lists only locations with at least {min} records. The minimum can be changed in the ranking panel and applies to the CSV export too. It does not change any score or rank.",
+      "labelNote": "Absolute labels such as \"critical gap\" or \"well surveyed\" are not used on locations with weak evidence.",
+      "caveat": "The level boundaries are a choice, not a calibration, just like the score weights."
     }
   },
   "Export": {
@@ -340,7 +363,8 @@
     "scopeVisible": "Top {count} shown",
     "scopeVisibleHint": "Matches the ranking on screen",
     "scopeAll": "All {count} ranked hexbins",
-    "scopeAllHint": "Full dataset for analysis in R, QGIS or a spreadsheet"
+    "scopeAllHint": "Full dataset for analysis in R, QGIS or a spreadsheet",
+    "scopeAllHintFiltered": "Only locations with at least {min, plural, one {# record} other {# records}}, as in the ranking"
   },
   "Community": {
     "title": "Community observations",
@@ -389,5 +413,12 @@
   },
   "ThemeToggle": {
     "label": "Switch between light and dark theme"
+  },
+  "Evidence": {
+    "weak": "Weak evidence",
+    "moderate": "Moderate evidence",
+    "strong": "Strong evidence",
+    "records": "{count, plural, one {# record} other {# records}}",
+    "tooltip": "How many records stand behind this score. Weak: fewer than {moderate}. Moderate: {moderate} to {strongMinusOne}. Strong: {strong} or more. A high score on weak evidence points to a place few people have visited, not a confirmed gap."
   }
 }

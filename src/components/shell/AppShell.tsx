@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 import type { TaxonFilter } from '@/lib/types'
 import { useBiofrontierData } from '@/hooks/useBiofrontierData'
@@ -19,6 +19,8 @@ import { useCommunitySubmissions } from '@/hooks/useCommunitySubmissions'
 import { useAuth } from '@/hooks/useAuth'
 import ThemeToggle from '@/components/ui/ThemeToggle'
 import Mark from '@/components/ui/Mark'
+import { filterByEvidence } from '@/lib/evidence'
+import { EVIDENCE_CONFIG } from '@/lib/scoring-config'
 
 /** Hexbins shown in the ranking sidebar, and the default CSV export scope. */
 const RANKING_LIMIT = 20
@@ -36,6 +38,16 @@ export default function AppShell() {
   // Approved community records. Held here rather than inside GapMap so that a
   // submission or vote made in HexDetail can refresh the map layer.
   const { submissions: communitySubmissions, refresh: refreshCommunity } = useCommunitySubmissions()
+
+  // Records a hexbin needs before the ranking lists it. The score puts the
+  // thinnest evidence at the top by construction, so the default is not 1.
+  // Applied to the list and the export only: the map, ranks and scores are the
+  // same at every setting.
+  const [minRecords, setMinRecords] = useState<number>(EVIDENCE_CONFIG.defaultMinRecords)
+  const listedHexIds = useMemo(
+    () => filterByEvidence(rankedHexIds, hexbins, taxonFilter, minRecords),
+    [rankedHexIds, hexbins, taxonFilter, minRecords],
+  )
 
   const [rankingOpen, setRankingOpen]               = useState(false)
   const [methodologyOpen, setMethodologyOpen]       = useState(false)
@@ -159,7 +171,8 @@ export default function AppShell() {
         >
           <div className="flex-1 min-h-0">
             <FrontierRanking
-              rankedHexIds={rankedHexIds}
+              rankedHexIds={listedHexIds}
+              totalRankedCount={rankedHexIds.length}
               hexbins={hexbins}
               taxonFilter={taxonFilter}
               selectedHexId={selectedHexId}
@@ -167,16 +180,19 @@ export default function AppShell() {
               onOpenMethodology={openMethodology}
               onClose={() => setRankingOpen(false)}
               limit={RANKING_LIMIT}
+              minRecords={minRecords}
+              onMinRecordsChange={setMinRecords}
             />
           </div>
           <ExportButton
-            rankedHexIds={rankedHexIds}
+            rankedHexIds={listedHexIds}
             hexbins={hexbins}
             taxonFilter={taxonFilter}
             visibleCount={RANKING_LIMIT}
             activeComponents={activeComponents}
             generatedAt={lastUpdated}
             sources={sources.map(s => s.id)}
+            minRecords={minRecords}
           />
         </aside>
 

@@ -10,6 +10,7 @@ import type { ScoredHexbin, TaxonFilter } from './types'
 import type { ActiveComponents } from './scoring'
 import { hexCenter } from './h3-utils'
 import { taxonDataFor } from './hexbins-file'
+import { evidenceLevel } from './evidence'
 
 /**
  * Characters that make Excel and LibreOffice treat a cell as a formula.
@@ -77,6 +78,8 @@ export const FRONTIER_CSV_HEADERS = [
   'first_record',
   'last_record',
   'top_species',
+  // Last, so scripts reading the earlier columns by position keep working.
+  'evidence_level',
 ] as const
 
 /** Rounds to `places` decimals, returning '' for null so the column stays empty. */
@@ -95,6 +98,12 @@ export interface FrontierCsvOptions {
   generatedAt?: string | null
   /** Source ids behind the dataset, for the provenance header. */
   sources?: string[]
+  /**
+   * Minimum records the ranking required of a hexbin, for the provenance
+   * header. Filtering itself happens upstream in `rankedHexIds`, so the export
+   * matches the panel; this only records that it happened.
+   */
+  minRecords?: number
 }
 
 /**
@@ -110,7 +119,7 @@ export interface FrontierCsvOptions {
  * `comment='#'`, and QGIS, and are visible as plain text everywhere else.
  */
 function provenanceHeader(
-  { taxonFilter, activeComponents, generatedAt, sources }: FrontierCsvOptions,
+  { taxonFilter, activeComponents, generatedAt, sources, minRecords }: FrontierCsvOptions,
 ): string[] {
   const included = [
     'survey_gap',
@@ -129,6 +138,9 @@ function provenanceHeader(
     `# dataset: ${generatedAt ?? 'unknown'}`,
     `# sources: ${sources?.length ? sources.join(', ') : 'unknown'}`,
     `# taxon filter: ${taxonFilter}`,
+    ...(minRecords !== undefined && minRecords > 1
+      ? [`# minimum records per hexbin: ${minRecords} (hexbins with fewer are left out; ranks are unchanged)`]
+      : []),
     `# frontier_score computed from: ${included}`,
   ]
 
@@ -190,6 +202,7 @@ export function buildFrontierCsv(
       td.firstDate,
       td.lastDate,
       td.topSpecies.map(s => s.name).join('; '),
+      evidenceLevel(td.occurrenceCount),
     ]))
   }
 

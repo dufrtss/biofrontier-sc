@@ -26,7 +26,14 @@
     "subtitle": "Mayor potencial de descubrimiento en Santa Catarina",
     "tooltipRanking": "Clasificados por Puntuación de Frontera entre hexbins con al menos una observación registrada. Mayor puntuación = menos relevado en relación a la calidad del hábitat.",
     "frontierPct": "{pct}% frontera",
-    "recordsCount": "{count} registros"
+    "recordsCount": "{count} registros",
+    "minRecordsLabel": "Mínimo de registros",
+    "minRecordsAll": "Todos",
+    "minRecordsOption": "≥ {min, number}",
+    "shownOfTotal": "{shown, plural, one {# localidad} other {# localidades}} de {total, number} con al menos {min, plural, one {# registro} other {# registros}}",
+    "shownAll": "Las {total, plural, one {# localidad clasificada} other {# localidades clasificadas}}, incluidas las de evidencia débil",
+    "emptyFiltered": "Ninguna localidad tiene {min, plural, one {# registro} other {# registros}} o más con este filtro. Baja el mínimo para ver las demás.",
+    "tooltipMinRecords": "Las localidades con menos registros puntúan más alto justamente porque casi nadie ha estado allí. El mínimo las quita de la lista sin cambiar la puntuación ni la posición de ninguna; por eso la numeración puede saltar."
   },
   "TaxonSelector": {
     "groupLabel": "Filtro de taxones",
@@ -77,7 +84,9 @@
     "incompletenessUnavailable": "No hay suficientes hexágonos vecinos comparables con datos para estimar qué podría faltar aquí.",
     "tooltipIncompleteness": "La proporción de especies encontradas en hexágonos cercanos ecológicamente similares que nunca se han registrado aquí. Un valor alto significa que las especies están realmente ausentes o que nadie ha buscado — junto con una gran brecha de muestreo, lo segundo se vuelve más probable.",
     "tooltipHabitatPlaceholder": "Los datos reales de cobertura del Bosque Atlántico aún no se han cargado, por lo que este componente se excluye del puntaje de frontera en lugar de contarse como una estimación.",
-    "habitatPlaceholderNote": "A la espera de datos reales de cobertura forestal — excluido del puntaje."
+    "habitatPlaceholderNote": "A la espera de datos reales de cobertura forestal — excluido del puntaje.",
+    "highPotentialWeakEvidence": "ALTO POTENCIAL, POCA EVIDENCIA",
+    "weakEvidence": "POCA EVIDENCIA"
   },
   "GapMap": {
     "surveyCoverage": "Cobertura de Relevamiento",
@@ -333,6 +342,20 @@
       ],
       "paramPrevalence": "Proporción mínima de vecinos que registran una especie",
       "prevalenceNote": "El umbral de prevalencia es lo que mantiene útil esta métrica. Esperar toda especie registrada alguna vez en cualquier lugar cercano marcaría casi todos los hexágonos como ~100% incompletos — medido con datos reales de Santa Catarina, esa formulación dio una mediana de exactamente 1,000 y no separó nada. Exigir que una especie aparezca en una proporción razonable de vecinos comparables plantea la pregunta más precisa."
+    },
+    "evidence": {
+      "title": "Evidencia detrás de la puntuación",
+      "intro": "La puntuación premia la falta de muestreo, así que los primeros puestos del ranking son, por construcción, las localidades con menos registros. Un hexágono con una sola observación puede puntuar alto: eso indica un lugar poco visitado, una afirmación más débil que una brecha confirmada.",
+      "levelHeaders": [
+        "Nivel",
+        "Registros en el filtro activo"
+      ],
+      "rangeBelow": "menos de {n}",
+      "rangeBetween": "{from} a {to}",
+      "rangeAtLeast": "{n} o más",
+      "filterNote": "Por defecto el ranking muestra solo localidades con al menos {min} registros. El mínimo se puede cambiar en el panel del ranking y también se aplica a la exportación CSV. No cambia ninguna puntuación ni posición.",
+      "labelNote": "Las etiquetas absolutas como \"brecha crítica\" o \"bien relevado\" no se usan en localidades con evidencia débil.",
+      "caveat": "Los límites de cada nivel son una elección, no una calibración, igual que los pesos de la puntuación."
     }
   },
   "Export": {
@@ -340,7 +363,8 @@
     "scopeVisible": "Top {count} mostrados",
     "scopeVisibleHint": "Coincide con el ranking en pantalla",
     "scopeAll": "Los {count} hexágonos clasificados",
-    "scopeAllHint": "Conjunto completo para análisis en R, QGIS u hoja de cálculo"
+    "scopeAllHint": "Conjunto completo para análisis en R, QGIS u hoja de cálculo",
+    "scopeAllHintFiltered": "Solo localidades con al menos {min, plural, one {# registro} other {# registros}}, como en el ranking"
   },
   "Community": {
     "title": "Observaciones de la comunidad",
@@ -389,5 +413,12 @@
   },
   "ThemeToggle": {
     "label": "Cambiar entre tema claro y oscuro"
+  },
+  "Evidence": {
+    "weak": "Evidencia débil",
+    "moderate": "Evidencia moderada",
+    "strong": "Evidencia fuerte",
+    "records": "{count, plural, one {# registro} other {# registros}}",
+    "tooltip": "Cuántos registros respaldan esta puntuación. Débil: menos de {moderate}. Moderada: de {moderate} a {strongMinusOne}. Fuerte: {strong} o más. Una puntuación alta con evidencia débil señala un lugar poco visitado, no una brecha confirmada."
   }
 }

@@ -8,6 +8,7 @@ import { buildFrontierCsv, frontierCsvFilename } from '@/lib/csv'
 import { downloadTextFile } from './download'
 
 interface Props {
+  /** Ranked ids already filtered to `minRecords`, so the export matches the panel. */
   rankedHexIds: string[]
   hexbins: Record<string, ScoredHexbin>
   taxonFilter: TaxonFilter
@@ -19,6 +20,8 @@ interface Props {
   generatedAt: string | null
   /** Source ids behind the dataset, recorded in the export header. */
   sources: string[]
+  /** Minimum records the ranking applied, recorded in the export header. */
+  minRecords?: number
 }
 
 type Scope = 'visible' | 'all'
@@ -33,7 +36,7 @@ type Scope = 'visible' | 'all'
  */
 export default function ExportButton({
   rankedHexIds, hexbins, taxonFilter, visibleCount,
-  activeComponents, generatedAt, sources,
+  activeComponents, generatedAt, sources, minRecords = 1,
 }: Props) {
   const t = useTranslations('Export')
   const [open, setOpen] = useState(false)
@@ -47,6 +50,7 @@ export default function ExportButton({
       activeComponents,
       generatedAt,
       sources,
+      minRecords,
       limit: scope === 'visible' ? visibleCount : undefined,
     })
     downloadTextFile(frontierCsvFilename(taxonFilter), csv)
@@ -83,7 +87,7 @@ export default function ExportButton({
               type="button"
             >
               <div className="font-medium">{t('scopeAll', { count: totalCount })}</div>
-              <div className="text-[10px] text-slate-500 mt-0.5">{t('scopeAllHint')}</div>
+              <div className="text-[10px] text-slate-500 mt-0.5">{minRecords > 1 ? t('scopeAllHintFiltered', { min: minRecords }) : t('scopeAllHint')}</div>
             </button>
           </div>
         </>
