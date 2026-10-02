@@ -43,3 +43,6 @@ next-env.d.ts
 
 # supabase CLI scratch state (linked project ref, cached versions)
 supabase/.temp/
+
+# GBIF occurrence downloads (hundreds of MB, rebuilt from the DOI)
+/data/gbif/

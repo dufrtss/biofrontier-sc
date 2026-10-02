@@ -16,6 +16,7 @@
     "data:habitat-merge": "tsx scripts/merge-habitat.ts",
     "data:fetch": "tsx scripts/fetch-occurrences.ts",
     "data:gbif-keys": "tsx scripts/gbif-keys.ts",
+    "data:gbif-download": "tsx scripts/gbif-download.ts",
     "data:sensitive-taxa": "tsx scripts/build-sensitive-taxa.ts"
   },
   "dependencies": {
