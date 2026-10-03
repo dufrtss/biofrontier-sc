@@ -83,6 +83,15 @@ function ExternalLink({ href, children }: { href: string; children: React.ReactN
   )
 }
 
+/** Links back to the eduardofrafre.com sites stay in the tab; only other applications open a new one. */
+function SiteLink({ href, children }: { href: string; children: React.ReactNode }) {
+  return (
+    <a href={href} className="text-brand-ink hover:underline transition-colors">
+      {children}
+    </a>
+  )
+}
+
 function Code({ children }: { children: string }) {
   return (
     <pre className="bg-slate-50 border border-slate-200 rounded px-3 py-2 font-mono text-brand-ink text-[11px] overflow-x-auto whitespace-pre-wrap">
@@ -344,8 +353,8 @@ export default function MethodologyPanel({ open, initialSection, onClose }: Meth
 
           <p className="text-[11px] text-slate-500 border-t border-slate-200 pt-4">
             {t.rich('credits.text', {
-              author: chunks => <ExternalLink href="https://eduardofrafre.com">{chunks}</ExternalLink>,
-              lab: chunks => <ExternalLink href={t('credits.labUrl')}>{chunks}</ExternalLink>,
+              author: chunks => <SiteLink href="https://eduardofrafre.com">{chunks}</SiteLink>,
+              lab: chunks => <SiteLink href={t('credits.labUrl')}>{chunks}</SiteLink>,
             })}
           </p>
 
